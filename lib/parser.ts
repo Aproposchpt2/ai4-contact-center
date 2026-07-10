@@ -17,10 +17,14 @@ export interface ParsedCallFlow {
   holiday: string | null;
 }
 
-/** Detect the top-level menu name. Defaults to "Main Menu". */
+/** Detect menu name using spec rules. */
 export function extractMenu(text: string): string {
-  const match = text.match(/(?:main\s+)?menu[:\s-]+([^\n.]+)/i);
-  return match ? match[1].trim() : 'Main Menu';
+  if (/main\s+menu/i.test(text)) return 'Main Menu';
+
+  const match = text.match(/menu\s*[:-]\s*([^\n.]+)/i);
+  if (match && match[1].trim()) return match[1].trim();
+
+  return 'Main Menu';
 }
 
 /**
@@ -49,7 +53,7 @@ export function extractOptions(text: string): CallFlowOption[] {
 export function extractAfterHours(text: string): string | null {
   if (!/after[-\s]?hours/i.test(text)) return null;
   if (/voicemail/i.test(text)) return 'Voicemail_Main';
-  return 'AfterHours_Default';
+  return null;
 }
 
 /**
@@ -59,7 +63,7 @@ export function extractAfterHours(text: string): string | null {
 export function extractHoliday(text: string): string | null {
   if (!/holidays?/i.test(text)) return null;
   if (/message/i.test(text)) return 'Holiday_Message';
-  return 'Holiday_Default';
+  return null;
 }
 
 /** Master parser — runs all extractors and returns a full ParsedCallFlow. */

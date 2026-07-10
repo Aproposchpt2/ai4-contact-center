@@ -4,6 +4,9 @@ import { useRouter } from 'next/router';
 const NAV = [
   { href: '/',           label: 'Home'      },
   { href: '/builder',    label: 'Builder'   },
+  { href: '/designer',   label: 'Designer'  },
+  { href: '/troubleshooter', label: 'Troubleshooter' },
+  { href: '/prompt-manager', label: 'Prompt Manager' },
   { href: '/templates',  label: 'Templates' },
   { href: '/dashboard',  label: 'Dashboard' },
 ];
