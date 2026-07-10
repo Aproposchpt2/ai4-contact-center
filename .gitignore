@@ -20,3 +20,4 @@ out/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.ai4-flow-versioning-store.json

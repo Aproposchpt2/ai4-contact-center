@@ -11,6 +11,7 @@ const NAV = [
   { href: '/analytics-engine', label: 'Analytics Engine' },
   { href: '/flow-simulator', label: 'Flow Simulator' },
   { href: '/flow-auto-repair', label: 'Flow Auto-Repair' },
+  { href: '/flow-versioning', label: 'Flow Versioning' },
   { href: '/prompt-manager', label: 'Prompt Manager' },
   { href: '/knowledge-vault', label: 'Knowledge Vault' },
   { href: '/templates',  label: 'Templates' },
