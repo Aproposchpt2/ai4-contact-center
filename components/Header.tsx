@@ -8,6 +8,7 @@ const NAV = [
   { href: '/troubleshooter', label: 'Troubleshooter' },
   { href: '/routing-optimizer', label: 'Routing Optimizer' },
   { href: '/prompt-manager', label: 'Prompt Manager' },
+  { href: '/knowledge-vault', label: 'Knowledge Vault' },
   { href: '/templates',  label: 'Templates' },
   { href: '/dashboard',  label: 'Dashboard' },
 ];
