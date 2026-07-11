@@ -16,6 +16,7 @@ const NAV = [
   { href: '/flow-runtime-monitor', label: 'Runtime Monitor' },
   { href: '/transcript-intelligence', label: 'Transcript Intelligence' },
   { href: '/agent-coaching', label: 'Agent Coaching' },
+  { href: '/intent-taxonomy', label: 'Intent Taxonomy' },
   { href: '/prompt-manager', label: 'Prompt Manager' },
   { href: '/knowledge-vault', label: 'Knowledge Vault' },
   { href: '/templates',  label: 'Templates' },
