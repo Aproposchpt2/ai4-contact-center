@@ -1,10 +1,14 @@
 [build]
-  command   = "npm run build"
-  publish   = ".next"
+  publish = "."
 
-[build.environment]
-  NEXT_TELEMETRY_DISABLED = "1"
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SUPABASE_URL,RESEND_FROM_EMAIL,RESEND_TO_EMAIL,SUPABASE_SERVICE_ROLE_KEY"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
 
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
