@@ -94,6 +94,37 @@
     }
     .nav-cta:hover { background: var(--blue-bright); box-shadow: var(--glow-blue); }
 
+    /* ── NAV DROPDOWN ── */
+    .nav-item-dropdown { position: relative; }
+    .nav-item-dropdown > a { display:flex; align-items:center; gap:0.35rem; cursor:pointer; }
+    .nav-item-dropdown > a::after {
+      content:""; width:6px; height:6px; border-right:1px solid currentColor; border-bottom:1px solid currentColor;
+      transform: rotate(45deg); margin-top:-3px; opacity:0.7; transition: transform 0.25s;
+    }
+    .nav-item-dropdown:hover > a::after { transform: rotate(225deg); margin-top:3px; }
+    .nav-dropdown-menu {
+      position: absolute; top: calc(100% + 1.4rem); left: 50%; transform: translateX(-50%) translateY(8px);
+      display: grid; grid-template-columns: repeat(4, 200px); gap: 0.5rem 2rem;
+      background: rgba(6,10,18,0.98); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.6rem 1.8rem; opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s, visibility 0.25s;
+      backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .nav-item-dropdown:hover .nav-dropdown-menu,
+    .nav-item-dropdown.open .nav-dropdown-menu {
+      opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0);
+    }
+    .nav-dropdown-col-title {
+      font-family: "Syncopate", sans-serif; font-size: 0.58rem; letter-spacing: 0.14em;
+      color: var(--blue-bright); text-transform: uppercase; margin-bottom: 0.7rem; opacity: 0.85;
+    }
+    .nav-dropdown-menu a {
+      display: block; font-size: 0.72rem; letter-spacing: 0.02em; text-transform: none;
+      color: var(--white); opacity: 0.85; text-decoration: none; padding: 0.32rem 0; transition: color 0.2s, opacity 0.2s;
+    }
+    .nav-dropdown-menu a:hover { color: var(--blue-bright); opacity: 1; }
+    @media (max-width:1024px) { .nav-dropdown-menu { display:none; } }
+
     /* ── HERO — 50/50 SPLIT ── */
     #hero {
       position: relative; min-height: 100vh;
@@ -515,7 +546,54 @@
 <nav id="nav">
   <a href="#hero" class="nav-brand">AI4 Contact Center<span>by Apropos Group LLC</span></a>
   <ul class="nav-links">
-    <li><a href="/systems.html">Systems</a></li>
+    <li class="nav-item-dropdown">
+      <a href="#products">Systems</a>
+      <div class="nav-dropdown-menu">
+        <div>
+          <div class="nav-dropdown-col-title">Flow Authoring</div>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/builder" target="_blank" rel="noopener">Builder</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/designer" target="_blank" rel="noopener">Designer</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/troubleshooter" target="_blank" rel="noopener">Troubleshooter</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-simulator" target="_blank" rel="noopener">Flow Simulator</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-auto-repair" target="_blank" rel="noopener">Flow Auto-Repair</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-versioning" target="_blank" rel="noopener">Flow Versioning</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-deployment" target="_blank" rel="noopener">Flow Deployment</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-rewrite" target="_blank" rel="noopener">Flow Rewrite</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/templates" target="_blank" rel="noopener">Templates</a>
+        </div>
+        <div>
+          <div class="nav-dropdown-col-title">Real-Time Operations</div>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/routing-optimizer" target="_blank" rel="noopener">Routing Optimizer</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/voice-attendant" target="_blank" rel="noopener">Voice Attendant</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/analytics-engine" target="_blank" rel="noopener">Analytics Engine</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-runtime-monitor" target="_blank" rel="noopener">Runtime Monitor</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/agent-assist" target="_blank" rel="noopener">Agent Assist</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/integration-hub" target="_blank" rel="noopener">Integration Hub</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/dashboard" target="_blank" rel="noopener">Dashboard</a>
+        </div>
+        <div>
+          <div class="nav-dropdown-col-title">Workforce &amp; QA</div>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/workforce-management" target="_blank" rel="noopener">Workforce Management</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/quality-assurance" target="_blank" rel="noopener">Quality Assurance</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/journey-designer" target="_blank" rel="noopener">Journey Designer</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/agent-coaching" target="_blank" rel="noopener">Agent Coaching</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/agent-skill-matrix" target="_blank" rel="noopener">Agent Skill Matrix</a>
+        </div>
+        <div>
+          <div class="nav-dropdown-col-title">Intelligence &amp; Governance</div>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/transcript-intelligence" target="_blank" rel="noopener">Transcript Intelligence</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/intent-taxonomy" target="_blank" rel="noopener">Intent Taxonomy</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/flow-governance" target="_blank" rel="noopener">Flow Governance</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/localization-engine" target="_blank" rel="noopener">Localization Engine</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/data-lake" target="_blank" rel="noopener">Data Lake</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/experimentation" target="_blank" rel="noopener">Experiments</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/cost-optimizer" target="_blank" rel="noopener">Cost Optimizer</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/compliance-automation" target="_blank" rel="noopener">Compliance Automation</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/prompt-manager" target="_blank" rel="noopener">Prompt Manager</a>
+          <a href="https://ai4contactcenter.aproposgroupllc.com/knowledge-vault" target="_blank" rel="noopener">Knowledge Vault</a>
+        </div>
+      </div>
+    </li>
     <li><a href="/articles.html">Articles</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="/contact.html">Contact</a></li>
