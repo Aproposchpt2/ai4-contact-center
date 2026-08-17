@@ -96,7 +96,7 @@ export default async function handler(
     action: 'flow.created',
     resource_type: 'flow',
     resource_id: flow.id,
-    details: { name: flowName, version: version.version, parser_engine: engine === 'ai' ? 'ai' : 'rules' },
+    payload: { name: flowName, version: version.version, parser_engine: engine === 'ai' ? 'ai' : 'rules' },
   });
 
   return res.status(200).json({
