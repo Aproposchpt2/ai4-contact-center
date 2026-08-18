@@ -127,9 +127,14 @@ export default function DashboardPage() {
                 </p>
               )}
             </div>
-            <Link href="/builder" style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: '#5bd3ff', color: '#06111f', fontWeight: 800, fontSize: '.76rem', letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', padding: '.7rem 1.4rem', borderRadius: '6px', alignSelf: 'flex-end' }}>
-              + New Flow
-            </Link>
+            <div style={{ display: 'flex', gap: '.65rem', flexWrap: 'wrap', alignSelf: 'flex-end' }}>
+              <Link href="/agent-workspace" style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: 'rgba(91,211,255,.08)', border: '1px solid rgba(91,211,255,.28)', color: '#5bd3ff', fontWeight: 800, fontSize: '.76rem', letterSpacing: '.12em', textTransform: 'uppercase', textDecoration: 'none', padding: '.7rem 1.1rem', borderRadius: '6px' }}>
+                Agent Workspace →
+              </Link>
+              <Link href="/builder" style={{ display: 'inline-flex', alignItems: 'center', gap: '.4rem', background: '#5bd3ff', color: '#06111f', fontWeight: 800, fontSize: '.76rem', letterSpacing: '.14em', textTransform: 'uppercase', textDecoration: 'none', padding: '.7rem 1.4rem', borderRadius: '6px' }}>
+                + New Flow
+              </Link>
+            </div>
           </div>
 
           {error && (
