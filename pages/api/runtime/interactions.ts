@@ -23,7 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ? ctx.admin.from('ai4cc_agents').select('id,name,email,status').eq('id', interaction.agent_id).maybeSingle()
           : Promise.resolve({ data: null, error: null }),
         ctx.admin.from('ai4cc_routing_decisions').select('intent,priority,reason,estimated_wait_seconds,overflow_used,decided_at').eq('interaction_id', interaction.id).order('decided_at', { ascending: false }).limit(1).maybeSingle(),
-        ctx.admin.from('ai4cc_transcripts').select('speaker,sequence_no,content,sentiment,created_at').eq('interaction_id', interaction.id).order('sequence_no', { ascending: true }),
+        ctx.admin.from('ai4cc_transcripts').select('speaker,sequence_no,content,sentiment,metadata,created_at').eq('interaction_id', interaction.id).order('sequence_no', { ascending: true }),
         ctx.admin.from('ai4cc_agent_assist_events').select('detected_intent,sentiment,escalation_risk,suggested_replies,kb_grounding,compliance_alerts,next_best_actions,model_info,created_at').eq('interaction_id', interaction.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
         ctx.admin.from('ai4cc_qa_scores').select('quality_score,compliance_score,flow_adherence_score,sentiment_score,flags,scoring_method,scorecard,scored_at').eq('interaction_id', interaction.id).order('scored_at', { ascending: false }).limit(1).maybeSingle(),
         ctx.admin.from('ai4cc_compliance_events').select('rule_code,severity,status,finding,detected_at').eq('interaction_id', interaction.id).order('detected_at', { ascending: false }),
