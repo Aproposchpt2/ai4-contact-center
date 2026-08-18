@@ -9,37 +9,50 @@ type Step = 'email' | 'otp' | 'done';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep]     = useState<Step>('email');
-  const [email, setEmail]   = useState('');
-  const [otp, setOtp]       = useState('');
+  const [step, setStep] = useState<Step>('email');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const configured = isSupabaseConfigured();
 
   async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!supabase) return;
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/agent-workspace`,
+        shouldCreateUser: false,
+      },
     });
     setLoading(false);
-    if (err) { setError(err.message); return; }
+    if (err) {
+      setError(err.message);
+      return;
+    }
     setStep('otp');
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!supabase) return;
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     const { error: err } = await supabase.auth.verifyOtp({
-      email, token: otp, type: 'email',
+      email,
+      token: otp,
+      type: 'email',
     });
     setLoading(false);
-    if (err) { setError(err.message); return; }
+    if (err) {
+      setError(err.message);
+      return;
+    }
     setStep('done');
-    setTimeout(() => router.push('/dashboard'), 1200);
+    setTimeout(() => router.push('/agent-workspace'), 700);
   }
 
   return (
@@ -47,7 +60,6 @@ export default function LoginPage() {
       <Header />
       <main style={{ minHeight: '100vh', background: '#06111f', color: '#e8f0fe', fontFamily: "'Inter', 'Jost', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ width: 'min(440px, 100%)', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '12px', padding: 'clamp(1.8rem,4vw,2.8rem)', position: 'relative' }}>
-          {/* Top accent */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg,#5bd3ff,rgba(91,211,255,.1))', borderRadius: '12px 12px 0 0' }} />
 
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.5rem' }}>
@@ -58,7 +70,7 @@ export default function LoginPage() {
             <div style={{ textAlign: 'center', padding: '1rem 0' }}>
               <div style={{ fontSize: '2.2rem', marginBottom: '1rem' }}>✓</div>
               <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#fff', marginBottom: '.5rem' }}>You're signed in.</h2>
-              <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '.88rem' }}>Redirecting to your dashboard…</p>
+              <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '.88rem' }}>Opening Agent Workspace…</p>
             </div>
           ) : (
             <>
@@ -67,13 +79,13 @@ export default function LoginPage() {
               </h1>
               <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '.86rem', marginBottom: '1.6rem', lineHeight: 1.6 }}>
                 {step === 'email'
-                  ? 'Enter your email — we\'ll send a one-time sign-in code.'
-                  : `We sent a 6-digit code to ${email}.`}
+                  ? 'Enter your authorized operator email. We will send a one-time sign-in code.'
+                  : `We sent a one-time code to ${email}.`}
               </p>
 
               {!configured && (
                 <div style={{ padding: '.8rem 1rem', background: 'rgba(255,180,50,.06)', border: '1px solid rgba(255,180,50,.2)', borderRadius: '6px', fontSize: '.78rem', color: '#fbbf24', marginBottom: '1.2rem' }}>
-                  Supabase is not configured. Set <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable auth.
+                  Supabase is not configured. Set <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> to enable auth.
                 </div>
               )}
 
@@ -81,8 +93,12 @@ export default function LoginPage() {
                 <form onSubmit={handleSendOtp}>
                   <label style={{ display: 'block', fontSize: '.6rem', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', marginBottom: '.5rem' }}>Email address</label>
                   <input
-                    type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    placeholder="you@company.com" disabled={!configured || loading}
+                    type="email"
+                    required
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="you@company.com"
+                    disabled={!configured || loading}
                     style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '6px', color: '#e8f0fe', padding: '.75rem 1rem', fontSize: '.9rem', fontFamily: 'inherit', outline: 'none', marginBottom: '1rem' }}
                   />
                   {error && <p style={{ color: '#ff7070', fontSize: '.82rem', marginBottom: '.8rem' }}>{error}</p>}
@@ -94,8 +110,14 @@ export default function LoginPage() {
                 <form onSubmit={handleVerifyOtp}>
                   <label style={{ display: 'block', fontSize: '.6rem', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,.35)', marginBottom: '.5rem' }}>One-Time Code</label>
                   <input
-                    type="text" required value={otp} onChange={e => setOtp(e.target.value)}
-                    placeholder="123456" maxLength={6} disabled={loading}
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={otp}
+                    onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="123456"
+                    maxLength={8}
+                    disabled={loading}
                     style={{ width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '6px', color: '#5bd3ff', padding: '.75rem 1rem', fontSize: '1.4rem', fontFamily: 'monospace', letterSpacing: '.2em', textAlign: 'center', outline: 'none', marginBottom: '1rem' }}
                   />
                   {error && <p style={{ color: '#ff7070', fontSize: '.82rem', marginBottom: '.8rem' }}>{error}</p>}
