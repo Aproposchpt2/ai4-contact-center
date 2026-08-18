@@ -25,6 +25,10 @@ export type AssistGuidance = {
   };
 };
 
+function hasVerificationSignal(text: string) {
+  return /\bverif(?:y|ied|ies|ying|ication)\b/i.test(text);
+}
+
 export function ingestAssistSession(input: AssistSession) {
   return {
     sessionId: input.sessionId,
@@ -49,7 +53,7 @@ export function getComplianceAlerts(session: AssistSession) {
   const transcript = session.turns.map((t) => t.text.toLowerCase()).join(' ');
   const alerts: string[] = [];
   if (transcript.includes('credit card number')) alerts.push('Do not collect full credit card number in plain text.');
-  if (!transcript.includes('verify')) alerts.push('Verification phrase not detected. Confirm customer identity.');
+  if (!hasVerificationSignal(transcript)) alerts.push('Verification phrase not detected. Confirm customer identity.');
   return alerts;
 }
 
@@ -64,6 +68,7 @@ export function generateGuidance(session: AssistSession): AssistGuidance {
         : 'general_inquiry';
   const sentiment: AssistGuidance['state']['sentiment'] = merged.includes('frustrated') || merged.includes('angry') ? 'negative' : merged.includes('thanks') ? 'positive' : 'neutral';
   const escalationRisk: AssistGuidance['state']['escalationRisk'] = sentiment === 'negative' ? 'high' : detectedIntent === 'billing_support' ? 'medium' : 'low';
+  const verificationPresent = hasVerificationSignal(merged);
 
   return {
     detectedIntent,
@@ -76,7 +81,9 @@ export function generateGuidance(session: AssistSession): AssistGuidance {
     complianceAlerts: getComplianceAlerts(session),
     nextBestActions: escalationRisk === 'high'
       ? ['Offer supervisor callback option', 'Create priority ticket with full context']
-      : ['Complete verification', 'Route to the mapped flow node'],
+      : verificationPresent
+        ? ['Route to the mapped flow node']
+        : ['Complete verification', 'Route to the mapped flow node'],
     mappedFlowNode: detectedIntent === 'billing_support' ? 'node-billing-triage' : detectedIntent === 'password_reset' ? 'node-auth-reset' : 'node-general-support',
     state: { sentiment, escalationRisk },
   };
@@ -95,4 +102,3 @@ export function getAssistState(session: AssistSession) {
     timestamp: new Date().toISOString(),
   };
 }
-
