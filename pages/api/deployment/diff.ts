@@ -37,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const { admin, tenantId } = await requireAi4ccContext(req);
 
-    async function latest(environment: EnvironmentName) {
+    const latest = async (environment: EnvironmentName) => {
       const { data, error } = await admin
         .from('ai4cc_deployments')
         .select('id, snapshot, flow_version_id, deployed_at')
@@ -49,7 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         .maybeSingle();
       if (error) throw error;
       return data;
-    }
+    };
 
     const [a, b] = await Promise.all([latest(environmentA), latest(environmentB)]);
     if (!a || !b) {
