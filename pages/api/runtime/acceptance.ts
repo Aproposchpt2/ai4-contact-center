@@ -9,6 +9,16 @@ type RuntimeBody = {
   agentText?: string;
 };
 
+type ComplianceEventInsert = {
+  tenant_id: string;
+  interaction_id: string;
+  rule_code: string;
+  severity: string;
+  status: string;
+  finding: string;
+  evidence: Record<string, unknown>;
+};
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -138,7 +148,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     const namedFindings = qa.complianceFindings.flatMap((finding) => finding.issues);
-    const complianceEvents = namedFindings.map((finding, index) => ({
+    const complianceEvents: ComplianceEventInsert[] = namedFindings.map((finding, index) => ({
       tenant_id: ctx.tenantId,
       interaction_id: interaction.id,
       rule_code: `DEV-${index + 1}`,
