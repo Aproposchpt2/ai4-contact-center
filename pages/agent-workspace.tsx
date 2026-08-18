@@ -9,14 +9,16 @@ type Interaction = {
   id: string;
   channel: string;
   direction: string;
+  external_id: string | null;
   customer_identifier: string | null;
   status: string;
   started_at: string;
   ended_at: string | null;
+  metadata?: Record<string, any>;
   queue?: { id: string; name: string; code: string } | null;
   agent?: { id: string; name: string; email: string | null; status: string } | null;
   route?: { intent: string | null; priority: string | null; reason: string | null; estimated_wait_seconds: number | null } | null;
-  transcript: Array<{ speaker: string | null; sequence_no: number; content: string; sentiment: number | null }>;
+  transcript: Array<{ speaker: string | null; sequence_no: number; content: string; sentiment: number | null; metadata?: Record<string, any> }>;
   assist?: {
     detected_intent: string | null;
     sentiment: string | null;
@@ -45,6 +47,7 @@ export default function AgentWorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string>('');
 
   async function authHeaders() {
     if (!supabase) return null;
@@ -53,7 +56,7 @@ export default function AgentWorkspacePage() {
     return { Authorization: `Bearer ${session.access_token}` };
   }
 
-  async function refresh() {
+  async function refresh(silent = false) {
     if (!isSupabaseConfigured() || !supabase) {
       setError('Canonical Supabase configuration is required.');
       setLoading(false);
@@ -69,12 +72,17 @@ export default function AgentWorkspacePage() {
     if (!res.ok) throw new Error(data?.error ?? 'Unable to load interactions');
     const rows = (data.interactions ?? []) as Interaction[];
     setInteractions(rows);
-    setSelectedId((current) => current || rows[0]?.id || '');
-    setLoading(false);
+    setSelectedId((current) => current && rows.some((row) => row.id === current) ? current : rows[0]?.id || '');
+    setLastUpdated(new Date().toLocaleTimeString());
+    if (!silent) setLoading(false);
   }
 
   useEffect(() => {
     refresh().catch((e: Error) => { setError(e.message); setLoading(false); });
+    const timer = window.setInterval(() => {
+      refresh(true).catch((e: Error) => setError(e.message));
+    }, 5000);
+    return () => window.clearInterval(timer);
   }, []);
 
   async function runAcceptance() {
@@ -103,6 +111,8 @@ export default function AgentWorkspacePage() {
   }
 
   const selected = interactions.find((item) => item.id === selectedId) ?? interactions[0] ?? null;
+  const selectedIsLiveVoice = selected?.channel === 'voice' && selected?.metadata?.source === 'twilio_voice_webhook';
+  const confidence = selected?.transcript?.[0]?.metadata?.confidence;
 
   return (
     <>
@@ -113,7 +123,7 @@ export default function AgentWorkspacePage() {
             <div>
               <p style={{ fontSize: '.65rem', fontWeight: 800, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', margin: '0 0 .4rem' }}>AI4 Contact Center · Runtime</p>
               <h1 style={{ margin: 0, fontSize: 'clamp(1.7rem,3vw,2.5rem)', color: '#fff' }}>Agent Workspace</h1>
-              <p style={{ color: 'rgba(255,255,255,.45)', fontSize: '.86rem', margin: '.45rem 0 0' }}>Canonical interaction, routing, assist, transcript, QA and compliance view.</p>
+              <p style={{ color: 'rgba(255,255,255,.45)', fontSize: '.86rem', margin: '.45rem 0 0' }}>Canonical live voice, routing, assist, transcript, QA and compliance view. Auto-refreshes every 5 seconds{lastUpdated ? ` · Updated ${lastUpdated}` : ''}.</p>
             </div>
             <button onClick={runAcceptance} disabled={running} style={{ border: 0, borderRadius: 7, background: '#5bd3ff', color: '#06111f', padding: '.8rem 1.15rem', fontWeight: 900, cursor: running ? 'wait' : 'pointer', opacity: running ? .7 : 1 }}>
               {running ? 'Running interaction…' : 'Run Development Interaction'}
@@ -126,17 +136,31 @@ export default function AgentWorkspacePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px,320px) minmax(0,1fr)', gap: '1rem' }}>
               <aside style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 10, overflow: 'hidden', background: 'rgba(255,255,255,.025)' }}>
                 <div style={{ padding: '.8rem 1rem', borderBottom: '1px solid rgba(255,255,255,.08)', fontSize: '.65rem', letterSpacing: '.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,.45)', fontWeight: 800 }}>Recent Interactions</div>
-                {interactions.length === 0 ? <div style={{ padding: '1.2rem', color: 'rgba(255,255,255,.4)', fontSize: '.85rem' }}>No interactions yet. Run the development interaction.</div> : interactions.map((item) => (
-                  <button key={item.id} onClick={() => setSelectedId(item.id)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '.9rem 1rem', border: 0, borderBottom: '1px solid rgba(255,255,255,.06)', background: item.id === selected?.id ? 'rgba(91,211,255,.09)' : 'transparent', color: '#e8f0fe', cursor: 'pointer' }}>
-                    <div style={{ fontWeight: 800, fontSize: '.84rem', marginBottom: '.3rem' }}>{item.route?.intent ?? 'interaction'}</div>
-                    <div style={{ display: 'flex', gap: '.45rem', flexWrap: 'wrap', fontSize: '.7rem', color: 'rgba(255,255,255,.45)' }}><span>{item.channel}</span><span>•</span><span>{item.status}</span><span>•</span><span>{new Date(item.started_at).toLocaleString()}</span></div>
-                  </button>
-                ))}
+                {interactions.length === 0 ? <div style={{ padding: '1.2rem', color: 'rgba(255,255,255,.4)', fontSize: '.85rem' }}>No interactions yet.</div> : interactions.map((item) => {
+                  const liveVoice = item.channel === 'voice' && item.metadata?.source === 'twilio_voice_webhook';
+                  return (
+                    <button key={item.id} onClick={() => setSelectedId(item.id)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '.9rem 1rem', border: 0, borderBottom: '1px solid rgba(255,255,255,.06)', background: item.id === selected?.id ? 'rgba(91,211,255,.09)' : 'transparent', color: '#e8f0fe', cursor: 'pointer' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '.45rem', marginBottom: '.3rem' }}>
+                        {liveVoice && <span style={{ fontSize: '.56rem', fontWeight: 900, letterSpacing: '.1em', color: '#06111f', background: '#5bd3ff', padding: '.16rem .35rem', borderRadius: 4 }}>LIVE VOICE</span>}
+                        <div style={{ fontWeight: 800, fontSize: '.84rem' }}>{item.route?.intent ?? item.assist?.detected_intent ?? 'interaction'}</div>
+                      </div>
+                      <div style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.58)', marginBottom: '.2rem' }}>{item.customer_identifier ?? 'Unknown customer'}</div>
+                      <div style={{ display: 'flex', gap: '.45rem', flexWrap: 'wrap', fontSize: '.7rem', color: 'rgba(255,255,255,.4)' }}><span>{item.channel}</span><span>•</span><span>{item.status}</span><span>•</span><span>{new Date(item.started_at).toLocaleString()}</span></div>
+                    </button>
+                  );
+                })}
               </aside>
 
               <section>
                 {!selected ? <div style={{ padding: '3rem', border: '1px dashed rgba(255,255,255,.1)', borderRadius: 10, color: 'rgba(255,255,255,.4)' }}>Select or create an interaction.</div> : (
                   <div style={{ display: 'grid', gap: '1rem' }}>
+                    {selectedIsLiveVoice && <div style={{ padding: '1rem', border: '1px solid rgba(91,211,255,.3)', borderRadius: 10, background: 'rgba(91,211,255,.06)' }}>
+                      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                        <div><div style={{ fontSize: '.6rem', textTransform: 'uppercase', letterSpacing: '.14em', color: '#5bd3ff', fontWeight: 900 }}>Live Twilio Voice Interaction</div><div style={{ marginTop: '.35rem', fontWeight: 900, color: '#fff' }}>{selected.customer_identifier ?? 'Unknown caller'}</div></div>
+                        <div style={{ fontSize: '.74rem', color: 'rgba(255,255,255,.55)' }}><div>Call SID: <span style={{ color: '#fff' }}>{selected.external_id ?? '—'}</span></div><div>Speech confidence: <span style={{ color: '#fff' }}>{confidence ? `${(Number(confidence) * 100).toFixed(1)}%` : '—'}</span></div></div>
+                      </div>
+                    </div>}
+
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '.75rem' }}>
                       {[['Status', selected.status], ['Intent', selected.route?.intent ?? selected.assist?.detected_intent ?? '—'], ['Queue', selected.queue?.name ?? '—'], ['Agent', selected.agent?.name ?? '—'], ['Priority', selected.route?.priority ?? '—'], ['Escalation', selected.assist?.escalation_risk ?? '—']].map(([label, value]) => (
                         <div key={label} style={{ padding: '.9rem 1rem', border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, background: 'rgba(255,255,255,.025)' }}><div style={{ fontSize: '.58rem', textTransform: 'uppercase', letterSpacing: '.14em', color: 'rgba(255,255,255,.35)', marginBottom: '.35rem', fontWeight: 800 }}>{label}</div><div style={{ fontWeight: 800, color: '#fff' }}>{value}</div></div>
