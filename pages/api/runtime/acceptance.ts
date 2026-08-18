@@ -137,17 +137,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       scorecard: score,
     });
 
-    const findings = qa.complianceFindings.flatMap((finding) => finding.issues);
-    if (findings.length) {
-      await ctx.admin.from('ai4cc_compliance_events').insert(findings.map((finding, index) => ({
+    const namedFindings = qa.complianceFindings.flatMap((finding) => finding.issues);
+    const complianceEvents = namedFindings.map((finding, index) => ({
+      tenant_id: ctx.tenantId,
+      interaction_id: interaction.id,
+      rule_code: `DEV-${index + 1}`,
+      severity: 'warning',
+      status: 'open',
+      finding,
+      evidence: { transcript: `${customerText}\n${agentText}`, source: 'qualityAssuranceEngine', complianceScore: score.complianceScore },
+    }));
+
+    if (score.complianceScore < 100 && complianceEvents.length === 0) {
+      complianceEvents.push({
         tenant_id: ctx.tenantId,
         interaction_id: interaction.id,
-        rule_code: `DEV-${index + 1}`,
-        severity: 'warning',
+        rule_code: 'DEV-QA-COMPLIANCE',
+        severity: score.complianceScore < 80 ? 'warning' : 'info',
         status: 'open',
-        finding,
-        evidence: { transcript: `${customerText}\n${agentText}`, source: 'qualityAssuranceEngine' },
-      })));
+        finding: `QA compliance score was ${score.complianceScore}/100; review is required even though no named rule issue was emitted.`,
+        evidence: {
+          transcript: `${customerText}\n${agentText}`,
+          source: 'qualityAssuranceEngine',
+          complianceScore: score.complianceScore,
+          scorecard: score,
+        },
+      });
+    }
+
+    if (complianceEvents.length) {
+      const { error: complianceError } = await ctx.admin.from('ai4cc_compliance_events').insert(complianceEvents);
+      if (complianceError) throw complianceError;
     }
 
     await ctx.admin
@@ -162,7 +182,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       action: 'runtime.acceptance_completed',
       resource_type: 'interaction',
       resource_id: interaction.id,
-      payload: { versionId, queueId: queue?.id ?? null, agentId: agent?.id ?? null, intent: guidance.detectedIntent, qa: qa.summary },
+      payload: { versionId, queueId: queue?.id ?? null, agentId: agent?.id ?? null, intent: guidance.detectedIntent, qa: qa.summary, complianceEventCount: complianceEvents.length },
     });
 
     return res.status(200).json({
@@ -172,7 +192,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       route: { queue, agent, intent: guidance.detectedIntent, escalationRisk: guidance.state.escalationRisk },
       assist: guidance,
       qa,
-      complianceFindings: findings,
+      complianceFindings: complianceEvents.map((event) => event.finding),
     });
   } catch (error) {
     return res.status(apiErrorStatus(error)).json({ error: apiErrorMessage(error) });
