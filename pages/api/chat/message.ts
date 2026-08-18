@@ -10,14 +10,6 @@ type ChatBody = {
   message?: string;
 };
 
-type RuntimeContext = {
-  admin: ReturnType<typeof createClient>;
-  tenant: { id: string; name: string };
-  queue: { id: string; name: string; code: string } | null;
-  agent: { id: string; name: string; email: string | null } | null;
-  version: { id: string } | null;
-};
-
 function storage() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -37,7 +29,7 @@ function validSessionId(value: string) {
   return /^[A-Za-z0-9_-]{8,80}$/.test(value);
 }
 
-async function runtimeContext(): Promise<RuntimeContext> {
+async function runtimeContext() {
   const admin = storage();
   const { data: tenant, error: tenantError } = await admin.from('ai4cc_tenants').select('id,name').order('created_at', { ascending: true }).limit(1).maybeSingle();
   if (tenantError) throw tenantError;
