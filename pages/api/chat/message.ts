@@ -153,7 +153,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
     if (assistError) throw assistError;
 
-    const qa = generateQAReport({ transcripts: [{ id: interaction.id, agent: ctx.agent?.name ?? 'AI4CC Chat Agent', text: completeSession.turns.map((turn) => `${turn.speaker}: ${turn.text}`).join('\n'), sentiment: sentimentValue(guidance.state.sentiment), outcome: 'active' }] });
+    const qa = generateQAReport({ transcripts: [{ id: interaction.id, agent: ctx.agent?.name ?? 'AI4CC Chat Agent', text: completeSession.turns.map((turn) => `${turn.speaker}: ${turn.text}`).join('\n'), sentiment: sentimentValue(guidance.state.sentiment), outcome: 'unresolved' }] });
     const score = qa.scorecards[0];
     const { error: qaError } = await ctx.admin.from('ai4cc_qa_scores').insert({ tenant_id: ctx.tenant.id, interaction_id: interaction.id, agent_id: ctx.agent?.id ?? null, quality_score: score.qualityScore, compliance_score: score.complianceScore, flow_adherence_score: score.flowAdherenceScore, sentiment_score: score.sentimentScore, flags: score.flags, scoring_method: 'rules', scorecard: { ...score, scoringMethodDetail: 'rules-live-web-chat', detectedIntent: guidance.detectedIntent, escalationRisk: guidance.state.escalationRisk } });
     if (qaError) throw qaError;
