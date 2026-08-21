@@ -159,13 +159,14 @@ export default function FlowDeploymentPage() {
     setError(null);
     setIsBusy(true);
     try {
+      if (!selectedVersionId) throw new Error('Select a canonical flow version to promote.');
       const response = await fetch('/api/deployment/promote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           fromEnvironment: promoteFrom,
           toEnvironment: promoteTo,
-          user: 'jeffery',
+          versionId: selectedVersionId,
           notes: 'Promoted from Flow Deployment UI',
         }),
       });
