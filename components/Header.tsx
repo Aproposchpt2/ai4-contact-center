@@ -8,6 +8,8 @@ const NAV = [
   { href: '/troubleshooter', label: 'Troubleshooter' },
   { href: '/routing-optimizer', label: 'Routing Optimizer' },
   { href: '/voice-attendant', label: 'Voice Attendant' },
+  { href: '/agent-workspace', label: 'Agent Workspace' },
+  { href: '/voicemails', label: 'Voicemails' },
   { href: '/analytics-engine', label: 'Analytics Engine' },
   { href: '/flow-simulator', label: 'Flow Simulator' },
   { href: '/flow-auto-repair', label: 'Flow Auto-Repair' },
@@ -49,7 +51,6 @@ export default function Header() {
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       height: '60px',
     }}>
-      {/* Brand */}
       <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '.7rem' }}>
         <span style={{
           width: '30px', height: '30px', borderRadius: '6px',
@@ -63,7 +64,6 @@ export default function Header() {
         </span>
       </Link>
 
-      {/* Nav */}
       <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
         {NAV.map(({ href, label }) => (
           <Link
@@ -84,7 +84,6 @@ export default function Header() {
         ))}
       </nav>
 
-      {/* CTA */}
       <Link
         href="/builder"
         style={{
