@@ -14,7 +14,14 @@ Replace implicit latest-version runtime selection with controlled deployment aut
 
 ## Migration safeguard
 
-Because the canonical deployment table is currently empty, non-production environments may temporarily fall back to the latest matching channel flow version. Production never falls back.
+Because the canonical deployment table is currently empty, non-production environments use staged fallback:
+
+1. latest matching channel flow version;
+2. if none exists, the legacy latest tenant flow version used by the validated development runtime.
+
+The legacy fallback is explicitly marked `development_legacy_fallback` for observability and must be eliminated after SMS and Chat receive channel-specific canonical configurations.
+
+Production never falls back.
 
 ## Runtime environment
 
@@ -22,7 +29,7 @@ Because the canonical deployment table is currently empty, non-production enviro
 
 ## Channel isolation
 
-Voice, SMS, and Chat can only resolve a deployment whose flow belongs to the same tenant and same channel.
+Deployed authority is strictly tenant- and channel-matched. The temporary legacy fallback is permitted only outside production to preserve the already validated channel runtime until channel-specific deployments exist.
 
 ## Observability
 
@@ -30,4 +37,4 @@ New interactions and audit records expose runtime environment, authority mode, d
 
 ## Production cutover prerequisite
 
-Before setting `AI4CC_RUNTIME_ENVIRONMENT=production`, create validated production deployments for every channel intended to accept live interactions.
+Before setting `AI4CC_RUNTIME_ENVIRONMENT=production`, create validated production deployments for every channel intended to accept live interactions. Production has no latest-version or legacy fallback.
