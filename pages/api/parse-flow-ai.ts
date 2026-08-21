@@ -14,7 +14,14 @@ The JSON must follow this exact schema:
     { "key": number, "label": "string", "queue": "string (label + _Queue, no spaces)" }
   ],
   "after_hours": "string or null",
-  "holiday": "string or null"
+  "holiday": "string or null",
+  "schedule": null OR {
+    "timezone": "IANA timezone string or null",
+    "business_hours": [
+      { "days": ["sun|mon|tue|wed|thu|fri|sat"], "start": "HH:mm", "end": "HH:mm" }
+    ],
+    "holiday_dates": ["YYYY-MM-DD"]
+  }
 }
 
 Rules:
@@ -22,6 +29,11 @@ Rules:
 - queue = label with spaces removed + "_Queue" (e.g. "Financial Aid" → "FinancialAid_Queue")
 - after_hours: if after-hours routing is mentioned, set to destination (e.g. "Voicemail_Main", "AfterHours_Queue"); null if not mentioned
 - holiday: if holiday routing is mentioned, set to destination (e.g. "Holiday_Message"); null if not mentioned
+- schedule MUST be null unless the caller explicitly supplies business hours and/or explicit holiday dates
+- Never invent opening hours, closing hours, weekdays, timezone, or holiday dates
+- Convert explicitly authored business hours to 24-hour HH:mm values
+- Use only explicit IANA timezone names when supplied; otherwise set schedule.timezone to null
+- holiday_dates may contain only explicitly supplied ISO YYYY-MM-DD dates
 - Return ONLY the JSON object. No prose. No backticks.`;
 
 export default async function handler(
@@ -47,7 +59,7 @@ export default async function handler(
         body: JSON.stringify({
           model: 'gpt-4o-mini',
           temperature: 0,
-          max_tokens: 800,
+          max_tokens: 1000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user',   content: text.trim()   },
@@ -62,6 +74,7 @@ export default async function handler(
         const raw = aiData.choices?.[0]?.message?.content?.trim() ?? '';
         try {
           const parsed = JSON.parse(raw) as ParsedCallFlow;
+          if (parsed.schedule === undefined) parsed.schedule = null;
           return res.status(200).json({ ...parsed, engine: 'ai' });
         } catch {
           console.warn('[parse-flow-ai] JSON parse failed, falling back to rules. Raw:', raw);
