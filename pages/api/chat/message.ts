@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { generateGuidance, type AssistSession } from '@/lib/agentAssistEngine';
 import { generateQAReport } from '@/lib/qualityAssuranceEngine';
 import { selectRuntimeRoute } from '@/lib/runtimeRouting';
+import { resolveRuntimeFlowAuthority, runtimeEnvironment } from '@/lib/runtimeFlowDeployment';
 
 type ChatBody = { action?: 'message' | 'end'; sessionId?: string; visitorId?: string; message?: string };
 
@@ -28,16 +29,21 @@ async function runtimeContext() {
   const { data: tenant, error: tenantError } = await admin.from('ai4cc_tenants').select('id,name').order('created_at', { ascending: true }).limit(1).maybeSingle();
   if (tenantError) throw tenantError;
   if (!tenant) throw new Error('No AI4CC tenant is configured');
-  const [{ data: queues, error: queueError }, { data: agents, error: agentError }, { data: active, error: activeError }, { data: version, error: versionError }] = await Promise.all([
+
+  const environment = runtimeEnvironment();
+  const [queueResult, agentResult, activeResult, flowAuthority] = await Promise.all([
     admin.from('ai4cc_queues').select('id,name,code,channel,skills,priority,capacity,overflow_queue_id,status').eq('tenant_id', tenant.id).eq('status', 'active'),
     admin.from('ai4cc_agents').select('id,name,email,status,skills,channels').eq('tenant_id', tenant.id),
     admin.from('ai4cc_interactions').select('queue_id').eq('tenant_id', tenant.id).eq('status', 'active'),
-    admin.from('ai4cc_flow_versions').select('id,ai4cc_flows!inner(tenant_id)').eq('ai4cc_flows.tenant_id', tenant.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+    resolveRuntimeFlowAuthority(admin, tenant.id, 'chat', environment),
   ]);
-  if (queueError) throw queueError; if (agentError) throw agentError; if (activeError) throw activeError; if (versionError) throw versionError;
+  if (queueResult.error) throw queueResult.error;
+  if (agentResult.error) throw agentResult.error;
+  if (activeResult.error) throw activeResult.error;
+
   const activeByQueue: Record<string, number> = {};
-  for (const row of active ?? []) if (row.queue_id) activeByQueue[row.queue_id] = (activeByQueue[row.queue_id] ?? 0) + 1;
-  return { admin, tenant, queues: queues ?? [], agents: agents ?? [], activeByQueue, version: version ? { id: version.id as string } : null };
+  for (const row of activeResult.data ?? []) if (row.queue_id) activeByQueue[row.queue_id] = (activeByQueue[row.queue_id] ?? 0) + 1;
+  return { admin, tenant, queues: queueResult.data ?? [], agents: agentResult.data ?? [], activeByQueue, flowAuthority, environment };
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -70,17 +76,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { data: previousTurns, error: previousError } = existing ? await ctx.admin.from('ai4cc_transcripts').select('speaker,sequence_no,content,created_at').eq('tenant_id', ctx.tenant.id).eq('interaction_id', existing.id).order('sequence_no', { ascending: true }) : { data: [], error: null };
     if (previousError) throw previousError;
-    const provisional: AssistSession = { sessionId: existing?.id ?? sessionId, flowId: existing?.flow_version_id ?? ctx.version?.id, channel: 'chat', turns: [...(previousTurns ?? []).filter((t:any)=>t.speaker==='customer'||t.speaker==='agent').map((t:any)=>({speaker:t.speaker,text:t.content,timestamp:t.created_at??new Date().toISOString()})), { speaker: 'customer', text: message, timestamp: new Date().toISOString() }] };
+    const provisional: AssistSession = { sessionId: existing?.id ?? sessionId, flowId: existing?.flow_version_id ?? ctx.flowAuthority?.versionId, channel: 'chat', turns: [...(previousTurns ?? []).filter((t:any)=>t.speaker==='customer'||t.speaker==='agent').map((t:any)=>({speaker:t.speaker,text:t.content,timestamp:t.created_at??new Date().toISOString()})), { speaker: 'customer', text: message, timestamp: new Date().toISOString() }] };
     const guidance = generateGuidance(provisional);
     const route = selectRuntimeRoute({ channel: 'chat', intent: guidance.detectedIntent, queues: ctx.queues, agents: ctx.agents, activeByQueue: ctx.activeByQueue });
 
     let interaction = existing;
     if (!interaction) {
-      if (!ctx.version) return res.status(503).json({ error: 'No canonical flow version is available' });
-      const { data: created, error: createError } = await ctx.admin.from('ai4cc_interactions').insert({ tenant_id: ctx.tenant.id, channel: 'chat', direction: 'inbound', external_id: externalId, customer_identifier: visitorId, queue_id: route.queue?.id ?? null, agent_id: route.agent?.id ?? null, flow_version_id: ctx.version.id, status: 'active', metadata: { source: 'ai4cc_web_chat', mode: 'development', sessionId, visitorId, routingEngine: 'runtime_optimizer' } }).select('id,status,flow_version_id').single();
+      if (!ctx.flowAuthority) return res.status(503).json({ error: `No ${ctx.environment} chat flow is available for runtime authority` });
+      const { data: created, error: createError } = await ctx.admin.from('ai4cc_interactions').insert({ tenant_id: ctx.tenant.id, channel: 'chat', direction: 'inbound', external_id: externalId, customer_identifier: visitorId, queue_id: route.queue?.id ?? null, agent_id: route.agent?.id ?? null, flow_version_id: ctx.flowAuthority.versionId, status: 'active', metadata: { source: 'ai4cc_web_chat', mode: 'development', sessionId, visitorId, routingEngine: 'runtime_optimizer', runtimeEnvironment: ctx.environment, flowAuthority: ctx.flowAuthority.authority, deploymentId: ctx.flowAuthority.deploymentId } }).select('id,status,flow_version_id').single();
       if (createError || !created) throw createError ?? new Error('Unable to create chat interaction');
       interaction = created;
-      const { error: routeError } = await ctx.admin.from('ai4cc_routing_decisions').insert({ tenant_id: ctx.tenant.id, interaction_id: interaction.id, intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', selected_queue_id: route.queue?.id ?? null, overflow_used: route.overflowUsed, estimated_wait_seconds: route.estimatedWaitSeconds, reason: route.reason, input: { source: 'runtime_optimizer', sessionId, visitorId, candidates: route.candidates } });
+      const { error: routeError } = await ctx.admin.from('ai4cc_routing_decisions').insert({ tenant_id: ctx.tenant.id, interaction_id: interaction.id, intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', selected_queue_id: route.queue?.id ?? null, overflow_used: route.overflowUsed, estimated_wait_seconds: route.estimatedWaitSeconds, reason: route.reason, input: { source: 'runtime_optimizer', sessionId, visitorId, candidates: route.candidates, runtimeEnvironment: ctx.environment, flowAuthority: ctx.flowAuthority.authority, deploymentId: ctx.flowAuthority.deploymentId } });
       if (routeError) throw routeError;
     } else {
       await ctx.admin.from('ai4cc_routing_decisions').update({ intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', selected_queue_id: route.queue?.id ?? null, overflow_used: route.overflowUsed, estimated_wait_seconds: route.estimatedWaitSeconds, reason: route.reason, input: { source: 'runtime_optimizer', sessionId, visitorId, candidates: route.candidates } }).eq('tenant_id', ctx.tenant.id).eq('interaction_id', interaction.id);
@@ -109,9 +115,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const fresh = findings.filter((finding) => !seen.has(finding));
       if (fresh.length) { const { error } = await ctx.admin.from('ai4cc_compliance_events').insert(fresh.map((finding,index)=>({ tenant_id:ctx.tenant.id, interaction_id:interaction.id, rule_code:`CHAT-${Date.now()}-${index+1}`, severity:guidance.complianceAlerts.includes(finding)?'warning':'info', status:'open', finding, evidence:{source:'liveWebChat',sessionId,message,complianceScore:score.complianceScore} }))); if (error) throw error; }
     }
-    await ctx.admin.from('ai4cc_interactions').update({ queue_id: route.queue?.id ?? null, agent_id: route.agent?.id ?? null, metadata: { source: 'ai4cc_web_chat', mode: 'development', sessionId, visitorId, detectedIntent: guidance.detectedIntent, sentiment: guidance.state.sentiment, escalationRisk: guidance.state.escalationRisk, routingEngine: 'runtime_optimizer', routingReason: route.reason } }).eq('tenant_id', ctx.tenant.id).eq('id', interaction.id);
-    await ctx.admin.from('ai4cc_audit_logs').insert({ tenant_id: ctx.tenant.id, actor_user_id: null, action: 'webchat.message_processed', resource_type: 'interaction', resource_id: interaction.id, payload: { sessionId, visitorId, intent: guidance.detectedIntent, escalationRisk: guidance.state.escalationRisk, queueId: route.queue?.id ?? null, agentId: route.agent?.id ?? null, routingReason: route.reason, candidates: route.candidates, qa: qa.summary, reply } });
-    return res.status(200).json({ ok: true, interactionId: interaction.id, sessionId, status: 'active', reply, route: { intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', escalationRisk: guidance.state.escalationRisk, queue: route.queue, agent: route.agent, reason: route.reason, estimatedWaitSeconds: route.estimatedWaitSeconds }, qa: { quality: score.qualityScore, compliance: score.complianceScore, adherence: score.flowAdherenceScore, sentiment: score.sentimentScore } });
+    await ctx.admin.from('ai4cc_interactions').update({ queue_id: route.queue?.id ?? null, agent_id: route.agent?.id ?? null, metadata: { source: 'ai4cc_web_chat', mode: 'development', sessionId, visitorId, detectedIntent: guidance.detectedIntent, sentiment: guidance.state.sentiment, escalationRisk: guidance.state.escalationRisk, routingEngine: 'runtime_optimizer', routingReason: route.reason, runtimeEnvironment: ctx.environment, flowAuthority: ctx.flowAuthority?.authority ?? 'existing_interaction', deploymentId: ctx.flowAuthority?.deploymentId ?? null } }).eq('tenant_id', ctx.tenant.id).eq('id', interaction.id);
+    await ctx.admin.from('ai4cc_audit_logs').insert({ tenant_id: ctx.tenant.id, actor_user_id: null, action: 'webchat.message_processed', resource_type: 'interaction', resource_id: interaction.id, payload: { sessionId, visitorId, intent: guidance.detectedIntent, escalationRisk: guidance.state.escalationRisk, queueId: route.queue?.id ?? null, agentId: route.agent?.id ?? null, routingReason: route.reason, candidates: route.candidates, qa: qa.summary, reply, runtimeEnvironment: ctx.environment, flowAuthority: ctx.flowAuthority?.authority ?? 'existing_interaction', deploymentId: ctx.flowAuthority?.deploymentId ?? null } });
+    return res.status(200).json({ ok: true, interactionId: interaction.id, sessionId, status: 'active', reply, route: { intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', escalationRisk: guidance.state.escalationRisk, queue: route.queue, agent: route.agent, reason: route.reason, estimatedWaitSeconds: route.estimatedWaitSeconds }, qa: { quality: score.qualityScore, compliance: score.complianceScore, adherence: score.flowAdherenceScore, sentiment: score.sentimentScore }, flowAuthority: ctx.flowAuthority ? { versionId: ctx.flowAuthority.versionId, deploymentId: ctx.flowAuthority.deploymentId, authority: ctx.flowAuthority.authority, environment: ctx.flowAuthority.environment } : null });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Web chat request failed';
     return res.status(message === 'Invalid web chat origin' ? 403 : 500).json({ error: message });
