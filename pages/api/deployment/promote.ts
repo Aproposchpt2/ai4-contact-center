@@ -23,25 +23,21 @@ type PromotionResponse = {
 
 type ErrorResponse = { error: string };
 const ENVIRONMENTS: EnvironmentName[] = ['dev', 'qa', 'staging', 'production'];
-const CHANNELS: RuntimeChannel[] = ['voice', 'sms', 'chat'];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<PromotionResponse | ErrorResponse>) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { fromEnvironment, toEnvironment, channel, notes } = req.body as {
+  const { fromEnvironment, toEnvironment, versionId, notes } = req.body as {
     fromEnvironment?: EnvironmentName;
     toEnvironment?: EnvironmentName;
-    channel?: RuntimeChannel;
+    versionId?: string;
     notes?: string;
   };
-  if (!fromEnvironment || !toEnvironment || !channel) {
-    return res.status(400).json({ error: 'fromEnvironment, toEnvironment, and channel are required' });
+  if (!fromEnvironment || !toEnvironment || !versionId) {
+    return res.status(400).json({ error: 'fromEnvironment, toEnvironment, and versionId are required' });
   }
   if (!ENVIRONMENTS.includes(fromEnvironment) || !ENVIRONMENTS.includes(toEnvironment)) {
     return res.status(400).json({ error: 'Invalid environment' });
-  }
-  if (!CHANNELS.includes(channel)) {
-    return res.status(400).json({ error: 'Invalid channel' });
   }
   if (fromEnvironment === toEnvironment) {
     return res.status(400).json({ error: 'Source and target environments must differ' });
@@ -50,40 +46,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const { admin, userId, tenantId } = await requireAi4ccContext(req);
 
-    const { data: candidates, error: sourceError } = await admin
+    const { data: version, error: versionError } = await admin
+      .from('ai4cc_flow_versions')
+      .select('id,flow_id,version,definition,validation_status,validation_report,ai4cc_flows!inner(id,tenant_id,name,channel)')
+      .eq('id', versionId)
+      .eq('ai4cc_flows.tenant_id', tenantId)
+      .maybeSingle();
+    if (versionError) throw versionError;
+    if (!version) return res.status(404).json({ error: 'Version not found' });
+
+    const flowRecord = version.ai4cc_flows as any;
+    const channel = flowRecord?.channel as RuntimeChannel;
+    if (!channel || !['voice', 'sms', 'chat'].includes(channel)) {
+      return res.status(400).json({ error: 'Version is not associated with a supported runtime channel' });
+    }
+
+    const { data: source, error: sourceError } = await admin
       .from('ai4cc_deployments')
       .select('id,flow_version_id,snapshot,deployed_at')
       .eq('tenant_id', tenantId)
       .eq('environment', fromEnvironment)
       .eq('status', 'deployed')
+      .eq('flow_version_id', versionId)
       .order('deployed_at', { ascending: false })
-      .limit(100);
+      .limit(1)
+      .maybeSingle();
 
     if (sourceError) throw sourceError;
-
-    let source: any = null;
-    let sourceVersion: any = null;
-    for (const candidate of candidates ?? []) {
-      if (!candidate.flow_version_id) continue;
-      const { data: version, error: versionError } = await admin
-        .from('ai4cc_flow_versions')
-        .select('id,flow_id,version,definition,validation_status,validation_report,ai4cc_flows!inner(id,tenant_id,name,channel)')
-        .eq('id', candidate.flow_version_id)
-        .eq('ai4cc_flows.tenant_id', tenantId)
-        .eq('ai4cc_flows.channel', channel)
-        .maybeSingle();
-      if (versionError) throw versionError;
-      if (!version) continue;
-      source = candidate;
-      sourceVersion = version;
-      break;
+    if (!source) {
+      return res.status(400).json({ error: `Version is not deployed for ${channel} in ${fromEnvironment}` });
     }
 
-    if (!source || !sourceVersion) {
-      return res.status(400).json({ error: `No deployed ${channel} snapshot exists in ${fromEnvironment}` });
-    }
-
-    const flowDefinition = (sourceVersion.definition ?? {}) as Record<string, unknown>;
+    const flowDefinition = (version.definition ?? {}) as Record<string, unknown>;
     const validation = validateFlow({ flow: flowDefinition });
     if (!validation.isValid) {
       return res.status(400).json({ error: 'Validation failed during promotion' });
@@ -91,14 +85,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
     const timestamp = new Date().toISOString();
     const promotionNotes = notes?.trim() || `Promoted ${channel} from ${fromEnvironment}`;
-    const providerReference = `canonical:${source.flow_version_id}`;
-    const flowRecord = sourceVersion.ai4cc_flows as any;
+    const providerReference = `canonical:${versionId}`;
     const sourceSnapshot = source.snapshot && typeof source.snapshot === 'object'
       ? source.snapshot
       : {
-          flow_id: sourceVersion.flow_id,
+          flow_id: version.flow_id,
           flow_name: flowRecord?.name ?? 'Flow',
-          version: sourceVersion.version,
+          version: version.version,
           definition: flowDefinition,
           validation,
           notes: promotionNotes,
@@ -108,7 +101,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       .from('ai4cc_deployments')
       .insert({
         tenant_id: tenantId,
-        flow_version_id: source.flow_version_id,
+        flow_version_id: versionId,
         environment: toEnvironment,
         status: 'deployed',
         provider: 'ai4cc-canonical',
@@ -133,7 +126,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         from_environment: fromEnvironment,
         to_environment: toEnvironment,
         source_deployment_id: source.id,
-        flow_version_id: source.flow_version_id,
+        flow_version_id: versionId,
         notes: promotionNotes,
       },
     });
@@ -146,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
       snapshot: {
         id: inserted.id,
         environment: toEnvironment,
-        versionId: source.flow_version_id,
+        versionId,
         flow: flowDefinition,
         timestamp: inserted.deployed_at,
         metadata: {
