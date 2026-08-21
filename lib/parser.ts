@@ -103,7 +103,7 @@ function parseDays(value: string): ScheduleDay[] {
       const startIndex = DAY_ORDER.indexOf(start);
       const endIndex = DAY_ORDER.indexOf(end);
       if (startIndex <= endIndex) return DAY_ORDER.slice(startIndex, endIndex + 1);
-      return [...DAY_ORDER.slice(startIndex), ...DAY_ORDER.slice(0, endIndex + 1)];
+      return DAY_ORDER.slice(startIndex).concat(DAY_ORDER.slice(0, endIndex + 1));
     }
   }
 
@@ -149,9 +149,8 @@ export function extractSchedule(text: string): CallFlowSchedule | null {
     if (days.length > 0 && start && end) businessHours.push({ days, start, end });
   }
 
-  const holidayDates = Array.from(new Set(
-    [...text.matchAll(/\b(\d{4}-\d{2}-\d{2})\b/g)].map((match) => match[1])
-  ));
+  const dateMatches = Array.from(text.matchAll(/\b(\d{4}-\d{2}-\d{2})\b/g));
+  const holidayDates = Array.from(new Set(dateMatches.map((match) => match[1])));
   const explicitlyHolidayDates = /holiday\s+dates?/i.test(text) ? holidayDates : [];
 
   if (businessHours.length === 0 && explicitlyHolidayDates.length === 0) return null;
