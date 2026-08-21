@@ -29,7 +29,7 @@ export interface ParsedCallFlow {
   options: CallFlowOption[];
   after_hours: string | null;
   holiday: string | null;
-  schedule: CallFlowSchedule | null;
+  schedule?: CallFlowSchedule | null;
 }
 
 /** Detect menu name using spec rules. */
