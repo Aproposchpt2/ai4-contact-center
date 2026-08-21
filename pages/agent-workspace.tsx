@@ -1,10 +1,11 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
+type ChannelFilter = 'all' | 'voice' | 'sms' | 'chat';
 type Interaction = {
   id: string;
   channel: string;
@@ -19,54 +20,45 @@ type Interaction = {
   agent?: { id: string; name: string; email: string | null; status: string } | null;
   route?: { intent: string | null; priority: string | null; reason: string | null; estimated_wait_seconds: number | null } | null;
   transcript: Array<{ speaker: string | null; sequence_no: number; content: string; sentiment: number | null; metadata?: Record<string, any> }>;
-  assist?: {
-    detected_intent: string | null;
-    sentiment: string | null;
-    escalation_risk: string | null;
-    suggested_replies: string[];
-    kb_grounding: Array<{ title?: string; snippet?: string }>;
-    compliance_alerts: string[];
-    next_best_actions: string[];
-    model_info: Record<string, unknown>;
-  } | null;
-  qa?: {
-    quality_score: number | null;
-    compliance_score: number | null;
-    flow_adherence_score: number | null;
-    sentiment_score: number | null;
-    flags: string[];
-    scoring_method: string;
-  } | null;
+  assist?: { detected_intent: string | null; sentiment: string | null; escalation_risk: string | null; suggested_replies: string[]; kb_grounding: Array<{ title?: string; snippet?: string }>; compliance_alerts: string[]; next_best_actions: string[]; model_info: Record<string, unknown> } | null;
+  qa?: { quality_score: number | null; compliance_score: number | null; flow_adherence_score: number | null; sentiment_score: number | null; flags: string[]; scoring_method: string } | null;
   compliance: Array<{ rule_code: string | null; severity: string; status: string; finding: string }>;
 };
+
+function channelLabel(channel: string, liveVoice = false) {
+  if (channel === 'voice') return liveVoice ? 'LIVE VOICE' : 'VOICE';
+  if (channel === 'sms') return 'SMS';
+  if (channel === 'chat') return 'WEB CHAT';
+  return channel.toUpperCase();
+}
 
 export default function AgentWorkspacePage() {
   const router = useRouter();
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [selectedId, setSelectedId] = useState('');
+  const [filter, setFilter] = useState<ChannelFilter>('all');
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState('');
 
+  useEffect(() => {
+    if (!router.isReady) return;
+    const requested = typeof router.query.channel === 'string' ? router.query.channel : 'all';
+    if (requested === 'voice' || requested === 'sms' || requested === 'chat' || requested === 'all') setFilter(requested);
+    if (typeof router.query.interaction === 'string') setSelectedId(router.query.interaction);
+  }, [router.isReady, router.query.channel, router.query.interaction]);
+
   async function authHeaders() {
     if (!supabase) return null;
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return null;
-    return { Authorization: `Bearer ${session.access_token}` };
+    return session ? { Authorization: `Bearer ${session.access_token}` } : null;
   }
 
   async function refresh(silent = false) {
-    if (!isSupabaseConfigured() || !supabase) {
-      setError('Canonical Supabase configuration is required.');
-      setLoading(false);
-      return;
-    }
+    if (!isSupabaseConfigured() || !supabase) { setError('Canonical Supabase configuration is required.'); setLoading(false); return; }
     const headers = await authHeaders();
-    if (!headers) {
-      router.replace('/login');
-      return;
-    }
+    if (!headers) { await router.replace('/login'); return; }
     const res = await fetch('/api/runtime/interactions', { headers });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error ?? 'Unable to load interactions');
@@ -85,108 +77,53 @@ export default function AgentWorkspacePage() {
 
   async function runAcceptance() {
     const headers = await authHeaders();
-    if (!headers) {
-      router.replace('/login');
-      return;
-    }
-    setRunning(true);
-    setError(null);
+    if (!headers) { await router.replace('/login'); return; }
+    setRunning(true); setError(null);
     try {
-      const res = await fetch('/api/runtime/acceptance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...headers },
-        body: JSON.stringify({}),
-      });
+      const res = await fetch('/api/runtime/acceptance', { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify({}) });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? 'Runtime acceptance failed');
-      await refresh();
-      setSelectedId(data.interactionId);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setRunning(false);
-    }
+      await refresh(); setSelectedId(data.interactionId);
+    } catch (e) { setError((e as Error).message); }
+    finally { setRunning(false); }
   }
 
-  const selected = interactions.find((item) => item.id === selectedId) ?? interactions[0] ?? null;
-  const selectedIsLiveVoice = selected?.channel === 'voice' && selected?.metadata?.source === 'twilio_voice_webhook';
+  const filtered = useMemo(() => filter === 'all' ? interactions : interactions.filter((item) => item.channel === filter), [interactions, filter]);
+  const selected = filtered.find((item) => item.id === selectedId) ?? filtered[0] ?? null;
+  const liveVoice = selected?.channel === 'voice' && selected?.metadata?.source === 'twilio_voice_webhook';
   const confidence = selected?.transcript?.[0]?.metadata?.confidence;
 
-  return (
-    <>
-      <Header />
-      <main className="workspacePage">
-        <div className="workspaceShell">
-          <div className="workspaceHeader">
-            <div>
-              <p className="eyebrow">AI4 Contact Center · Runtime</p>
-              <h1>Agent Workspace</h1>
-              <p className="subhead">Canonical live voice, routing, assist, transcript, QA and compliance view. Auto-refreshes every 5 seconds{lastUpdated ? ` · Updated ${lastUpdated}` : ''}.</p>
-            </div>
-            <button className="runButton" onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button>
-          </div>
+  useEffect(() => {
+    if (selected && selected.id !== selectedId) setSelectedId(selected.id);
+  }, [selected?.id, selectedId]);
 
-          {error && <div className="errorBox">{error}</div>}
+  return <>
+    <Header />
+    <main className="page"><div className="shell">
+      <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · UNIFIED OPERATIONS</p><h1>Agent Workspace</h1><p className="subhead">Unified Voice, SMS and Web Chat interactions with canonical routing, transcripts, AI Assist, QA and compliance. Auto-refreshes every 5 seconds{lastUpdated ? ` · Updated ${lastUpdated}` : ''}.</p></div><button onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button></div>
 
-          {loading ? <p className="muted">Loading canonical runtime…</p> : (
-            <div className="workspaceGrid">
-              <aside className="interactionRail">
-                <div className="railTitle">Recent Interactions</div>
-                {interactions.length === 0 ? <div className="emptyRail">No interactions yet.</div> : interactions.map((item) => {
-                  const liveVoice = item.channel === 'voice' && item.metadata?.source === 'twilio_voice_webhook';
-                  return (
-                    <button key={item.id} onClick={() => setSelectedId(item.id)} className={`interactionButton ${item.id === selected?.id ? 'selected' : ''}`}>
-                      <div className="interactionTitleRow">
-                        {liveVoice && <span className="voiceBadge">LIVE VOICE</span>}
-                        <strong>{item.route?.intent ?? item.assist?.detected_intent ?? 'interaction'}</strong>
-                      </div>
-                      <div className="customerLine">{item.customer_identifier ?? 'Unknown customer'}</div>
-                      <div className="interactionMeta"><span>{item.channel}</span><span>•</span><span>{item.status}</span><span>•</span><span>{new Date(item.started_at).toLocaleString()}</span></div>
-                    </button>
-                  );
-                })}
-              </aside>
+      <div className="filters">{(['all','voice','sms','chat'] as ChannelFilter[]).map((item) => <button key={item} className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>{item === 'all' ? 'ALL' : channelLabel(item)}</button>)}</div>
+      {error && <div className="error">{error}</div>}
 
-              <section className="detailPanel">
-                {!selected ? <div className="emptyState">Select or create an interaction.</div> : (
-                  <div className="detailStack">
-                    {selectedIsLiveVoice && <div className="liveVoiceCard">
-                      <div><div className="cardLabel accent">Live Twilio Voice Interaction</div><div className="cardValue">{selected.customer_identifier ?? 'Unknown caller'}</div></div>
-                      <div className="voiceMeta"><div>Call SID: <span>{selected.external_id ?? '—'}</span></div><div>Speech confidence: <span>{confidence ? `${(Number(confidence) * 100).toFixed(1)}%` : '—'}</span></div></div>
-                    </div>}
+      {loading ? <p className="muted">Loading canonical runtime…</p> : <div className="workspace">
+        <aside className="rail"><div className="railTitle">Recent Interactions · {filtered.length}</div>{filtered.length === 0 ? <div className="empty">No {filter === 'all' ? '' : filter} interactions available.</div> : filtered.map((item) => {
+          const itemLiveVoice = item.channel === 'voice' && item.metadata?.source === 'twilio_voice_webhook';
+          return <button key={item.id} onClick={() => setSelectedId(item.id)} className={item.id === selected?.id ? 'selected' : ''}><div className="rowTitle"><span className={`badge ${item.channel}`}>{channelLabel(item.channel, itemLiveVoice)}</span><strong>{item.route?.intent ?? item.assist?.detected_intent ?? 'interaction'}</strong></div><div className="customer">{item.customer_identifier ?? 'Unknown customer'}</div><div className="meta"><span>{item.status}</span><span>•</span><span>{new Date(item.started_at).toLocaleString()}</span></div></button>;
+        })}</aside>
 
-                    <div className="statusGrid">
-                      {[['Status', selected.status], ['Intent', selected.route?.intent ?? selected.assist?.detected_intent ?? '—'], ['Queue', selected.queue?.name ?? '—'], ['Agent', selected.agent?.name ?? '—'], ['Priority', selected.route?.priority ?? '—'], ['Escalation', selected.assist?.escalation_risk ?? '—']].map(([label, value]) => (
-                        <div key={label} className="infoCard"><div className="cardLabel">{label}</div><div className="cardValue">{value}</div></div>
-                      ))}
-                    </div>
+        <section className="detail">{!selected ? <div className="emptyState">Select an interaction.</div> : <div className="stack">
+          <div className="channelCard"><div><span className={`badge ${selected.channel}`}>{channelLabel(selected.channel, liveVoice)}</span><h2>{selected.customer_identifier ?? 'Unknown customer'}</h2></div><div className="channelMeta">{selected.channel === 'voice' && <><div>Call SID <b>{selected.external_id ?? '—'}</b></div><div>Speech confidence <b>{confidence ? `${(Number(confidence) * 100).toFixed(1)}%` : '—'}</b></div></>}{selected.channel === 'sms' && <div>Message SID <b>{selected.external_id ?? '—'}</b></div>}{selected.channel === 'chat' && <div>Session <b>{selected.metadata?.sessionId ?? selected.external_id ?? '—'}</b></div>}</div></div>
 
-                    <div className="contentGrid">
-                      <div className="panel transcriptPanel">
-                        <h2>Transcript</h2>
-                        {selected.transcript.map((turn) => <div key={`${turn.sequence_no}-${turn.speaker}`} className={`turn ${turn.speaker === 'agent' ? 'agentTurn' : ''}`}><div className={`turnLabel ${turn.speaker === 'agent' ? 'accent' : ''}`}>{turn.speaker ?? 'speaker'}</div><div className="turnText">{turn.content}</div></div>)}
-                      </div>
+          <div className="statusGrid">{[['Status',selected.status],['Intent',selected.route?.intent ?? selected.assist?.detected_intent ?? '—'],['Queue',selected.queue?.name ?? '—'],['Agent',selected.agent?.name ?? '—'],['Priority',selected.route?.priority ?? '—'],['Escalation',selected.assist?.escalation_risk ?? '—']].map(([label,value]) => <div className="info" key={label}><small>{label}</small><b>{value}</b></div>)}</div>
 
-                      <div className="rightStack">
-                        <div className="panel"><h2>AI Assist</h2>{(selected.assist?.suggested_replies ?? []).map((reply) => <div key={reply} className="assistLine">• {reply}</div>)}{(selected.assist?.next_best_actions ?? []).length > 0 && <><div className="nextLabel">Next best actions</div>{selected.assist?.next_best_actions.map((action) => <div key={action} className="actionLine">→ {action}</div>)}</>}</div>
-                        <div className="panel"><h2>QA</h2><div className="qaGrid">{[['Quality', selected.qa?.quality_score], ['Compliance', selected.qa?.compliance_score], ['Adherence', selected.qa?.flow_adherence_score], ['Sentiment', selected.qa?.sentiment_score]].map(([label, value]) => <div key={String(label)}><div className="qaLabel">{label}</div><div className="qaValue">{value ?? '—'}</div></div>)}</div></div>
-                      </div>
-                    </div>
+          <div className="content"><div className="panel"><h3>Transcript</h3>{selected.transcript.length === 0 ? <p className="muted">No transcript turns.</p> : selected.transcript.map((turn) => <div className={`turn ${turn.speaker === 'agent' ? 'agent' : ''}`} key={`${turn.sequence_no}-${turn.speaker}`}><small>{turn.speaker ?? 'speaker'}</small><p>{turn.content}</p></div>)}</div><div className="side"><div className="panel"><h3>AI Assist</h3>{(selected.assist?.suggested_replies ?? []).map((reply) => <p key={reply}>• {reply}</p>)}{(selected.assist?.next_best_actions ?? []).length > 0 && <><small className="accent">NEXT BEST ACTIONS</small>{selected.assist?.next_best_actions.map((action) => <p key={action}>→ {action}</p>)}</>}</div><div className="panel"><h3>QA</h3><div className="qa">{[['Quality',selected.qa?.quality_score],['Compliance',selected.qa?.compliance_score],['Adherence',selected.qa?.flow_adherence_score],['Sentiment',selected.qa?.sentiment_score]].map(([label,value]) => <div key={String(label)}><small>{label}</small><b>{value ?? '—'}</b></div>)}</div></div></div></div>
 
-                    {(selected.assist?.compliance_alerts?.length ?? 0) + selected.compliance.length > 0 && <div className="compliancePanel"><h2>Compliance Findings</h2>{selected.assist?.compliance_alerts?.map((alert) => <div key={alert} className="finding">⚠ {alert}</div>)}{selected.compliance.map((finding, index) => <div key={`${finding.rule_code}-${index}`} className="finding">⚠ {finding.finding}</div>)}</div>}
-                  </div>
-                )}
-              </section>
-            </div>
-          )}
-        </div>
-      </main>
-      <Footer />
-      <style jsx>{`
-        .workspacePage{min-height:100vh;background:#06111f;color:#e8f0fe;font-family:'Inter','Jost',sans-serif;padding:2rem clamp(1rem,3vw,2rem);overflow-x:hidden}.workspaceShell{max-width:1320px;margin:0 auto;min-width:0}.workspaceHeader{display:flex;justify-content:space-between;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1.5rem}.eyebrow{font-size:.65rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#5bd3ff;margin:0 0 .4rem}.workspaceHeader h1{margin:0;font-size:clamp(1.7rem,3vw,2.5rem);color:#fff}.subhead{color:rgba(255,255,255,.45);font-size:.86rem;margin:.45rem 0 0;line-height:1.55}.runButton{border:0;border-radius:7px;background:#5bd3ff;color:#06111f;padding:.8rem 1.15rem;font-weight:900;cursor:pointer}.runButton:disabled{opacity:.7;cursor:wait}.errorBox{margin-bottom:1rem;padding:.75rem 1rem;border:1px solid rgba(255,100,100,.3);border-radius:7px;color:#ff9090;background:rgba(255,80,80,.06)}.muted{color:rgba(255,255,255,.45)}.workspaceGrid{display:grid;grid-template-columns:minmax(240px,320px) minmax(0,1fr);gap:1rem;min-width:0}.interactionRail{border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.025);min-width:0}.railTitle{padding:.8rem 1rem;border-bottom:1px solid rgba(255,255,255,.08);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:800}.emptyRail{padding:1.2rem;color:rgba(255,255,255,.4);font-size:.85rem}.interactionButton{display:block;width:100%;text-align:left;padding:.9rem 1rem;border:0;border-bottom:1px solid rgba(255,255,255,.06);background:transparent;color:#e8f0fe;cursor:pointer;min-width:0}.interactionButton.selected{background:rgba(91,211,255,.09)}.interactionTitleRow{display:flex;align-items:center;gap:.45rem;margin-bottom:.3rem;min-width:0}.interactionTitleRow strong{font-size:.84rem;overflow-wrap:anywhere}.voiceBadge{font-size:.56rem;font-weight:900;letter-spacing:.1em;color:#06111f;background:#5bd3ff;padding:.16rem .35rem;border-radius:4px;white-space:nowrap}.customerLine{font-size:.72rem;color:rgba(255,255,255,.58);margin-bottom:.2rem;overflow-wrap:anywhere}.interactionMeta{display:flex;gap:.45rem;flex-wrap:wrap;font-size:.7rem;color:rgba(255,255,255,.4)}.detailPanel,.detailStack{min-width:0}.detailStack{display:grid;gap:1rem}.emptyState{padding:3rem;border:1px dashed rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.4)}.liveVoiceCard{padding:1rem;border:1px solid rgba(91,211,255,.3);border-radius:10px;background:rgba(91,211,255,.06);display:flex;gap:1rem;justify-content:space-between;flex-wrap:wrap;min-width:0}.voiceMeta{font-size:.74rem;color:rgba(255,255,255,.55);overflow-wrap:anywhere}.voiceMeta span{color:#fff}.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;min-width:0}.infoCard,.panel{padding:1rem;border:1px solid rgba(255,255,255,.08);border-radius:10px;background:rgba(255,255,255,.025);min-width:0}.cardLabel{font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,.35);margin-bottom:.35rem;font-weight:800}.accent{color:#5bd3ff}.cardValue{font-weight:800;color:#fff;overflow-wrap:anywhere}.contentGrid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:1rem;min-width:0}.panel h2,.compliancePanel h2{margin:0 0 .75rem;font-size:1rem;color:#fff}.turn{margin-bottom:.75rem;padding:.75rem .85rem;border-radius:8px;background:rgba(255,255,255,.04);min-width:0}.agentTurn{background:rgba(91,211,255,.07)}.turnLabel{font-size:.62rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.4);margin-bottom:.25rem;font-weight:800}.turnText{line-height:1.55;font-size:.9rem;overflow-wrap:anywhere;word-break:break-word}.rightStack{display:grid;gap:1rem;min-width:0}.assistLine{margin-bottom:.55rem;font-size:.82rem;line-height:1.45;overflow-wrap:anywhere}.nextLabel{margin-top:.8rem;font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;color:#5bd3ff;font-weight:800}.actionLine{margin-top:.35rem;font-size:.8rem;overflow-wrap:anywhere}.qaGrid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}.qaLabel{font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase}.qaValue{font-size:1.2rem;font-weight:900;color:#fff}.compliancePanel{padding:1rem;border:1px solid rgba(255,190,80,.22);border-radius:10px;background:rgba(255,180,60,.05);min-width:0}.finding{margin-bottom:.4rem;font-size:.82rem;overflow-wrap:anywhere}
-        @media(max-width:820px){.workspacePage{padding:1rem}.workspaceHeader{align-items:stretch}.runButton{width:100%}.workspaceGrid{grid-template-columns:1fr}.interactionRail{max-height:260px;overflow:auto}.railTitle{position:sticky;top:0;background:#0a1826;z-index:1}.statusGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.contentGrid{grid-template-columns:1fr}.rightStack{grid-template-columns:1fr}.subhead{font-size:.82rem}.detailPanel{width:100%}}
-        @media(max-width:480px){.workspacePage{padding:.8rem}.workspaceHeader h1{font-size:2rem}.statusGrid{grid-template-columns:1fr 1fr}.infoCard,.panel,.compliancePanel{padding:.85rem}.interactionRail{max-height:220px}.interactionButton{padding:.75rem .85rem}.interactionMeta{font-size:.64rem}.contentGrid{gap:.75rem}.qaGrid{grid-template-columns:1fr 1fr}.turnText{font-size:.88rem}.liveVoiceCard{display:block}.voiceMeta{margin-top:.75rem}.cardValue{font-size:.95rem}.subhead{line-height:1.45}}
-      `}</style>
-    </>
-  );
+          {(selected.assist?.compliance_alerts?.length ?? 0) + selected.compliance.length > 0 && <div className="compliance"><h3>Compliance Findings</h3>{selected.assist?.compliance_alerts?.map((alert) => <p key={alert}>⚠ {alert}</p>)}{selected.compliance.map((finding,index) => <p key={`${finding.rule_code}-${index}`}>⚠ {finding.finding}</p>)}</div>}
+        </div>}</section>
+      </div>}
+    </div></main>
+    <Footer />
+    <style jsx>{`
+      :global(*){box-sizing:border-box}:global(body){margin:0;background:#06111f}.page{min-height:100vh;background:#06111f;color:#e8f0fe;padding:2rem clamp(1rem,3vw,2rem)}.shell{max-width:1320px;margin:auto}.heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap}.eyebrow{margin:0 0 6px;color:#5bd3ff;font-size:.65rem;font-weight:900;letter-spacing:.18em}.heading h1{margin:0;color:#fff;font-size:clamp(1.8rem,3vw,2.6rem)}.subhead{max-width:850px;color:#7891a3;font-size:.84rem;line-height:1.55}.heading>button{border:0;border-radius:7px;background:#5bd3ff;color:#06111f;padding:.8rem 1.1rem;font-weight:900;cursor:pointer}.heading>button:disabled{opacity:.6}.filters{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0 14px}.filters button{border:1px solid #23465f;background:rgba(255,255,255,.03);color:#91a8bb;border-radius:999px;padding:8px 13px;font-size:.68rem;font-weight:900;letter-spacing:.08em;cursor:pointer}.filters button.active{background:#5bd3ff;color:#06111f;border-color:#5bd3ff}.error{margin-bottom:14px;border:1px solid rgba(255,100,100,.3);background:rgba(255,80,80,.06);padding:11px;border-radius:8px;color:#ff9090}.muted{color:#71899b}.workspace{display:grid;grid-template-columns:minmax(250px,330px) minmax(0,1fr);gap:14px}.rail{border:1px solid #17364b;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.02)}.railTitle{padding:11px 13px;border-bottom:1px solid #17364b;font-size:.62rem;font-weight:900;letter-spacing:.12em;color:#71899b}.rail>button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #102d42;background:transparent;color:#d8eaf4;padding:12px;cursor:pointer}.rail>button.selected{background:rgba(91,211,255,.08)}.rowTitle{display:flex;gap:7px;align-items:center}.rowTitle strong{font-size:.8rem;overflow-wrap:anywhere}.badge{display:inline-block;border-radius:4px;padding:3px 6px;font-size:.55rem;font-weight:900;letter-spacing:.08em;background:#5bd3ff;color:#06111f}.badge.sms{background:#8df0c2}.badge.chat{background:#c6a8ff}.customer{margin-top:5px;font-size:.71rem;color:#91a8bb}.meta{display:flex;gap:5px;margin-top:4px;font-size:.65rem;color:#617b8e}.empty{padding:18px;color:#71899b;font-size:.8rem}.detail,.stack{min-width:0}.stack{display:grid;gap:12px}.emptyState{padding:3rem;border:1px dashed #17364b;border-radius:10px;color:#71899b}.channelCard{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border:1px solid #1b435d;border-radius:10px;padding:15px;background:rgba(91,211,255,.04)}.channelCard h2{margin:8px 0 0;font-size:1.15rem}.channelMeta{font-size:.7rem;color:#7891a3;display:grid;gap:5px}.channelMeta b{color:#d6e8f3;overflow-wrap:anywhere}.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.info,.panel{border:1px solid #17364b;border-radius:9px;padding:13px;background:rgba(255,255,255,.02)}small{font-size:.58rem;font-weight:900;letter-spacing:.1em;color:#71899b;text-transform:uppercase}.info b{display:block;margin-top:5px;color:#fff;overflow-wrap:anywhere}.content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:12px}.panel h3,.compliance h3{margin:0 0 10px;color:#fff;font-size:.95rem}.turn{margin:0 0 8px;background:rgba(255,255,255,.035);border-radius:7px;padding:10px}.turn.agent{background:rgba(91,211,255,.06)}.turn p,.panel p,.compliance p{font-size:.8rem;line-height:1.5;overflow-wrap:anywhere}.side{display:grid;gap:12px;align-content:start}.accent{color:#5bd3ff}.qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}.qa b{display:block;margin-top:4px;font-size:1.15rem}.compliance{border:1px solid rgba(255,190,80,.25);background:rgba(255,180,60,.05);border-radius:9px;padding:13px}@media(max-width:840px){.workspace{grid-template-columns:1fr}.rail{max-height:290px;overflow:auto}.content{grid-template-columns:1fr}.heading>button{width:100%}}`}</style>
+  </>;
 }
