@@ -11,7 +11,7 @@ export type RuntimeFlowAuthority = {
   channel: RuntimeChannel;
   environment: RuntimeEnvironment;
   deploymentId: string | null;
-  authority: 'deployment' | 'development_fallback';
+  authority: 'deployment' | 'development_fallback' | 'development_legacy_fallback';
 };
 
 function validEnvironment(value: string | undefined): RuntimeEnvironment {
@@ -36,6 +36,19 @@ async function loadVersionForChannel(
     .eq('ai4cc_flows.tenant_id', tenantId)
     .eq('ai4cc_flows.channel', channel)
     .maybeSingle();
+  if (error) throw error;
+  return data as any;
+}
+
+async function latestTenantVersion(admin: SupabaseClient, tenantId: string, channel?: RuntimeChannel) {
+  let query = admin
+    .from('ai4cc_flow_versions')
+    .select('id,flow_id,definition,created_at,ai4cc_flows!inner(id,tenant_id,name,channel)')
+    .eq('ai4cc_flows.tenant_id', tenantId)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (channel) query = query.eq('ai4cc_flows.channel', channel);
+  const { data, error } = await query.maybeSingle();
   if (error) throw error;
   return data as any;
 }
@@ -75,26 +88,32 @@ export async function resolveRuntimeFlowAuthority(
 
   if (environment === 'production') return null;
 
-  const { data: fallback, error: fallbackError } = await admin
-    .from('ai4cc_flow_versions')
-    .select('id,flow_id,definition,created_at,ai4cc_flows!inner(id,tenant_id,name,channel)')
-    .eq('ai4cc_flows.tenant_id', tenantId)
-    .eq('ai4cc_flows.channel', channel)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (fallbackError) throw fallbackError;
-  if (!fallback) return null;
+  const channelFallback = await latestTenantVersion(admin, tenantId, channel);
+  if (channelFallback) {
+    const flow = channelFallback.ai4cc_flows as any;
+    return {
+      versionId: channelFallback.id,
+      definition: (channelFallback.definition ?? null) as Record<string, unknown> | null,
+      flowId: channelFallback.flow_id,
+      flowName: flow?.name ?? 'Flow',
+      channel,
+      environment,
+      deploymentId: null,
+      authority: 'development_fallback',
+    };
+  }
 
-  const flow = fallback.ai4cc_flows as any;
+  const legacyFallback = await latestTenantVersion(admin, tenantId);
+  if (!legacyFallback) return null;
+  const legacyFlow = legacyFallback.ai4cc_flows as any;
   return {
-    versionId: fallback.id,
-    definition: (fallback.definition ?? null) as Record<string, unknown> | null,
-    flowId: fallback.flow_id,
-    flowName: flow?.name ?? 'Flow',
+    versionId: legacyFallback.id,
+    definition: (legacyFallback.definition ?? null) as Record<string, unknown> | null,
+    flowId: legacyFallback.flow_id,
+    flowName: legacyFlow?.name ?? 'Flow',
     channel,
     environment,
     deploymentId: null,
-    authority: 'development_fallback',
+    authority: 'development_legacy_fallback',
   };
 }
