@@ -4,6 +4,7 @@ import {
   extractOptions,
   extractAfterHours,
   extractHoliday,
+  extractSchedule,
   ParsedCallFlow,
 } from '@/lib/parser';
 
@@ -24,11 +25,12 @@ export default function handler(
   }
 
   const input = text.trim();
-  const result = {
+  const result: ParsedCallFlow = {
     menu: extractMenu(input),
     options: extractOptions(input),
     after_hours: extractAfterHours(input),
     holiday: extractHoliday(input),
+    schedule: extractSchedule(input),
   };
   return res.status(200).json(result);
 }
