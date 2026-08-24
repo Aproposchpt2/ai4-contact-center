@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FlowRuntimeMonitorDashboard from '@/components/FlowRuntimeMonitorDashboard';
@@ -63,17 +63,6 @@ export default function FlowRuntimeMonitorPage() {
       setIsLoading(false);
     }
   }, [query]);
-
-  useEffect(() => {
-    refresh().catch(() => undefined);
-  }, [refresh]);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      refresh().catch(() => undefined);
-    }, 8000);
-    return () => clearInterval(timer);
-  }, [refresh]);
 
   async function handleAcknowledge(incidentId: string) {
     setError(null);
@@ -165,7 +154,7 @@ export default function FlowRuntimeMonitorPage() {
       >
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-            AI4 Contact Center · Live Runtime Monitor
+            AI4 Contact Center · On-Demand Runtime Monitor
           </p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>
             Flow Runtime Monitor & Incident Console
