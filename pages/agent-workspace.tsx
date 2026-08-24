@@ -37,7 +37,7 @@ export default function AgentWorkspacePage() {
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [filter, setFilter] = useState<ChannelFilter>('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState('');
@@ -55,25 +55,24 @@ export default function AgentWorkspacePage() {
     return session ? { Authorization: `Bearer ${session.access_token}` } : null;
   }
 
-  async function refresh(silent = false) {
+  async function refresh() {
+    setLoading(true);
+    setError(null);
     if (!isSupabaseConfigured() || !supabase) { setError('Canonical Supabase configuration is required.'); setLoading(false); return; }
     const headers = await authHeaders();
-    if (!headers) { await router.replace('/login'); return; }
-    const res = await fetch('/api/runtime/interactions', { headers });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error ?? 'Unable to load interactions');
-    const rows = (data.interactions ?? []) as Interaction[];
-    setInteractions(rows);
-    setSelectedId((current) => current && rows.some((row) => row.id === current) ? current : rows[0]?.id || '');
-    setLastUpdated(new Date().toLocaleTimeString());
-    if (!silent) setLoading(false);
+    if (!headers) { setLoading(false); await router.replace('/login'); return; }
+    try {
+      const res = await fetch('/api/runtime/interactions', { headers });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? 'Unable to load interactions');
+      const rows = (data.interactions ?? []) as Interaction[];
+      setInteractions(rows);
+      setSelectedId((current) => current && rows.some((row) => row.id === current) ? current : rows[0]?.id || '');
+      setLastUpdated(new Date().toLocaleTimeString());
+    } finally {
+      setLoading(false);
+    }
   }
-
-  useEffect(() => {
-    refresh().catch((e: Error) => { setError(e.message); setLoading(false); });
-    const timer = window.setInterval(() => refresh(true).catch((e: Error) => setError(e.message)), 5000);
-    return () => window.clearInterval(timer);
-  }, []);
 
   async function runAcceptance() {
     const headers = await authHeaders();
@@ -100,18 +99,18 @@ export default function AgentWorkspacePage() {
   return <>
     <Header />
     <main className="page"><div className="shell">
-      <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · UNIFIED OPERATIONS</p><h1>Agent Workspace</h1><p className="subhead">Unified Voice, SMS and Web Chat interactions with canonical routing, transcripts, AI Assist, QA and compliance. Auto-refreshes every 5 seconds{lastUpdated ? ` · Updated ${lastUpdated}` : ''}.</p></div><button onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button></div>
+      <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · DEVELOPMENT OPERATIONS</p><h1>Agent Workspace</h1><p className="subhead">Unified Voice, SMS and Web Chat interactions with canonical routing, transcripts, AI Assist, QA and compliance. Monitoring is off. Refresh only when you need a current development snapshot{lastUpdated ? ` · Last checked ${lastUpdated}` : ''}.</p></div><div className="headingActions"><button onClick={() => refresh().catch((e: Error) => setError(e.message))} disabled={loading}>{loading ? 'Checking…' : 'Refresh Interactions'}</button><button onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button></div></div>
 
       <div className="filters">{(['all','voice','sms','chat'] as ChannelFilter[]).map((item) => <button key={item} className={filter === item ? 'active' : ''} onClick={() => setFilter(item)}>{item === 'all' ? 'ALL' : channelLabel(item)}</button>)}</div>
       {error && <div className="error">{error}</div>}
 
-      {loading ? <p className="muted">Loading canonical runtime…</p> : <div className="workspace">
-        <aside className="rail"><div className="railTitle">Recent Interactions · {filtered.length}</div>{filtered.length === 0 ? <div className="empty">No {filter === 'all' ? '' : filter} interactions available.</div> : filtered.map((item) => {
+      {loading ? <p className="muted">Checking canonical runtime…</p> : <div className="workspace">
+        <aside className="rail"><div className="railTitle">Recent Interactions · {filtered.length}</div>{filtered.length === 0 ? <div className="empty">No snapshot loaded. Use Refresh Interactions when you want to query development data.</div> : filtered.map((item) => {
           const itemLiveVoice = item.channel === 'voice' && item.metadata?.source === 'twilio_voice_webhook';
           return <button key={item.id} onClick={() => setSelectedId(item.id)} className={item.id === selected?.id ? 'selected' : ''}><div className="rowTitle"><span className={`badge ${item.channel}`}>{channelLabel(item.channel, itemLiveVoice)}</span><strong>{item.route?.intent ?? item.assist?.detected_intent ?? 'interaction'}</strong></div><div className="customer">{item.customer_identifier ?? 'Unknown customer'}</div><div className="meta"><span>{item.status}</span><span>•</span><span>{new Date(item.started_at).toLocaleString()}</span></div></button>;
         })}</aside>
 
-        <section className="detail">{!selected ? <div className="emptyState">Select an interaction.</div> : <div className="stack">
+        <section className="detail">{!selected ? <div className="emptyState">Refresh interactions, then select an interaction.</div> : <div className="stack">
           <div className="channelCard"><div><span className={`badge ${selected.channel}`}>{channelLabel(selected.channel, liveVoice)}</span><h2>{selected.customer_identifier ?? 'Unknown customer'}</h2></div><div className="channelMeta">{selected.channel === 'voice' && <><div>Call SID <b>{selected.external_id ?? '—'}</b></div><div>Speech confidence <b>{confidence ? `${(Number(confidence) * 100).toFixed(1)}%` : '—'}</b></div></>}{selected.channel === 'sms' && <div>Message SID <b>{selected.external_id ?? '—'}</b></div>}{selected.channel === 'chat' && <div>Session <b>{selected.metadata?.sessionId ?? selected.external_id ?? '—'}</b></div>}</div></div>
 
           <div className="statusGrid">{[['Status',selected.status],['Intent',selected.route?.intent ?? selected.assist?.detected_intent ?? '—'],['Queue',selected.queue?.name ?? '—'],['Agent',selected.agent?.name ?? '—'],['Priority',selected.route?.priority ?? '—'],['Escalation',selected.assist?.escalation_risk ?? '—']].map(([label,value]) => <div className="info" key={label}><small>{label}</small><b>{value}</b></div>)}</div>
@@ -124,6 +123,6 @@ export default function AgentWorkspacePage() {
     </div></main>
     <Footer />
     <style jsx>{`
-      :global(*){box-sizing:border-box}:global(body){margin:0;background:#06111f}.page{min-height:100vh;background:#06111f;color:#e8f0fe;padding:2rem clamp(1rem,3vw,2rem)}.shell{max-width:1320px;margin:auto}.heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap}.eyebrow{margin:0 0 6px;color:#5bd3ff;font-size:.65rem;font-weight:900;letter-spacing:.18em}.heading h1{margin:0;color:#fff;font-size:clamp(1.8rem,3vw,2.6rem)}.subhead{max-width:850px;color:#7891a3;font-size:.84rem;line-height:1.55}.heading>button{border:0;border-radius:7px;background:#5bd3ff;color:#06111f;padding:.8rem 1.1rem;font-weight:900;cursor:pointer}.heading>button:disabled{opacity:.6}.filters{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0 14px}.filters button{border:1px solid #23465f;background:rgba(255,255,255,.03);color:#91a8bb;border-radius:999px;padding:8px 13px;font-size:.68rem;font-weight:900;letter-spacing:.08em;cursor:pointer}.filters button.active{background:#5bd3ff;color:#06111f;border-color:#5bd3ff}.error{margin-bottom:14px;border:1px solid rgba(255,100,100,.3);background:rgba(255,80,80,.06);padding:11px;border-radius:8px;color:#ff9090}.muted{color:#71899b}.workspace{display:grid;grid-template-columns:minmax(250px,330px) minmax(0,1fr);gap:14px}.rail{border:1px solid #17364b;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.02)}.railTitle{padding:11px 13px;border-bottom:1px solid #17364b;font-size:.62rem;font-weight:900;letter-spacing:.12em;color:#71899b}.rail>button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #102d42;background:transparent;color:#d8eaf4;padding:12px;cursor:pointer}.rail>button.selected{background:rgba(91,211,255,.08)}.rowTitle{display:flex;gap:7px;align-items:center}.rowTitle strong{font-size:.8rem;overflow-wrap:anywhere}.badge{display:inline-block;border-radius:4px;padding:3px 6px;font-size:.55rem;font-weight:900;letter-spacing:.08em;background:#5bd3ff;color:#06111f}.badge.sms{background:#8df0c2}.badge.chat{background:#c6a8ff}.customer{margin-top:5px;font-size:.71rem;color:#91a8bb}.meta{display:flex;gap:5px;margin-top:4px;font-size:.65rem;color:#617b8e}.empty{padding:18px;color:#71899b;font-size:.8rem}.detail,.stack{min-width:0}.stack{display:grid;gap:12px}.emptyState{padding:3rem;border:1px dashed #17364b;border-radius:10px;color:#71899b}.channelCard{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border:1px solid #1b435d;border-radius:10px;padding:15px;background:rgba(91,211,255,.04)}.channelCard h2{margin:8px 0 0;font-size:1.15rem}.channelMeta{font-size:.7rem;color:#7891a3;display:grid;gap:5px}.channelMeta b{color:#d6e8f3;overflow-wrap:anywhere}.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.info,.panel{border:1px solid #17364b;border-radius:9px;padding:13px;background:rgba(255,255,255,.02)}small{font-size:.58rem;font-weight:900;letter-spacing:.1em;color:#71899b;text-transform:uppercase}.info b{display:block;margin-top:5px;color:#fff;overflow-wrap:anywhere}.content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:12px}.panel h3,.compliance h3{margin:0 0 10px;color:#fff;font-size:.95rem}.turn{margin:0 0 8px;background:rgba(255,255,255,.035);border-radius:7px;padding:10px}.turn.agent{background:rgba(91,211,255,.06)}.turn p,.panel p,.compliance p{font-size:.8rem;line-height:1.5;overflow-wrap:anywhere}.side{display:grid;gap:12px;align-content:start}.accent{color:#5bd3ff}.qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}.qa b{display:block;margin-top:4px;font-size:1.15rem}.compliance{border:1px solid rgba(255,190,80,.25);background:rgba(255,180,60,.05);border-radius:9px;padding:13px}@media(max-width:840px){.workspace{grid-template-columns:1fr}.rail{max-height:290px;overflow:auto}.content{grid-template-columns:1fr}.heading>button{width:100%}}`}</style>
+      :global(*){box-sizing:border-box}:global(body){margin:0;background:#06111f}.page{min-height:100vh;background:#06111f;color:#e8f0fe;padding:2rem clamp(1rem,3vw,2rem)}.shell{max-width:1320px;margin:auto}.heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap}.eyebrow{margin:0 0 6px;color:#5bd3ff;font-size:.65rem;font-weight:900;letter-spacing:.18em}.heading h1{margin:0;color:#fff;font-size:clamp(1.8rem,3vw,2.6rem)}.subhead{max-width:850px;color:#7891a3;font-size:.84rem;line-height:1.55}.headingActions{display:flex;gap:8px;flex-wrap:wrap}.headingActions button{border:0;border-radius:7px;background:#5bd3ff;color:#06111f;padding:.8rem 1.1rem;font-weight:900;cursor:pointer}.headingActions button:disabled{opacity:.6}.filters{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0 14px}.filters button{border:1px solid #23465f;background:rgba(255,255,255,.03);color:#91a8bb;border-radius:999px;padding:8px 13px;font-size:.68rem;font-weight:900;letter-spacing:.08em;cursor:pointer}.filters button.active{background:#5bd3ff;color:#06111f;border-color:#5bd3ff}.error{margin-bottom:14px;border:1px solid rgba(255,100,100,.3);background:rgba(255,80,80,.06);padding:11px;border-radius:8px;color:#ff9090}.muted{color:#71899b}.workspace{display:grid;grid-template-columns:minmax(250px,330px) minmax(0,1fr);gap:14px}.rail{border:1px solid #17364b;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.02)}.railTitle{padding:11px 13px;border-bottom:1px solid #17364b;font-size:.62rem;font-weight:900;letter-spacing:.12em;color:#71899b}.rail>button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #102d42;background:transparent;color:#d8eaf4;padding:12px;cursor:pointer}.rail>button.selected{background:rgba(91,211,255,.08)}.rowTitle{display:flex;gap:7px;align-items:center}.rowTitle strong{font-size:.8rem;overflow-wrap:anywhere}.badge{display:inline-block;border-radius:4px;padding:3px 6px;font-size:.55rem;font-weight:900;letter-spacing:.08em;background:#5bd3ff;color:#06111f}.badge.sms{background:#8df0c2}.badge.chat{background:#c6a8ff}.customer{margin-top:5px;font-size:.71rem;color:#91a8bb}.meta{display:flex;gap:5px;margin-top:4px;font-size:.65rem;color:#617b8e}.empty{padding:18px;color:#71899b;font-size:.8rem}.detail,.stack{min-width:0}.stack{display:grid;gap:12px}.emptyState{padding:3rem;border:1px dashed #17364b;border-radius:10px;color:#71899b}.channelCard{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;border:1px solid #1b435d;border-radius:10px;padding:15px;background:rgba(91,211,255,.04)}.channelCard h2{margin:8px 0 0;font-size:1.15rem}.channelMeta{font-size:.7rem;color:#7891a3;display:grid;gap:5px}.channelMeta b{color:#d6e8f3;overflow-wrap:anywhere}.statusGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px}.info,.panel{border:1px solid #17364b;border-radius:9px;padding:13px;background:rgba(255,255,255,.02)}small{font-size:.58rem;font-weight:900;letter-spacing:.1em;color:#71899b;text-transform:uppercase}.info b{display:block;margin-top:5px;color:#fff;overflow-wrap:anywhere}.content{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:12px}.panel h3,.compliance h3{margin:0 0 10px;color:#fff;font-size:.95rem}.turn{margin:0 0 8px;background:rgba(255,255,255,.035);border-radius:7px;padding:10px}.turn.agent{background:rgba(91,211,255,.06)}.turn p,.panel p,.compliance p{font-size:.8rem;line-height:1.5;overflow-wrap:anywhere}.side{display:grid;gap:12px;align-content:start}.accent{color:#5bd3ff}.qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}.qa b{display:block;margin-top:4px;font-size:1.15rem}.compliance{border:1px solid rgba(255,190,80,.25);background:rgba(255,180,60,.05);border-radius:9px;padding:13px}@media(max-width:840px){.workspace{grid-template-columns:1fr}.rail{max-height:290px;overflow:auto}.content{grid-template-columns:1fr}.headingActions{width:100%}.headingActions button{flex:1}}`}</style>
   </>;
 }
