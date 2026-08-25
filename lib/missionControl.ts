@@ -23,6 +23,7 @@ export const missionControlModules: MissionControlModule[] = [
   { id: 'flow-deployment', name: 'Flow Deployment', route: '/flow-deployment', group: 'Release & Runtime', maturity: 'canonical' },
   { id: 'runtime-monitor', name: 'Runtime Monitor', route: '/flow-runtime-monitor', group: 'Release & Runtime', maturity: 'runtime_integrated' },
   { id: 'agent-workspace', name: 'Agent Workspace', route: '/agent-workspace', group: 'Release & Runtime', maturity: 'canonical' },
+  { id: 'voice-operations', name: 'Voice Operations & Analytics', route: '/voice-operations', group: 'Release & Runtime', maturity: 'canonical' },
   { id: 'transcript-intelligence', name: 'Transcript Intelligence', route: '/transcript-intelligence', group: 'Intelligence', maturity: 'canonical' },
   { id: 'agent-assist', name: 'Agent Assist', route: '/agent-assist', group: 'Intelligence', maturity: 'runtime_integrated' },
   { id: 'agent-coaching', name: 'Agent Coaching', route: '/agent-coaching', group: 'Intelligence', maturity: 'development' },
