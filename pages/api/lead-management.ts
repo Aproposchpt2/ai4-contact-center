@@ -4,8 +4,40 @@ import { apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4c
 const STAGES = new Set(['new','qualified','contacted','follow_up','opportunity','converted','lost','nurture']);
 const PRIORITIES = new Set(['low','normal','high','urgent']);
 
+type IdentifierType = 'email' | 'phone' | 'opaque';
+type IdentifierClassification = {
+  type: IdentifierType;
+  value: string;
+  email: string | null;
+  phone: string | null;
+};
+
 function text(value: unknown) { return typeof value === 'string' ? value.trim() : ''; }
 function number(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
+
+function normalizePhone(value: string): string | null {
+  const raw = value.trim();
+  if (!raw || !/^[+\d().\-\s]+$/.test(raw)) return null;
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length < 7 || digits.length > 15) return null;
+  if (raw.startsWith('+')) return `+${digits}`;
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return digits;
+}
+
+function classifyIdentifier(value: unknown): IdentifierClassification {
+  const identifier = text(value);
+  const emailLike = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (identifier && emailLike.test(identifier)) {
+    return { type: 'email', value: identifier, email: identifier.toLowerCase(), phone: null };
+  }
+
+  const phone = normalizePhone(identifier);
+  if (phone) return { type: 'phone', value: identifier, email: null, phone };
+
+  return { type: 'opaque', value: identifier, email: null, phone: null };
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -29,12 +61,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const { data: interaction, error: interactionError } = await admin
         .from('ai4cc_interactions')
-        .select('id,tenant_id,channel,customer_identifier,queue_id,agent_id,metadata,started_at')
+        .select('id,tenant_id,channel,status,customer_identifier,queue_id,agent_id,metadata,started_at')
         .eq('tenant_id', tenantId)
         .eq('id', interactionId)
         .maybeSingle();
       if (interactionError) throw interactionError;
       if (!interaction) return res.status(404).json({ error: 'Interaction was not found for this tenant' });
+      if (interaction.status !== 'completed') {
+        return res.status(409).json({ error: 'Interaction must be completed before creating a Lead' });
+      }
 
       const { data: existingLead, error: existingError } = await admin
         .from('ai4cc_leads')
@@ -45,73 +80,69 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (existingError) throw existingError;
       if (existingLead) return res.status(409).json({ error: 'A lead already exists for this originating interaction', leadId: existingLead.id });
 
-      const identifier = text(interaction.customer_identifier);
-      const email = identifier.includes('@') ? identifier.toLowerCase() : null;
-      const phone = !email && identifier ? identifier : null;
-
-      let contact: any = null;
-      if (email) {
-        const found = await admin.from('ai4cc_contacts').select('*').eq('tenant_id', tenantId).ilike('email', email).limit(1).maybeSingle();
-        if (found.error) throw found.error; contact = found.data;
-      } else if (phone) {
-        const found = await admin.from('ai4cc_contacts').select('*').eq('tenant_id', tenantId).eq('phone', phone).limit(1).maybeSingle();
-        if (found.error) throw found.error; contact = found.data;
-      }
-
-      if (!contact) {
-        const inserted = await admin.from('ai4cc_contacts').insert({
-          tenant_id: tenantId,
-          display_name: text(body.contactName) || identifier || 'Unknown contact',
-          company_name: text(body.companyName) || null,
-          email,
-          phone,
-          preferred_channel: interaction.channel,
-          lead_source: `ai4cc_${interaction.channel}`,
-          lead_score: Math.max(0, Math.min(100, number(body.score, 50))),
-          priority: PRIORITIES.has(text(body.priority)) ? text(body.priority) : 'normal',
-          metadata: { originatingInteractionId: interactionId },
-        }).select('*').single();
-        if (inserted.error) throw inserted.error; contact = inserted.data;
-      }
-
+      const identifier = classifyIdentifier(interaction.customer_identifier);
       const intent = text(interaction.metadata?.detectedIntent || interaction.metadata?.routingIntent);
       const stage = STAGES.has(text(body.pipelineStage)) ? text(body.pipelineStage) : 'new';
       const priority = PRIORITIES.has(text(body.priority)) ? text(body.priority) : 'normal';
-      const leadInsert = await admin.from('ai4cc_leads').insert({
-        tenant_id: tenantId,
-        contact_id: contact.id,
-        originating_interaction_id: interaction.id,
-        originating_channel: interaction.channel,
-        originating_queue_id: interaction.queue_id,
-        originating_agent_id: interaction.agent_id,
-        assigned_agent_id: interaction.agent_id,
-        title: text(body.title) || `${intent ? intent.replace(/_/g, ' ') : interaction.channel} lead`,
-        service_interest: text(body.serviceInterest) || intent || null,
-        description: text(body.description) || `Lead created from canonical AI4CC ${interaction.channel} interaction.`,
-        pipeline_stage: stage,
-        priority,
-        score: Math.max(0, Math.min(100, number(body.score, 50))),
-        estimated_value: Math.max(0, number(body.estimatedValue, 0)),
-        probability: Math.max(0, Math.min(100, number(body.probability, 0))),
-        next_action: text(body.nextAction) || 'Review interaction and determine follow-up.',
-        next_follow_up: body.nextFollowUp || null,
-        metadata: { source: 'ai4cc_interaction', originatingInteractionStartedAt: interaction.started_at },
-      }).select('*').single();
-      if (leadInsert.error) throw leadInsert.error;
+      const score = Math.max(0, Math.min(100, number(body.score, 50)));
+      const estimatedValue = Math.max(0, number(body.estimatedValue, 0));
+      const probability = Math.max(0, Math.min(100, number(body.probability, 0)));
 
-      await admin.from('ai4cc_lead_activities').insert({
-        tenant_id: tenantId, lead_id: leadInsert.data.id, contact_id: contact.id,
-        interaction_id: interaction.id, activity_type: 'lead_created', direction: 'internal',
-        subject: 'Lead created from AI4CC interaction', actor_user_id: userId,
-        actor_agent_id: interaction.agent_id,
-        metadata: { channel: interaction.channel, intent },
+      const { data: lifecycle, error: lifecycleError } = await admin.rpc('ai4cc_create_lead_from_interaction', {
+        p_tenant_id: tenantId,
+        p_actor_user_id: userId,
+        p_interaction_id: interactionId,
+        p_identifier_type: identifier.type,
+        p_identifier_value: identifier.value,
+        p_email: identifier.email,
+        p_phone: identifier.phone,
+        p_contact_name: text(body.contactName) || identifier.value || 'Unknown contact',
+        p_company_name: text(body.companyName) || null,
+        p_title: text(body.title) || `${intent ? intent.replace(/_/g, ' ') : interaction.channel} lead`,
+        p_service_interest: text(body.serviceInterest) || intent || null,
+        p_description: text(body.description) || `Lead created from canonical AI4CC ${interaction.channel} interaction.`,
+        p_pipeline_stage: stage,
+        p_priority: priority,
+        p_score: score,
+        p_estimated_value: estimatedValue,
+        p_probability: probability,
+        p_next_action: text(body.nextAction) || 'Review interaction and determine follow-up.',
+        p_next_follow_up: body.nextFollowUp || null,
       });
-      await admin.from('ai4cc_audit_logs').insert({
-        tenant_id: tenantId, actor_user_id: userId, action: 'lead.created_from_interaction',
-        resource_type: 'ai4cc_lead', resource_id: leadInsert.data.id,
-        payload: { contactId: contact.id, interactionId, channel: interaction.channel, intent },
+
+      if (lifecycleError) {
+        if (lifecycleError.code === '23505') {
+          const { data: duplicateLead } = await admin
+            .from('ai4cc_leads')
+            .select('id')
+            .eq('tenant_id', tenantId)
+            .eq('originating_interaction_id', interactionId)
+            .maybeSingle();
+          return res.status(409).json({
+            error: 'A lead already exists for this originating interaction',
+            ...(duplicateLead?.id ? { leadId: duplicateLead.id } : {}),
+          });
+        }
+        if (lifecycleError.message.includes('AI4CC_INTERACTION_NOT_COMPLETED')) {
+          return res.status(409).json({ error: 'Interaction must be completed before creating a Lead' });
+        }
+        if (lifecycleError.message.includes('AI4CC_INTERACTION_NOT_FOUND')) {
+          return res.status(404).json({ error: 'Interaction was not found for this tenant' });
+        }
+        if (lifecycleError.message.includes('AI4CC_TENANT_MEMBERSHIP_REQUIRED')) {
+          return res.status(403).json({ error: 'No AI4 Contact Center tenant membership found' });
+        }
+        throw lifecycleError;
+      }
+
+      const result = lifecycle as any;
+      if (!result?.lead || !result?.contact) throw new Error('AI4CC_LEAD_TRANSACTION_INVALID_RESPONSE');
+      return res.status(201).json({
+        lead: result.lead,
+        contact: result.contact,
+        activityId: result.activityId,
+        auditId: result.auditId,
       });
-      return res.status(201).json({ lead: leadInsert.data, contact });
     }
 
     if (req.method === 'PATCH') {
