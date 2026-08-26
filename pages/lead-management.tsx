@@ -45,7 +45,7 @@ function dateTimeLocal(value:string|null){
 function makeForm(lead:Lead):LeadForm{
   return {
     assignedAgentId:lead.assigned_agent_id||'',
-    pipelineStage:TERMINAL_STAGES.has(lead.pipeline_stage)?'opportunity':lead.pipeline_stage,
+    pipelineStage:lead.pipeline_stage,
     priority:lead.priority||'normal',
     score:String(lead.score??0),
     estimatedValue:String(Number(lead.estimated_value||0)),
@@ -238,7 +238,7 @@ export default function LeadManagementPage(){
           <div className="formGrid">
             <label><span>Assigned Agent</span><select value={form.assignedAgentId} onChange={e=>setField('assignedAgentId',e.target.value)} disabled={!canAssign||saving}><option value="">Unassigned / originating authority</option>{agents.map(agent=><option value={agent.id} key={agent.id}>{agent.name} · {agent.status}</option>)}</select><small>{canAssign?'Owner/Admin/Supervisor assignment authority.':'Assignment is read-only for this role.'}</small></label>
 
-            <label><span>{selectedTerminal&&privileged?'Return to Active Stage':'Pipeline Stage'}</span><select value={form.pipelineStage} onChange={e=>setField('pipelineStage',e.target.value)} disabled={!canEdit||saving}>{stageOptions.map(stage=><option value={stage} key={stage}>{stage.replace('_',' ')}</option>)}</select><small>{selectedTerminal&&privileged?'Saving an active stage reopens the Lead coherently.':'Terminal states use deliberate actions below.'}</small></label>
+            <label><span>{selectedTerminal&&privileged?'Terminal Stage / Reopen':'Pipeline Stage'}</span><select value={form.pipelineStage} onChange={e=>setField('pipelineStage',e.target.value)} disabled={!canEdit||saving}>{selectedTerminal&&<option value={selected.pipeline_stage} disabled>{selected.pipeline_stage.replace('_',' ')} · terminal</option>}{stageOptions.map(stage=><option value={stage} key={stage}>{stage.replace('_',' ')}</option>)}</select><small>{selectedTerminal&&privileged?'Choose an active stage explicitly to reopen the Lead.':'Terminal states use deliberate actions below.'}</small></label>
 
             <label><span>Priority</span><select value={form.priority} onChange={e=>setField('priority',e.target.value)} disabled={!canEdit||saving}>{PRIORITIES.map(priority=><option value={priority} key={priority}>{priority}</option>)}</select></label>
 
