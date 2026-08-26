@@ -43,60 +43,128 @@ export default function Header() {
   const { pathname } = useRouter();
 
   return (
-    <header style={{
-      position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(6,17,31,.92)',
-      backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid rgba(255,255,255,.08)',
-      padding: '0 clamp(1.5rem,4vw,3rem)',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      height: '60px',
-    }}>
-      <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '.7rem' }}>
-        <span style={{
-          width: '30px', height: '30px', borderRadius: '6px',
-          background: 'linear-gradient(135deg,#5bd3ff,#0078d4)',
-          display: 'grid', placeItems: 'center',
-          fontSize: '.65rem', fontWeight: 900, color: '#06111f',
-          letterSpacing: '.06em',
-        }}>AI4</span>
-        <span style={{ fontSize: '.78rem', fontWeight: 700, color: '#fff', letterSpacing: '.04em' }}>
-          Contact Center
-        </span>
-      </Link>
+    <>
+      <header className="siteHeader">
+        <Link href="/" className="brand">
+          <span className="brandMark">AI4</span>
+          <span className="brandText">Contact Center</span>
+        </Link>
 
-      <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-        {NAV.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              fontSize: '.75rem', fontWeight: 600,
-              letterSpacing: '.12em', textTransform: 'uppercase',
-              textDecoration: 'none',
-              color: pathname === href ? '#5bd3ff' : 'rgba(255,255,255,.5)',
-              borderBottom: pathname === href ? '1px solid #5bd3ff' : '1px solid transparent',
-              paddingBottom: '2px',
-              transition: 'color .2s',
-            }}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+        <nav className="navRail" aria-label="Primary navigation">
+          {NAV.map(({ href, label }) => (
+            <Link
+              key={href}
+              href={href}
+              className={pathname === href ? 'navLink active' : 'navLink'}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
 
-      <Link
-        href="/builder"
-        style={{
-          background: '#5bd3ff', color: '#06111f',
-          fontWeight: 800, fontSize: '.72rem',
-          letterSpacing: '.14em', textTransform: 'uppercase',
-          textDecoration: 'none',
-          padding: '.55rem 1.2rem', borderRadius: '5px',
-        }}
-      >
-        Open Builder →
-      </Link>
-    </header>
+        <Link href="/builder" className="builderCta">
+          Open Builder →
+        </Link>
+      </header>
+
+      <style jsx>{`
+        .siteHeader {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          width: 100%;
+          max-width: 100vw;
+          min-width: 0;
+          height: 60px;
+          padding: 0 clamp(.75rem, 2.4vw, 2rem);
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          overflow: hidden;
+          background: rgba(6,17,31,.92);
+          backdrop-filter: blur(12px);
+          border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: .7rem;
+          flex: 0 0 auto;
+          text-decoration: none;
+        }
+        .brandMark {
+          width: 30px;
+          height: 30px;
+          border-radius: 6px;
+          background: linear-gradient(135deg,#5bd3ff,#0078d4);
+          display: grid;
+          place-items: center;
+          font-size: .65rem;
+          font-weight: 900;
+          color: #06111f;
+          letter-spacing: .06em;
+        }
+        .brandText {
+          font-size: .78rem;
+          font-weight: 700;
+          color: #fff;
+          letter-spacing: .04em;
+          white-space: nowrap;
+        }
+        .navRail {
+          flex: 1 1 auto;
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 1.35rem;
+          overflow-x: auto;
+          overflow-y: hidden;
+          overscroll-behavior-x: contain;
+          scrollbar-width: none;
+          -webkit-overflow-scrolling: touch;
+          mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+        }
+        .navRail::-webkit-scrollbar { display: none; }
+        .navLink {
+          flex: 0 0 auto;
+          padding: 20px 0 4px;
+          border-bottom: 1px solid transparent;
+          color: rgba(255,255,255,.5);
+          font-size: .7rem;
+          font-weight: 600;
+          line-height: 1;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        .navLink.active {
+          color: #5bd3ff;
+          border-bottom-color: #5bd3ff;
+        }
+        .builderCta {
+          flex: 0 0 auto;
+          padding: .55rem 1rem;
+          border-radius: 5px;
+          background: #5bd3ff;
+          color: #06111f;
+          font-size: .7rem;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+        @media (max-width: 1180px) {
+          .builderCta { display: none; }
+        }
+        @media (max-width: 700px) {
+          .siteHeader { gap: .7rem; padding-inline: .65rem; }
+          .brandText { display: none; }
+          .navRail { gap: 1rem; }
+          .navLink { font-size: .66rem; letter-spacing: .08em; }
+        }
+      `}</style>
+    </>
   );
 }
