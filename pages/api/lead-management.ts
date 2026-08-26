@@ -8,6 +8,10 @@ const TERMINAL_STAGES = new Set(['converted','lost']);
 const PRIORITIES = new Set(['low','normal','high','urgent']);
 const PRIVILEGED_ROLES = new Set(['owner','admin','supervisor']);
 const KNOWN_ROLES = new Set(['owner','admin','supervisor','operator','agent']);
+const PATCH_FIELDS = new Set([
+  'leadId','assignedAgentId','pipelineStage','priority','score','estimatedValue','probability',
+  'expectedCloseDate','nextAction','nextFollowUp','lostReason',
+]);
 
 type IdentifierType = 'email' | 'phone' | 'opaque';
 type IdentifierClassification = {
@@ -77,7 +81,11 @@ function numericField(
   integerOnly: boolean,
 ): { ok: true; value?: number } | { ok: false; error: string } {
   if (!has(body, key)) return { ok: true };
-  const value = Number(body[key]);
+  const raw = body[key];
+  if (raw === null || raw === undefined || (typeof raw === 'string' && raw.trim() === '')) {
+    return { ok: false, error: `${key} must be numeric` };
+  }
+  const value = Number(raw);
   if (!Number.isFinite(value)) return { ok: false, error: `${key} must be numeric` };
   if (integerOnly && !Number.isInteger(value)) return { ok: false, error: `${key} must be an integer` };
   if (value < min || (max !== null && value > max)) {
@@ -250,6 +258,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'PATCH') {
       const body = (req.body ?? {}) as Record<string, unknown>;
+      if (Object.keys(body).some((key) => !PATCH_FIELDS.has(key))) {
+        return res.status(400).json({ error: 'The Lead mutation contains an unsupported field' });
+      }
+
       const leadId = text(body.leadId);
       if (!leadId || !validUuid(leadId)) return res.status(400).json({ error: 'A valid leadId is required' });
       if (!KNOWN_ROLES.has(role)) return res.status(403).json({ error: 'This membership role cannot mutate Leads' });
