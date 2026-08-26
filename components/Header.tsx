@@ -9,6 +9,7 @@ const NAV = [
   { href: '/routing-optimizer', label: 'Routing Optimizer' },
   { href: '/voice-attendant', label: 'Voice Attendant' },
   { href: '/agent-workspace', label: 'Agent Workspace' },
+  { href: '/lead-management', label: 'Lead Management' },
   { href: '/voicemails', label: 'Voicemails' },
   { href: '/analytics-engine', label: 'Analytics Engine' },
   { href: '/flow-simulator', label: 'Flow Simulator' },
