@@ -85,7 +85,7 @@ export default function Header() {
           backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(255,255,255,.08);
         }
-        .brand {
+        :global(.brand) {
           display: flex;
           align-items: center;
           gap: .7rem;
@@ -125,7 +125,8 @@ export default function Header() {
           mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
         }
         .navRail::-webkit-scrollbar { display: none; }
-        .navLink {
+        :global(.navLink),
+        :global(.navLink:visited) {
           flex: 0 0 auto;
           padding: 20px 0 4px;
           border-bottom: 1px solid transparent;
@@ -138,11 +139,17 @@ export default function Header() {
           text-decoration: none;
           white-space: nowrap;
         }
-        .navLink.active {
+        :global(.navLink:hover) {
+          color: rgba(255,255,255,.78);
+          text-decoration: none;
+        }
+        :global(.navLink.active),
+        :global(.navLink.active:visited) {
           color: #5bd3ff;
           border-bottom-color: #5bd3ff;
         }
-        .builderCta {
+        :global(.builderCta),
+        :global(.builderCta:visited) {
           flex: 0 0 auto;
           padding: .55rem 1rem;
           border-radius: 5px;
@@ -155,14 +162,18 @@ export default function Header() {
           text-decoration: none;
           white-space: nowrap;
         }
+        :global(.builderCta:hover) {
+          text-decoration: none;
+          filter: brightness(1.05);
+        }
         @media (max-width: 1180px) {
-          .builderCta { display: none; }
+          :global(.builderCta) { display: none; }
         }
         @media (max-width: 700px) {
           .siteHeader { gap: .7rem; padding-inline: .65rem; }
           .brandText { display: none; }
           .navRail { gap: 1rem; }
-          .navLink { font-size: .66rem; letter-spacing: .08em; }
+          :global(.navLink) { font-size: .66rem; letter-spacing: .08em; }
         }
       `}</style>
     </>
