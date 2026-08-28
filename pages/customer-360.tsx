@@ -42,7 +42,7 @@ export default function Customer360Page(){
   useEffect(()=>{if(!selectedId||!router.isReady)return;router.replace({pathname:'/customer-360',query:{contactId:selectedId}},undefined,{shallow:true});loadDetail(selectedId);},[selectedId]);
 
   const filtered=useMemo(()=>{const q=search.trim().toLowerCase();if(!q)return contacts;return contacts.filter(c=>[name(c),c.company_name,c.email,c.phone,c.preferred_channel,c.lead_source,c.priority,...(c.tags||[])].filter(Boolean).join(' ').toLowerCase().includes(q));},[contacts,search]);
-  const leadById=useMemo(()=>new Map((detail?.leads||[]).map(l=>[l.id,l])),[detail?.leads]);
+  const leadById=useMemo(()=>new Map<string,Lead>((detail?.leads||[]).map((lead):[string,Lead]=>[lead.id,lead])),[detail?.leads]);
 
   return <><Header/><main className="page"><div className="shell">
     <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · CR-01C</p><h1>Customer 360</h1><p>Unified Contact intelligence across canonical Voice, SMS, Web Chat, Leads, Activities and Tasks. Manual refresh only.{lastUpdated?` · Last refreshed ${lastUpdated}`:''}</p></div><button onClick={refresh} disabled={loading}>{loading?'Refreshing…':'Refresh Customers'}</button></div>
