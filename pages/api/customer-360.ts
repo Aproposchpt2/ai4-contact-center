@@ -118,12 +118,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ]);
     if (queueResult.error || agentResult.error) throw queueResult.error || agentResult.error;
 
-    const queues = new Map((queueResult.data ?? []).map((row: any) => [row.id, row]));
-    const agents = new Map((agentResult.data ?? []).map((row: any) => [row.id, row]));
+    const queues = new Map<string, any>((queueResult.data ?? []).map((row: any): [string, any] => [String(row.id), row]));
+    const agents = new Map<string, any>((agentResult.data ?? []).map((row: any): [string, any] => [String(row.id), row]));
     const hydratedInteractions = interactions.map((row: any) => ({
       ...row,
-      queue: row.queue_id ? queues.get(row.queue_id) ?? null : null,
-      agent: row.agent_id ? agents.get(row.agent_id) ?? null : null,
+      queue: row.queue_id ? queues.get(String(row.queue_id)) ?? null : null,
+      agent: row.agent_id ? agents.get(String(row.agent_id)) ?? null : null,
     }));
 
     const openLeads = leads.filter((lead: any) => !['converted', 'lost'].includes(lead.pipeline_stage));
