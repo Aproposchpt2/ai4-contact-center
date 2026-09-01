@@ -9,7 +9,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 const PUBLIC_PATHS = new Set(['/login', '/web-chat']);
-const PUBLIC_PREFIXES = ['/api/chat/'];
+// /api/intake/ authenticates itself via a shared secret header (see pages/api/intake/webhook.ts) —
+// it's called machine-to-machine by ElevenLabs, which can't carry a Supabase session cookie.
+const PUBLIC_PREFIXES = ['/api/chat/', '/api/intake/'];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
