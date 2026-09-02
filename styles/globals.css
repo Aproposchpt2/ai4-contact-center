@@ -43,3 +43,27 @@ body { background: #050b14; color: #e8f0fe; font-family: var(--font-body), 'Inte
   border-radius: 16px;
   backdrop-filter: blur(6px);
 }
+
+/* Acquisition closing CTA is rendered by Next Link outside the page's styled-jsx scope. */
+a.callCta.small,
+a.callCta.small:visited {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 13px 22px;
+  border-radius: 12px;
+  background: #69d8ff;
+  color: #06111f;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 0 0 0 1px rgba(105, 216, 255, 0.4), 0 18px 40px -12px rgba(105, 216, 255, 0.45);
+}
+
+a.callCta.small:hover {
+  color: #06111f;
+  text-decoration: none;
+  filter: brightness(1.04);
+}
