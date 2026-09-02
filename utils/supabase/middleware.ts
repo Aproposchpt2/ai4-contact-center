@@ -8,10 +8,13 @@ import { type NextRequest, NextResponse } from 'next/server';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
-const PUBLIC_PATHS = new Set(['/login', '/web-chat']);
+// Public marketing/sale surface — buyer-facing pages meant to be seen without a login.
+const PUBLIC_PATHS = new Set(['/', '/login', '/web-chat', '/acquisition']);
 // /api/intake/ authenticates itself via a shared secret header (see pages/api/intake/webhook.ts) —
 // it's called machine-to-machine by ElevenLabs, which can't carry a Supabase session cookie.
-const PUBLIC_PREFIXES = ['/api/chat/', '/api/intake/'];
+// /api/public/ is deliberately read-only, minimal-field, no-auth — see pages/api/public/*.
+// /platform/ holds the public capability detail pages linked from the homepage.
+const PUBLIC_PREFIXES = ['/api/chat/', '/api/intake/', '/api/public/', '/platform/'];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));

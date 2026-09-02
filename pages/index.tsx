@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -12,11 +13,11 @@ const STEPS = [
   { n: '03', title: 'A lead appears', body: 'The moment the call ends, a structured, qualified lead lands in the CRM automatically — no data entry, no follow-up gap.' },
 ];
 
-const CAPABILITIES = [
-  { group: 'Flow Authoring', items: ['AI Script Builder — plain English → working IVR logic', 'Visual Flow Designer (node-based canvas, JSON import/export)', 'Flow Simulator, Auto-Repair & Versioning'] },
-  { group: 'Live Operations', items: ['Unified Agent Workspace (Voice, SMS, Web Chat)', 'Lead Management & Activities/Tasks pipeline', 'Customer 360 unified contact intelligence'] },
-  { group: 'Intelligence & QA', items: ['Analytics Engine & Transcript Intelligence', 'Quality Assurance & Agent Coaching', 'Intent Taxonomy & Routing Optimizer'] },
-  { group: 'Governance & Platform', items: ['Multi-tenant, role-based access control', 'Compliance Automation & Flow Governance', 'Knowledge Vault, Prompt Manager, Integration Hub'] },
+const PLATFORM_PAGES = [
+  { href: '/platform/flow-authoring', eyebrow: 'FLOW AUTHORING', title: 'Build call logic without writing code', body: 'AI Script Builder, a node-based Visual Flow Designer, simulation, auto-repair and full version history.' },
+  { href: '/platform/live-operations', eyebrow: 'LIVE OPERATIONS', title: 'Where calls become customers', body: 'A unified Agent Workspace, Lead Management, Activities/Tasks and Customer 360 — the commercial engine.' },
+  { href: '/platform/intelligence-qa', eyebrow: 'INTELLIGENCE & QA', title: 'Know what happened on every call', body: 'Analytics, transcript intelligence, quality scoring, agent coaching, intent taxonomy and routing optimization.' },
+  { href: '/platform/governance-platform', eyebrow: 'GOVERNANCE & PLATFORM', title: 'Built for more than one business', body: 'Multi-tenant RBAC, compliance automation, flow governance, and the shared platform services underneath it all.' },
 ];
 
 const BUYERS = [
@@ -34,7 +35,38 @@ const ROADMAP = [
   'White-label & vertical-specific deployments',
 ];
 
+type LiveCall = {
+  callerName: string | null;
+  businessName: string | null;
+  phone: string | null;
+  description: string | null;
+  serviceInterest: string | null;
+  duration: string | null;
+  leadStage: string | null;
+  capturedAt: string;
+};
+
+function useLatestCall() {
+  const [call, setCall] = useState<LiveCall | null>(null);
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/public/latest-call')
+      .then((r) => (r.ok ? r.json() : { call: null }))
+      .then((data) => { if (!cancelled) setCall(data?.call ?? null); })
+      .catch(() => { if (!cancelled) setCall(null); })
+      .finally(() => { if (!cancelled) setChecked(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  return { call, checked };
+}
+
 export default function HomePage() {
+  const { call, checked } = useLatestCall();
+  const live = checked && call;
+
   return <>
     <Head>
       <title>AI4 Contact Center — AI-Native Contact Center Platform</title>
@@ -73,30 +105,47 @@ export default function HomePage() {
 
       <section id="proof" className="proof">
         <div className="proofHead">
-          <small>REAL CALL · OWNER-TESTED END TO END</small>
+          <small>{live ? 'LATEST REAL CALL · LIVE FROM THE CRM' : 'REAL CALL · OWNER-TESTED END TO END'}</small>
           <h2>What actually happens on that call</h2>
-          <p>Real output from an actual completed call to this number, using placeholder business details for
-            demonstration. Every field below was extracted by the AI during the conversation and written
-            straight into the platform&apos;s own CRM — not a mockup, not a slide.</p>
+          <p>{live
+            ? 'This is the most recent call to the number above, pulled live from the platform\'s own CRM the moment the page loaded — not a screenshot, not a slide.'
+            : 'Real output from an actual completed call to this number, using placeholder business details for demonstration. Every field below was extracted by the AI during the conversation and written straight into the platform\'s own CRM.'}</p>
         </div>
         <div className="proofCard">
-          <div className="proofRow"><span>Caller</span><b>Jordan Reyes</b></div>
-          <div className="proofRow"><span>Business</span><b>Acme Fabrication</b></div>
-          <div className="proofRow"><span>What they needed</span><b>Metal fabrication shop, 15 employees, six years in business — spreadsheet-based customer intake failing under order volume.</b></div>
-          <div className="proofRow"><span>Service interest</span><b>Automated intake / CRM system to track leads and follow up.</b></div>
-          <div className="proofRow"><span>Call duration</span><b>1 min 35 sec</b></div>
-          <div className="proofRow result"><span>Result</span><b>Lead auto-created · pipeline stage: New</b></div>
+          {live ? (
+            <>
+              <div className="proofRow"><span>Caller</span><b>{call!.callerName ?? '—'}</b></div>
+              <div className="proofRow"><span>Number</span><b>{call!.phone ?? '—'}</b></div>
+              {call!.businessName && <div className="proofRow"><span>Business</span><b>{call!.businessName}</b></div>}
+              {call!.description && <div className="proofRow"><span>What they needed</span><b>{call!.description}</b></div>}
+              {call!.serviceInterest && <div className="proofRow"><span>Service interest</span><b>{call!.serviceInterest}</b></div>}
+              {call!.duration && <div className="proofRow"><span>Call duration</span><b>{call!.duration}</b></div>}
+              <div className="proofRow result"><span>Result</span><b>Lead auto-created{call!.leadStage ? ` · pipeline stage: ${call!.leadStage}` : ''}</b></div>
+            </>
+          ) : (
+            <>
+              <div className="proofRow"><span>Caller</span><b>Jordan Reyes</b></div>
+              <div className="proofRow"><span>Business</span><b>Acme Fabrication</b></div>
+              <div className="proofRow"><span>What they needed</span><b>Metal fabrication shop, 15 employees, six years in business — spreadsheet-based customer intake failing under order volume.</b></div>
+              <div className="proofRow"><span>Service interest</span><b>Automated intake / CRM system to track leads and follow up.</b></div>
+              <div className="proofRow"><span>Call duration</span><b>1 min 35 sec</b></div>
+              <div className="proofRow result"><span>Result</span><b>Lead auto-created · pipeline stage: New</b></div>
+            </>
+          )}
         </div>
+        {live && <p className="proofNote">Real caller information, shown because this is a public demo line — call it yourself and you&apos;ll see your own call appear here next.</p>}
       </section>
 
       <section className="capabilities">
         <Title eyebrow="THE PLATFORM" title="More than one feature — a full operating system" />
         <div className="capGrid">
-          {CAPABILITIES.map(c => (
-            <div className="capCard" key={c.group}>
-              <h3>{c.group}</h3>
-              <ul>{c.items.map(i => <li key={i}>{i}</li>)}</ul>
-            </div>
+          {PLATFORM_PAGES.map(p => (
+            <Link href={p.href} className="capCard" key={p.href}>
+              <small>{p.eyebrow}</small>
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+              <span className="capLink">Explore this section →</span>
+            </Link>
           ))}
         </div>
       </section>
@@ -150,7 +199,7 @@ export default function HomePage() {
       .step h3{margin:12px 0 8px;font-size:1.15rem;color:#eef8ff}
       .step p{margin:0;color:#8ea2b3;font-size:.86rem;line-height:1.6}
 
-      .proof{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
+      .proof{max-width:1240px;margin:0 auto;padding:24px 24px 46px}
       .proofHead{max-width:680px;margin-bottom:26px}
       .proofHead small{color:#69d8ff;font-size:.65rem;font-weight:900;letter-spacing:.16em}
       .proofHead h2{margin:10px 0 12px;font-size:2rem;letter-spacing:-.02em}
@@ -162,14 +211,16 @@ export default function HomePage() {
       .proofRow b{color:#d7e9f4;font-size:.92rem;font-weight:600;line-height:1.55}
       .proofRow.result{background:rgba(105,216,255,.06);border-radius:10px}
       .proofRow.result b{color:#69d8ff;font-weight:800}
+      .proofNote{max-width:760px;margin:14px 0 0;color:#5c7284;font-size:.74rem;font-style:italic}
 
       .capabilities{max-width:1240px;margin:0 auto;padding:24px 24px 88px}
       .capGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:28px}
-      .capCard{border:1px solid #19384d;border-radius:14px;background:rgba(7,24,38,.72);padding:22px}
-      .capCard h3{margin:0 0 14px;font-size:.95rem;color:#69d8ff;text-transform:uppercase;letter-spacing:.08em}
-      .capCard ul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
-      .capCard li{color:#a9bcc9;font-size:.82rem;line-height:1.5;padding-left:14px;position:relative}
-      .capCard li::before{content:'';position:absolute;left:0;top:.5em;width:5px;height:5px;border-radius:50%;background:#3f5b70}
+      :global(.capCard){display:block;border:1px solid #19384d;border-radius:14px;background:rgba(7,24,38,.72);padding:22px;text-decoration:none;transition:border-color .15s,transform .15s}
+      :global(.capCard:hover){border-color:#69d8ff;transform:translateY(-2px)}
+      :global(.capCard small){display:block;color:#69d8ff;font-size:.62rem;font-weight:900;letter-spacing:.12em;margin-bottom:10px}
+      :global(.capCard h3){margin:0 0 10px;font-size:1.02rem;color:#eef8ff;line-height:1.3}
+      :global(.capCard p){margin:0 0 16px;color:#a9bcc9;font-size:.82rem;line-height:1.55}
+      :global(.capLink){color:#69d8ff;font-size:.72rem;font-weight:800}
 
       .split{max-width:1240px;margin:0 auto;padding:24px 24px 88px;display:grid;grid-template-columns:1fr 1fr;gap:50px}
       .checkList{margin:24px 0 0;padding:0;list-style:none;display:grid;gap:14px}
