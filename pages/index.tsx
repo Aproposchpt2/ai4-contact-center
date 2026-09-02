@@ -188,9 +188,9 @@ export default function HomePage() {
       <section className="closing">
         <h2>Available for acquisition or white-label partnership</h2>
         <p className="price">$25,000 <span>— asking price, full technology-asset sale</span></p>
-        <p>AI4CC is a pre-revenue technology asset — offered on documented development cost and production
-          maturity, not a revenue multiple. Full technical diligence, architecture documentation and a guided
-          walkthrough are available under NDA.</p>
+        <p>AI4CC is pre-revenue and has never been publicly launched — offered on documented development cost and
+          production maturity, not a revenue multiple. Full technical diligence, architecture documentation and
+          a guided walkthrough are available under NDA.</p>
         <div className="closingCta">
           <Link href="/acquisition" className="callCta small">See the full buyer walkthrough →</Link>
         </div>

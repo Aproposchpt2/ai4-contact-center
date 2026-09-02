@@ -68,7 +68,7 @@ const SECTIONS: Section[] = [
     n: '08',
     eyebrow: 'ACQUISITION',
     title: 'A technology asset, priced on what was built',
-    body: 'AI4CC is pre-revenue and offered as a full technology-asset sale — documented development cost, production deployment history, and a clear commercialization path, not a revenue multiple. Full technical diligence (repository, schema, deployment model, security controls, known-issues register) is available under NDA.',
+    body: 'AI4CC is pre-revenue and has never been publicly launched — offered as a full technology-asset sale on documented development cost, production deployment history, and a clear commercialization path, not a revenue multiple. Full technical diligence (repository, schema, deployment model, security controls, known-issues register) is available under NDA.',
   },
 ];
 
