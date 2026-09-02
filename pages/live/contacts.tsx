@@ -56,7 +56,8 @@ export default function LiveContactsPage() {
       :global(body){margin:0;background:#06111f}
       .page{color:#eef8ff;background:radial-gradient(circle at 80% 5%,rgba(53,178,235,.14),transparent 32%),linear-gradient(155deg,#06111f,#071827 55%,#06111f);}
       .intro{max-width:900px;margin:0 auto;padding:60px 24px 30px}
-      .back{color:#69d8ff;text-decoration:none;font-size:.78rem;font-weight:800}
+      :global(.back){display:inline-flex;align-items:center;min-height:44px;padding:11px 16px;border:1px solid rgba(105,216,255,.65);border-radius:10px;background:rgba(105,216,255,.08);color:#69d8ff!important;text-decoration:none!important;font-size:.78rem;font-weight:900;letter-spacing:.03em;box-shadow:0 8px 24px rgba(0,0,0,.16);transition:background .15s,border-color .15s,transform .15s}
+      :global(.back:hover){background:rgba(105,216,255,.16);border-color:#69d8ff;transform:translateY(-1px)}
       .eyebrow{color:#718ba0;font-size:.65rem;font-weight:900;letter-spacing:.16em;margin-top:22px}
       h1{font-size:clamp(1.9rem,4vw,2.6rem);letter-spacing:-.03em;margin:14px 0 14px}
       .intro p{color:#9eb3c4;line-height:1.7;font-size:.96rem;max-width:620px;margin:0}
