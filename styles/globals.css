@@ -55,12 +55,15 @@ textarea {
   border-color: var(--apropos-border) !important;
 }
 
+/* Federal Ops Command Center visual baseline: navy is the dominant canvas. */
 .mc-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(1200px 500px at 80% -10%, rgba(213,174,85,.10), transparent 60%),
-    radial-gradient(900px 400px at -10% 10%, rgba(15,42,106,.34), transparent 60%),
-    linear-gradient(160deg, #071A3C 0%, #0F2A6A 50%, #071A3C 100%);
+  background: var(--apropos-navy);
+}
+
+body .page {
+  background: var(--apropos-navy) !important;
+  color: var(--apropos-text) !important;
 }
 
 .mc-grid { position: relative; }
@@ -70,9 +73,9 @@ textarea {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(232,203,135,.12) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(232,203,135,.10) 1px, transparent 1px);
   background-size: 26px 26px;
-  opacity: .12;
+  opacity: .08;
 }
 
 .mc-card {
@@ -88,15 +91,15 @@ textarea {
 }
 
 .mc-hero-overlay {
-  background: linear-gradient(165deg, rgba(7,26,60,.88), rgba(15,42,106,.58));
-  border: 1px solid rgba(213,174,85,.34);
+  background: rgba(7,26,60,.88);
+  border: 1px solid rgba(213,174,85,.30);
   border-radius: 12px;
   backdrop-filter: blur(6px);
 }
 
 /* Apropos Group brand overrides for shared navigation and CTA surfaces. */
 body .siteHeader {
-  background: rgba(7,26,60,.96) !important;
+  background: rgba(7,26,60,.98) !important;
   border-bottom-color: var(--apropos-border) !important;
 }
 
@@ -124,7 +127,7 @@ a.callCta.small:visited {
   background: var(--apropos-gold) !important;
   color: var(--apropos-navy) !important;
   border-color: var(--apropos-gold) !important;
-  box-shadow: 0 0 0 1px rgba(213,174,85,.35), 0 18px 40px -12px rgba(213,174,85,.28) !important;
+  box-shadow: 0 0 0 1px rgba(213,174,85,.35), 0 18px 40px -12px rgba(213,174,85,.20) !important;
 }
 
 body .builderCta:hover,
@@ -194,8 +197,8 @@ body .drawerBody .role,
 body .drawerBody strong { color: var(--apropos-text) !important; }
 
 body .naturalCallout {
-  background: rgba(15,42,106,.72) !important;
-  border-color: rgba(213,174,85,.46) !important;
+  background: rgba(15,42,106,.38) !important;
+  border-color: rgba(213,174,85,.40) !important;
 }
 
 body .naturalCallout strong,
@@ -206,8 +209,8 @@ body .naturalCallout span,
 body .afterCall p { color: var(--apropos-muted) !important; }
 
 body .closeButton {
-  background: var(--apropos-sapphire) !important;
-  border-color: rgba(213,174,85,.46) !important;
+  background: rgba(15,42,106,.62) !important;
+  border-color: rgba(213,174,85,.40) !important;
   color: var(--apropos-text) !important;
 }
 
