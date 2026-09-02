@@ -1,6 +1,5 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -34,8 +33,8 @@ const COMPARE_ROWS = [
   { label: 'Voice, SMS & chat routing', values: ['✓', '✓', '✓', '✓'], ai4cc: '✓' },
   { label: 'Conversational AI intake', values: ['Add-on', 'Add-on', 'Add-on, higher tiers only', 'Add-on, +$30–60/agent/mo'], ai4cc: 'Built in, proven live' },
   { label: 'CRM / Lead workflow', values: ['Third-party integration', 'Third-party integration', 'Third-party integration', 'Third-party integration'], ai4cc: 'Native, included' },
-  { label: 'Per-minute voice charges', values: ['$0.009–$0.015/min', 'Varies by plan', 'Varies by plan', 'Varies by plan'], ai4cc: 'No recurring fee to a vendor' },
-  { label: 'Ongoing vendor lock-in', values: ['Yes', 'Yes', 'Yes', 'Yes'], ai4cc: 'None — you own the source' },
+  { label: 'Per-minute voice charges', values: ['$0.009–$0.015/min', 'Varies by plan', 'Varies by plan', 'Varies by plan'], ai4cc: 'Buyer-controlled provider usage costs' },
+  { label: 'Ongoing vendor lock-in', values: ['Yes', 'Yes', 'Yes', 'Yes'], ai4cc: 'No AI4CC platform lock-in — source transfers' },
 ];
 
 const ROADMAP = [
@@ -45,38 +44,7 @@ const ROADMAP = [
   'White-label & vertical-specific deployments',
 ];
 
-type LiveCall = {
-  callerName: string | null;
-  businessName: string | null;
-  phone: string | null;
-  description: string | null;
-  serviceInterest: string | null;
-  duration: string | null;
-  leadStage: string | null;
-  capturedAt: string;
-};
-
-function useLatestCall() {
-  const [call, setCall] = useState<LiveCall | null>(null);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/public/latest-call')
-      .then((r) => (r.ok ? r.json() : { call: null }))
-      .then((data) => { if (!cancelled) setCall(data?.call ?? null); })
-      .catch(() => { if (!cancelled) setCall(null); })
-      .finally(() => { if (!cancelled) setChecked(true); });
-    return () => { cancelled = true; };
-  }, []);
-
-  return { call, checked };
-}
-
 export default function HomePage() {
-  const { call, checked } = useLatestCall();
-  const live = checked && call;
-
   return <>
     <Head>
       <title>AI4 Contact Center — AI-Native Contact Center Platform</title>
@@ -103,16 +71,16 @@ export default function HomePage() {
         </div>
         <div className="ctaRow">
           <a href={PHONE_TEL} className="callCta">
-            <span className="callLabel">Call it right now</span>
+            <span className="callLabel">Call the AI now</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
           </a>
-          <Link href="/demo" className="ghostCta">See the live demo →</Link>
-          <Link href="/acquisition" className="ghostCta">Buyer walkthrough →</Link>
+          <Link href="/demo" className="buyerCta">Watch the live demo →</Link>
+          <Link href="/acquisition" className="buyerCta secondary">Buyer walkthrough →</Link>
         </div>
       </section>
 
       <section className="compare">
-        <Title eyebrow="VS. THE MAJORS" title="The same core, without the seat fee" />
+        <Title eyebrow="VS. THE MAJORS" title="The core capabilities — without the perpetual seat fee" />
         <div className="compareScroll">
           <div className="compareTable">
             <div className="compareRow compareHead">
@@ -127,7 +95,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-        <p className="compareNote">Pricing per public 2026 sources: Genesys <a href="https://www.platform28.com/blog/genesys-cloud-pricing-guide" target="_blank" rel="noopener">[1]</a>, RingCentral <a href="https://www.cloudtalk.io/blog/ringcentral-pricing/" target="_blank" rel="noopener">[2]</a>, Five9 <a href="https://www.platform28.com/blog/five9-pricing-breakdown" target="_blank" rel="noopener">[3]</a>, NICE CXone <a href="https://www.cloudtalk.io/blog/nice-cxone-pricing/" target="_blank" rel="noopener">[4]</a>. <strong>The implementation cost alone for an enterprise Five9 or NICE deployment ($50K–$500K+) exceeds AI4CC&apos;s entire $25,000 asking price — before a single month of subscription.</strong> AI4CC doesn&apos;t match every enterprise feature the majors have built over a decade — it matches the core a buyer would otherwise pay per seat, per month, forever, plus a setup fee to even begin.</p>
+        <p className="compareNote">Pricing per public 2026 sources: Genesys <a href="https://www.platform28.com/blog/genesys-cloud-pricing-guide" target="_blank" rel="noopener">[1]</a>, RingCentral <a href="https://www.cloudtalk.io/blog/ringcentral-pricing/" target="_blank" rel="noopener">[2]</a>, Five9 <a href="https://www.platform28.com/blog/five9-pricing-breakdown" target="_blank" rel="noopener">[3]</a>, NICE CXone <a href="https://www.cloudtalk.io/blog/nice-cxone-pricing/" target="_blank" rel="noopener">[4]</a>. <strong>The implementation cost alone for an enterprise Five9 or NICE deployment ($50K–$500K+) exceeds AI4CC&apos;s entire $25,000 asking price — before a single month of subscription.</strong> AI4CC doesn&apos;t match every enterprise feature the majors have built over a decade — it matches the core a buyer would otherwise pay per seat, per month, forever, plus a setup fee to even begin. AI4CC buyers still operate their own infrastructure and usage-based third-party services.</p>
       </section>
 
       <section className="steps">
@@ -142,35 +110,21 @@ export default function HomePage() {
 
       <section id="proof" className="proof">
         <div className="proofHead">
-          <small>{live ? 'LATEST REAL CALL · LIVE FROM THE CRM' : 'REAL CALL · OWNER-TESTED END TO END'}</small>
+          <small>REAL CALL · OWNER-TESTED END TO END</small>
           <h2>What actually happens on that call</h2>
-          <p>{live
-            ? 'This is the most recent call to the number above, pulled live from the platform\'s own CRM the moment the page loaded — not a screenshot, not a slide.'
-            : 'Real output from an actual completed call to this number, using placeholder business details for demonstration. Every field below was extracted by the AI during the conversation and written straight into the platform\'s own CRM.'}</p>
+          <p>This homepage uses a static, sanitized example so public visitors never see another caller&apos;s personal information. The dedicated live demo shows the buyer the product operating in real time and then clears the display automatically.</p>
         </div>
         <div className="proofCard">
-          {live ? (
-            <>
-              <div className="proofRow"><span>Caller</span><b>{call!.callerName ?? '—'}</b></div>
-              <div className="proofRow"><span>Number</span><b>{call!.phone ?? '—'}</b></div>
-              {call!.businessName && <div className="proofRow"><span>Business</span><b>{call!.businessName}</b></div>}
-              {call!.description && <div className="proofRow"><span>What they needed</span><b>{call!.description}</b></div>}
-              {call!.serviceInterest && <div className="proofRow"><span>Service interest</span><b>{call!.serviceInterest}</b></div>}
-              {call!.duration && <div className="proofRow"><span>Call duration</span><b>{call!.duration}</b></div>}
-              <div className="proofRow result"><span>Result</span><b>Lead auto-created{call!.leadStage ? ` · pipeline stage: ${call!.leadStage}` : ''}</b></div>
-            </>
-          ) : (
-            <>
-              <div className="proofRow"><span>Caller</span><b>Jordan Reyes</b></div>
-              <div className="proofRow"><span>Business</span><b>Acme Fabrication</b></div>
-              <div className="proofRow"><span>What they needed</span><b>Metal fabrication shop, 15 employees, six years in business — spreadsheet-based customer intake failing under order volume.</b></div>
-              <div className="proofRow"><span>Service interest</span><b>Automated intake / CRM system to track leads and follow up.</b></div>
-              <div className="proofRow"><span>Call duration</span><b>1 min 35 sec</b></div>
-              <div className="proofRow result"><span>Result</span><b>Lead auto-created · pipeline stage: New</b></div>
-            </>
-          )}
+          <div className="proofRow"><span>Caller</span><b>Jordan Reyes</b></div>
+          <div className="proofRow"><span>Business</span><b>Acme Fabrication</b></div>
+          <div className="proofRow"><span>What they needed</span><b>Metal fabrication shop, 15 employees, six years in business — spreadsheet-based customer intake failing under order volume.</b></div>
+          <div className="proofRow"><span>Service interest</span><b>Automated intake / CRM system to track leads and follow up.</b></div>
+          <div className="proofRow"><span>Call duration</span><b>1 min 35 sec</b></div>
+          <div className="proofRow result"><span>Result</span><b>Lead auto-created · pipeline stage: New</b></div>
         </div>
-        {live && <p className="proofNote">Real caller information, shown because this is a public demo line — call it yourself and you&apos;ll see your own call appear here next.</p>}
+        <div className="proofActions">
+          <Link href="/demo" className="buyerCta">Open the live buyer demo →</Link>
+        </div>
       </section>
 
       <section className="capabilities">
@@ -222,13 +176,14 @@ export default function HomePage() {
       h1 span{color:#69d8ff}
       .lede{color:#9eb3c4;line-height:1.7;font-size:1.05rem;max-width:720px;margin:0 0 34px}
 
-      .ctaRow{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+      .ctaRow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
       .callCta{display:flex;flex-direction:column;gap:2px;text-decoration:none;background:#69d8ff;color:#06111f;padding:16px 26px;border-radius:12px;box-shadow:0 0 0 1px rgba(105,216,255,.4), 0 18px 40px -12px rgba(105,216,255,.45);}
       .callCta.small{padding:13px 22px;flex-direction:row;align-items:center}
       .callLabel{font-size:.66rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
       .callNumber{font-size:1.4rem;font-weight:900;letter-spacing:-.01em}
-      .ghostCta{color:#c7dbe8;text-decoration:none;font-size:.85rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:2px}
-      .ghostCta:hover{border-color:#69d8ff;color:#69d8ff}
+      :global(.buyerCta){display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:13px 18px;border:1px solid rgba(105,216,255,.7);border-radius:10px;background:rgba(105,216,255,.08);color:#69d8ff;text-decoration:none;font-size:.78rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;transition:background .15s,border-color .15s,transform .15s}
+      :global(.buyerCta:hover){background:rgba(105,216,255,.15);border-color:#69d8ff;transform:translateY(-1px);text-decoration:none}
+      :global(.buyerCta.secondary){color:#d7e9f4;border-color:rgba(215,233,244,.28);background:rgba(255,255,255,.03)}
 
       .whatHow{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:0 0 36px;max-width:1000px}
       .whatHow small{display:block;color:#69d8ff;font-size:.64rem;font-weight:900;letter-spacing:.14em;margin-bottom:10px}
@@ -256,7 +211,7 @@ export default function HomePage() {
       .step p{margin:0;color:#8ea2b3;font-size:.86rem;line-height:1.6}
 
       .proof{max-width:1240px;margin:0 auto;padding:24px 24px 46px}
-      .proofHead{max-width:680px;margin-bottom:26px}
+      .proofHead{max-width:760px;margin-bottom:26px}
       .proofHead small{color:#69d8ff;font-size:.65rem;font-weight:900;letter-spacing:.16em}
       .proofHead h2{margin:10px 0 12px;font-size:2rem;letter-spacing:-.02em}
       .proofHead p{color:#8ea2b3;line-height:1.65;font-size:.9rem;margin:0}
@@ -267,7 +222,7 @@ export default function HomePage() {
       .proofRow b{color:#d7e9f4;font-size:.92rem;font-weight:600;line-height:1.55}
       .proofRow.result{background:rgba(105,216,255,.06);border-radius:10px}
       .proofRow.result b{color:#69d8ff;font-weight:800}
-      .proofNote{max-width:760px;margin:14px 0 0;color:#5c7284;font-size:.74rem;font-style:italic}
+      .proofActions{display:flex;margin-top:16px}
 
       .capabilities{max-width:1240px;margin:0 auto;padding:24px 24px 88px}
       .capGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:28px}
@@ -298,7 +253,14 @@ export default function HomePage() {
         .proofRow{grid-template-columns:1fr;gap:4px}
         .whatHow{grid-template-columns:1fr}
       }
-      @media(max-width:600px){ .capGrid{grid-template-columns:1fr} }
+      @media(max-width:600px){
+        .capGrid{grid-template-columns:1fr}
+        .hero{padding-top:58px}
+        .ctaRow{align-items:stretch}
+        .callCta,:global(.buyerCta){width:100%}
+        .callCta{align-items:center;text-align:center}
+        .proofActions,:global(.proofActions .buyerCta){width:100%}
+      }
     `}</style>
   </>;
 }
