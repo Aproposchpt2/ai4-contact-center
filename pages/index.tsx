@@ -222,8 +222,8 @@ export default function HomePage() {
       .whatHow p{margin:0;color:#9eb3c4;line-height:1.7;font-size:.94rem}
 
       .compare{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
-      .compareTable{border:1px solid #19384d;border-radius:16px;overflow:hidden;margin-top:26px}
-      .compareRow{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.3fr;border-bottom:1px solid #123047}
+      .compareTable{border:1px solid #19384d;border-radius:16px;margin-top:26px;overflow-x:auto}
+      .compareRow{display:grid;grid-template-columns:180px 170px 170px 220px;min-width:740px;border-bottom:1px solid #123047}
       .compareRow:last-child{border-bottom:none}
       .compareRow span{padding:14px 18px;font-size:.82rem;color:#a9bcc9;display:flex;align-items:center}
       .compareRow span:first-child{color:#c7d7e2;font-weight:700}
@@ -283,10 +283,6 @@ export default function HomePage() {
         .split{grid-template-columns:1fr;gap:36px}
         .proofRow{grid-template-columns:1fr;gap:4px}
         .whatHow{grid-template-columns:1fr}
-      }
-      @media(max-width:700px){
-        .compareTable{overflow-x:auto}
-        .compareRow{grid-template-columns:120px 100px 100px 130px;min-width:560px}
       }
       @media(max-width:600px){ .capGrid{grid-template-columns:1fr} }
     `}</style>
