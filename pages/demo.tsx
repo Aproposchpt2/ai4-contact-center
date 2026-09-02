@@ -21,6 +21,7 @@ const DOC_PAGES = [
 export default function DemoPage() {
   const [call, setCall] = useState<LiveCall | null>(null);
   const [checked, setChecked] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,6 +30,14 @@ export default function DemoPage() {
       .then(d => { if (!cancelled) setCall(d?.call ?? null); })
       .finally(() => { if (!cancelled) setChecked(true); });
     return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawerOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   return <>
@@ -42,6 +51,7 @@ export default function DemoPage() {
         <div className="eyebrow">LIVE DEMO</div>
         <h1>Don&apos;t take our word for it. Call it.</h1>
         <p>This is a real, production system — not a sandbox, not a recording. Three steps, no signup.</p>
+        <button type="button" className="guideButton" onClick={() => setDrawerOpen(true)}>Open demo guide →</button>
       </section>
 
       <section className="steps">
@@ -56,14 +66,12 @@ export default function DemoPage() {
         <div className="step">
           <span>02</span>
           <h2>Have a real conversation</h2>
-          <p>Tell it about a business — real or made up. Name, what it does, what it needs. The AI runs a natural
-            intake interview, the same way a trained rep would.</p>
+          <p>Play the role of a business owner or decision-maker shopping for a Contact Center, CRM or Lead Management solution. Ask what you would genuinely want to know and let the conversation develop naturally.</p>
         </div>
         <div className="step">
           <span>03</span>
           <h2>Watch it become a lead</h2>
-          <p>The moment you hang up, a structured lead exists in the CRM below — no data entry, nobody typing
-            notes after the call.</p>
+          <p>The moment you hang up, a structured lead exists in the CRM below — no data entry, nobody typing notes after the call.</p>
         </div>
       </section>
 
@@ -101,6 +109,41 @@ export default function DemoPage() {
         <Link href="/acquisition" className="ghostCta">← Back to the buyer walkthrough</Link>
       </section>
     </main>
+
+    <div className={`drawerBackdrop ${drawerOpen ? 'open' : ''}`} onClick={() => setDrawerOpen(false)} aria-hidden={!drawerOpen} />
+    <aside className={`demoDrawer ${drawerOpen ? 'open' : ''}`} aria-hidden={!drawerOpen} aria-label="Live demo instructions">
+      <div className="drawerHead">
+        <div>
+          <small>LIVE DEMO</small>
+          <h2>How to experience the AI</h2>
+        </div>
+        <button type="button" className="closeButton" aria-label="Close demo guide" onClick={() => setDrawerOpen(false)}>×</button>
+      </div>
+
+      <div className="drawerBody">
+        <p className="role"><strong>The AI Conversational Agent is currently programmed to serve as a representative of the AI4 Contact Center Sales Division.</strong></p>
+
+        <p>For this demonstration, play the role of a business owner or decision-maker who is shopping for a <strong>Contact Center, CRM or Lead Management solution.</strong></p>
+
+        <p>Call the Agent and have a normal conversation. Ask whatever questions you would genuinely ask if you were evaluating this type of solution for your company.</p>
+
+        <div className="naturalCallout">
+          <strong>There is no required script.</strong>
+          <span>Speak naturally, ask follow-up questions, change direction, challenge an answer, or call more than once using a different business scenario. The purpose of the demonstration is to experience how dynamically the AI Conversational Agent responds.</span>
+        </div>
+
+        <a href={PHONE_TEL} className="drawerCallCta">
+          <span>CALL THE LIVE AGENT</span>
+          <b>{PHONE_DISPLAY}</b>
+        </a>
+
+        <div className="afterCall">
+          <small>AFTER YOUR CALL</small>
+          <p>Close this guide and watch AI4 Contact Center convert the conversation into a structured Lead in the live CRM.</p>
+        </div>
+      </div>
+    </aside>
+
     <Footer />
     <style jsx>{`
       :global(*){box-sizing:border-box}
@@ -110,6 +153,8 @@ export default function DemoPage() {
       .eyebrow{color:#718ba0;font-size:.65rem;font-weight:900;letter-spacing:.16em}
       h1{font-size:clamp(2rem,4.4vw,3rem);letter-spacing:-.03em;margin:14px 0 14px}
       .intro p{color:#9eb3c4;line-height:1.7;font-size:1rem;max-width:600px;margin:0}
+      .guideButton{margin-top:18px;border:1px solid rgba(105,216,255,.55);border-radius:9px;background:rgba(105,216,255,.08);color:#69d8ff;padding:10px 14px;font-size:.72rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+      .guideButton:hover{background:rgba(105,216,255,.14)}
 
       .steps{max-width:1100px;margin:0 auto;padding:10px 24px 70px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
       .step{border:1px solid #19384d;border-radius:16px;background:rgba(7,24,38,.72);padding:26px}
@@ -145,7 +190,35 @@ export default function DemoPage() {
       .ghostCta{color:#c7dbe8;text-decoration:none;font-size:.85rem;font-weight:700}
       .ghostCta:hover{color:#69d8ff}
 
+      .drawerBackdrop{position:fixed;inset:0;background:rgba(2,8,15,.62);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:90}
+      .drawerBackdrop.open{opacity:1;pointer-events:auto}
+      .demoDrawer{position:fixed;top:0;right:0;width:min(520px,92vw);height:100vh;background:linear-gradient(180deg,#071827,#06111f);border-left:1px solid #244a61;box-shadow:-24px 0 80px rgba(0,0,0,.45);transform:translateX(104%);transition:transform .26s ease;z-index:100;color:#eef8ff;display:flex;flex-direction:column}
+      .demoDrawer.open{transform:translateX(0)}
+      .drawerHead{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:26px 26px 20px;border-bottom:1px solid #16364b}
+      .drawerHead small{display:block;color:#69d8ff;font-size:.62rem;font-weight:900;letter-spacing:.16em;margin-bottom:7px}
+      .drawerHead h2{margin:0;font-size:1.35rem;letter-spacing:-.02em}
+      .closeButton{border:1px solid #29495d;background:rgba(255,255,255,.03);color:#d7e9f4;border-radius:9px;width:38px;height:38px;font-size:1.45rem;line-height:1;cursor:pointer}
+      .closeButton:hover{border-color:#69d8ff;color:#69d8ff}
+      .drawerBody{padding:24px 26px 34px;overflow-y:auto}
+      .drawerBody p{color:#a9bcc9;font-size:.92rem;line-height:1.7;margin:0 0 18px}
+      .drawerBody .role{color:#d9edf8}
+      .drawerBody strong{color:#eef8ff}
+      .naturalCallout{border:1px solid rgba(105,216,255,.35);background:rgba(105,216,255,.07);border-radius:14px;padding:18px;margin:22px 0;display:grid;gap:9px}
+      .naturalCallout strong{color:#69d8ff;font-size:.92rem}
+      .naturalCallout span{color:#c1d4df;font-size:.86rem;line-height:1.65}
+      .drawerCallCta{display:flex;flex-direction:column;gap:4px;text-decoration:none;background:#69d8ff;color:#06111f;border-radius:12px;padding:16px 20px;margin:24px 0;box-shadow:0 16px 36px -20px rgba(105,216,255,.75)}
+      .drawerCallCta span{font-size:.62rem;font-weight:900;letter-spacing:.14em}
+      .drawerCallCta b{font-size:1.45rem;letter-spacing:-.01em}
+      .afterCall{border-top:1px solid #16364b;padding-top:20px}
+      .afterCall small{color:#69d8ff;font-size:.62rem;font-weight:900;letter-spacing:.14em}
+      .afterCall p{margin:8px 0 0;color:#c0d2de}
+
       @media(max-width:800px){ .steps{grid-template-columns:1fr} .docGrid{grid-template-columns:1fr} }
+      @media(max-width:520px){
+        .demoDrawer{width:100vw}
+        .drawerHead,.drawerBody{padding-left:20px;padding-right:20px}
+        .guideButton{width:100%}
+      }
     `}</style>
   </>;
 }
