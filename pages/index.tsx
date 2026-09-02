@@ -76,7 +76,7 @@ export default function HomePage() {
     <main className="page">
       <section className="hero">
         <div className="eyebrow">AI4 INTELLIGENT CONTACT CENTER (AI4CC) · APROPOS GROUP LLC</div>
-        <h1>An AI that answers<br/>the phone. <span>For real.</span></h1>
+        <h1>State of the Art AI<br/>Intelligent Conversational Agent. <span>24 Hour Coverage</span></h1>
         <div className="whatHow">
           <div>
             <small>WHAT IT DOES</small>
