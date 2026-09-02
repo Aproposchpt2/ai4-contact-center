@@ -1,47 +1,157 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { background: #050b14; color: #e8f0fe; font-family: var(--font-body), 'Inter', sans-serif; }
+
+:root {
+  --apropos-navy: #071A3C;
+  --apropos-sapphire: #0F2A6A;
+  --apropos-gold: #D5AE55;
+  --apropos-gold-light: #E8CB87;
+  --apropos-text: #EEF3FF;
+  --apropos-muted: rgba(255,255,255,.58);
+  --apropos-border: rgba(255,255,255,.13);
+  --apropos-panel: rgba(255,255,255,.055);
+  --apropos-success: #3EE391;
+  --apropos-error: #FF7777;
+}
+
+body {
+  background: var(--apropos-navy);
+  color: var(--apropos-text);
+  font-family: Arial, sans-serif !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+h1, h2, h3, .mc-title {
+  font-family: Georgia, 'Times New Roman', serif !important;
+  font-weight: 400;
+  color: var(--apropos-text);
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+
+a { color: var(--apropos-gold-light); }
+a:hover { color: var(--apropos-gold); }
+
+button,
+input,
+select,
+textarea {
+  font-family: Arial, sans-serif;
+  border-radius: 6px;
+}
+
+button {
+  border-color: var(--apropos-gold) !important;
+}
+
+input,
+select,
+textarea {
+  background: rgba(255,255,255,.04) !important;
+  color: var(--apropos-text) !important;
+  border-color: var(--apropos-border) !important;
+}
 
 .mc-shell {
   min-height: 100vh;
   background:
-    radial-gradient(1200px 500px at 80% -10%, rgba(42, 194, 255, 0.14), transparent 60%),
-    radial-gradient(900px 400px at -10% 10%, rgba(32, 92, 255, 0.16), transparent 60%),
-    linear-gradient(160deg, #050b14 0%, #0a1524 50%, #050b14 100%);
+    radial-gradient(1200px 500px at 80% -10%, rgba(213,174,85,.10), transparent 60%),
+    radial-gradient(900px 400px at -10% 10%, rgba(15,42,106,.34), transparent 60%),
+    linear-gradient(160deg, #071A3C 0%, #0F2A6A 50%, #071A3C 100%);
 }
 
-.mc-grid {
-  position: relative;
-}
+.mc-grid { position: relative; }
 
 .mc-grid::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(121, 180, 255, 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(232,203,135,.12) 1px, transparent 1px);
   background-size: 26px 26px;
-  opacity: .14;
+  opacity: .12;
 }
 
 .mc-card {
-  background: rgba(8, 16, 30, 0.86);
-  border: 1px solid rgba(121, 180, 255, 0.18);
-  border-radius: 14px;
+  background: var(--apropos-panel);
+  border: 1px solid var(--apropos-border);
+  border-radius: 12px;
   backdrop-filter: blur(4px);
 }
 
 .mc-title {
-  font-family: var(--font-display), 'Inter', sans-serif;
   letter-spacing: -0.02em;
   line-height: 1.06;
 }
 
 .mc-hero-overlay {
-  background: linear-gradient(165deg, rgba(8, 18, 34, 0.72), rgba(8, 18, 34, 0.48));
-  border: 1px solid rgba(121, 180, 255, 0.26);
-  border-radius: 16px;
+  background: linear-gradient(165deg, rgba(7,26,60,.88), rgba(15,42,106,.58));
+  border: 1px solid rgba(213,174,85,.34);
+  border-radius: 12px;
   backdrop-filter: blur(6px);
+}
+
+/* Apropos Group brand overrides for shared navigation and CTA surfaces. */
+body .siteHeader {
+  background: rgba(7,26,60,.96) !important;
+  border-bottom-color: var(--apropos-border) !important;
+}
+
+body .brandMark {
+  background: linear-gradient(135deg, var(--apropos-gold-light), var(--apropos-gold)) !important;
+  color: var(--apropos-navy) !important;
+}
+
+body .brandText { color: var(--apropos-text) !important; }
+
+body .navLink { color: var(--apropos-muted) !important; }
+body .navLink:hover { color: var(--apropos-text) !important; }
+body .navLink.active,
+body .navLink.active:visited {
+  color: var(--apropos-gold-light) !important;
+  border-bottom-color: var(--apropos-gold) !important;
+}
+
+body .builderCta,
+body .builderCta:visited,
+body .callCta,
+body .callCta:visited,
+a.callCta.small,
+a.callCta.small:visited {
+  background: var(--apropos-gold) !important;
+  color: var(--apropos-navy) !important;
+  border-color: var(--apropos-gold) !important;
+  box-shadow: 0 0 0 1px rgba(213,174,85,.35), 0 18px 40px -12px rgba(213,174,85,.28) !important;
+}
+
+body .builderCta:hover,
+body .callCta:hover,
+a.callCta.small:hover {
+  color: var(--apropos-navy) !important;
+  filter: brightness(1.05);
+}
+
+/* Common product UI surfaces. */
+body .card,
+body .panel,
+body .tile,
+body .surface {
+  border-color: var(--apropos-border) !important;
+}
+
+body .eyebrow,
+body .kicker,
+body .label,
+body small {
+  color: var(--apropos-muted);
+}
+
+body .badge,
+body .pill {
+  border-color: rgba(213,174,85,.35) !important;
 }
 
 /* Acquisition closing CTA is rendered by Next Link outside the page's styled-jsx scope. */
@@ -53,78 +163,55 @@ a.callCta.small:visited {
   gap: 0.35rem;
   padding: 13px 22px;
   border-radius: 12px;
-  background: #69d8ff;
-  color: #06111f;
   text-decoration: none;
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.04em;
-  box-shadow: 0 0 0 1px rgba(105, 216, 255, 0.4), 0 18px 40px -12px rgba(105, 216, 255, 0.45);
 }
 
-a.callCta.small:hover {
-  color: #06111f;
-  text-decoration: none;
-  filter: brightness(1.04);
-}
-
-/* Live demo drawer: crisp buyer-demo treatment with no glass blur. */
+/* Live demo drawer: Apropos institutional treatment. */
 body .drawerBackdrop {
-  background: rgba(2, 8, 15, 0.78) !important;
+  background: rgba(2,8,15,.78) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
 body .demoDrawer {
-  background: #071827 !important;
-  color: #f2f7fb !important;
-  border-left-color: #1b3d52 !important;
-  box-shadow: -24px 0 70px rgba(0, 0, 0, 0.52) !important;
+  background: var(--apropos-navy) !important;
+  color: var(--apropos-text) !important;
+  border-left-color: rgba(213,174,85,.34) !important;
+  box-shadow: -24px 0 70px rgba(0,0,0,.52) !important;
 }
 
-body .drawerHead {
-  background: #071827 !important;
-  border-bottom-color: #1b3d52 !important;
-}
-
+body .drawerHead,
 body .drawerBody {
-  background: #071827 !important;
+  background: var(--apropos-navy) !important;
 }
 
-body .drawerBody p {
-  color: #b5c7d6 !important;
-}
-
+body .drawerHead { border-bottom-color: var(--apropos-border) !important; }
+body .drawerBody p { color: var(--apropos-muted) !important; }
 body .drawerBody .role,
-body .drawerBody strong {
-  color: #f2f7fb !important;
-}
+body .drawerBody strong { color: var(--apropos-text) !important; }
 
 body .naturalCallout {
-  background: #0b2233 !important;
-  border-color: #2b6b8d !important;
+  background: rgba(15,42,106,.72) !important;
+  border-color: rgba(213,174,85,.46) !important;
 }
 
 body .naturalCallout strong,
 body .drawerHead small,
-body .afterCall small {
-  color: #69d8ff !important;
-}
+body .afterCall small { color: var(--apropos-gold-light) !important; }
 
 body .naturalCallout span,
-body .afterCall p {
-  color: #c8d7e2 !important;
-}
+body .afterCall p { color: var(--apropos-muted) !important; }
 
 body .closeButton {
-  background: #0b2233 !important;
-  border-color: #31566f !important;
-  color: #f2f7fb !important;
+  background: var(--apropos-sapphire) !important;
+  border-color: rgba(213,174,85,.46) !important;
+  color: var(--apropos-text) !important;
 }
 
-body .afterCall {
-  border-top-color: #1b3d52 !important;
-}
+body .afterCall { border-top-color: var(--apropos-border) !important; }
 
 /* Demo step 01 is a number to dial from the visitor's phone, not an in-app call action. */
 body .step > a.callCta {
@@ -132,6 +219,4 @@ body .step > a.callCta {
   cursor: default;
 }
 
-body .step > a.callCta .callLabel {
-  display: none !important;
-}
+body .step > a.callCta .callLabel { display: none !important; }
