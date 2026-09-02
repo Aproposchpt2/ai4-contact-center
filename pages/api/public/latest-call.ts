@@ -1,13 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-// Public, read-only, no-auth endpoint for the homepage's live call-proof widget.
-// Deliberately returns only the minimal fields needed for that demo — never the
-// full interaction/lead row, never internal ids beyond what's harmless to show.
-// This is intentional public exposure of the most recent real (or test) call to
-// the AI4CC Business Intake Agent, by design — see pages/index.tsx's proof section.
-
 const TENANT_ID = '5885a020-d363-4c27-910a-c035eda132f5';
+const DEMO_SESSION_COOKIE = 'ai4cc_demo_started_at';
 
 function admin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -23,14 +18,26 @@ function durationLabel(startedAt: string, endedAt: string | null) {
   return `${Math.floor(seconds / 60)} min ${seconds % 60} sec`;
 }
 
+function validDemoSessionStart(value: string | undefined) {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return null;
+
+  const ageMs = Date.now() - timestamp;
+  if (ageMs < 0 || ageMs > 60 * 60 * 1000) return null;
+  return new Date(timestamp).toISOString();
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
-  res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=45');
+
+  const demoSessionStart = validDemoSessionStart(req.cookies[DEMO_SESSION_COOKIE]);
+  res.setHeader('Cache-Control', demoSessionStart ? 'private, no-store' : 'public, max-age=15, stale-while-revalidate=45');
 
   try {
     const db = admin();
 
-    const { data: interaction, error } = await db
+    let interactionQuery = db
       .from('ai4cc_interactions')
       .select('id, status, customer_identifier, metadata, started_at, ended_at')
       .eq('tenant_id', TENANT_ID)
@@ -39,8 +46,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .contains('metadata', { source: 'elevenlabs_agent' })
       .not('metadata->>callerName', 'is', null)
       .order('started_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(1);
+
+    if (demoSessionStart) {
+      interactionQuery = interactionQuery.gte('started_at', demoSessionStart);
+    }
+
+    const { data: interaction, error } = await interactionQuery.maybeSingle();
 
     if (error) throw error;
     if (!interaction) return res.status(200).json({ call: null });
