@@ -28,6 +28,16 @@ const BUYERS = [
   'Operators ready to commercialize under their own brand',
 ];
 
+const COMPARE_ROWS = [
+  { label: 'Pricing model', values: ['$75–$240 / user / mo', '$65–$95 / agent / mo', '$119–$230+ / seat / mo (50-seat min)', '$71–$209 / agent / mo'], ai4cc: '$25,000 one-time, own it outright' },
+  { label: 'Implementation cost', values: ['Not published', 'Not published', '$50K–$500K+ (enterprise)', '$50K–$500K+ (enterprise)'], ai4cc: '$0 — included' },
+  { label: 'Voice, SMS & chat routing', values: ['✓', '✓', '✓', '✓'], ai4cc: '✓' },
+  { label: 'Conversational AI intake', values: ['Add-on', 'Add-on', 'Add-on, higher tiers only', 'Add-on, +$30–60/agent/mo'], ai4cc: 'Built in, proven live' },
+  { label: 'CRM / Lead workflow', values: ['Third-party integration', 'Third-party integration', 'Third-party integration', 'Third-party integration'], ai4cc: 'Native, included' },
+  { label: 'Per-minute voice charges', values: ['$0.009–$0.015/min', 'Varies by plan', 'Varies by plan', 'Varies by plan'], ai4cc: 'No recurring fee to a vendor' },
+  { label: 'Ongoing vendor lock-in', values: ['Yes', 'Yes', 'Yes', 'Yes'], ai4cc: 'None — you own the source' },
+];
+
 const ROADMAP = [
   'Multi-tenant SaaS packaging with self-serve provisioning',
   'Usage metering & subscription billing',
@@ -103,18 +113,21 @@ export default function HomePage() {
 
       <section className="compare">
         <Title eyebrow="VS. THE MAJORS" title="The same core, without the seat fee" />
-        <div className="compareTable">
-          <div className="compareRow compareHead">
-            <span></span><span>Genesys Cloud CX</span><span>RingCentral RingCX</span><span className="hi">AI4CC</span>
+        <div className="compareScroll">
+          <div className="compareTable">
+            <div className="compareRow compareHead">
+              <span></span><span>Genesys Cloud CX</span><span>RingCentral RingCX</span><span>Five9</span><span>NICE CXone</span><span className="hi">AI4CC</span>
+            </div>
+            {COMPARE_ROWS.map(row => (
+              <div className="compareRow" key={row.label}>
+                <span>{row.label}</span>
+                {row.values.map((v, i) => <span key={i}>{v}</span>)}
+                <span className="hi">{row.ai4cc}</span>
+              </div>
+            ))}
           </div>
-          <div className="compareRow"><span>Pricing model</span><span>$75–$240 / user / month</span><span>$65–$95 / agent / month</span><span className="hi">$25,000 one-time, own it outright</span></div>
-          <div className="compareRow"><span>Voice, SMS &amp; chat routing</span><span>✓</span><span>✓</span><span className="hi">✓</span></div>
-          <div className="compareRow"><span>Conversational AI intake</span><span>Add-on</span><span>Add-on</span><span className="hi">Built in, proven live</span></div>
-          <div className="compareRow"><span>CRM / Lead workflow</span><span>Third-party integration</span><span>Third-party integration</span><span className="hi">Native, included</span></div>
-          <div className="compareRow"><span>Per-minute voice charges</span><span>$0.009–$0.015/min</span><span>Varies by plan</span><span className="hi">No recurring fee to a vendor</span></div>
-          <div className="compareRow"><span>Ongoing vendor lock-in</span><span>Yes</span><span>Yes</span><span className="hi">None — you own the source</span></div>
         </div>
-        <p className="compareNote">Genesys and RingCentral pricing per public 2026 sources <a href="https://www.platform28.com/blog/genesys-cloud-pricing-guide" target="_blank" rel="noopener">[1]</a> <a href="https://www.cloudtalk.io/blog/ringcentral-pricing/" target="_blank" rel="noopener">[2]</a> — a 20-seat team on either runs $15,600–$57,600/year in licensing alone, before AI4CC&apos;s $25,000 one-time cost ever recurs. AI4CC doesn&apos;t match every enterprise feature the majors have built over a decade — it matches the core a buyer would otherwise pay per seat, per month, forever.</p>
+        <p className="compareNote">Pricing per public 2026 sources: Genesys <a href="https://www.platform28.com/blog/genesys-cloud-pricing-guide" target="_blank" rel="noopener">[1]</a>, RingCentral <a href="https://www.cloudtalk.io/blog/ringcentral-pricing/" target="_blank" rel="noopener">[2]</a>, Five9 <a href="https://www.platform28.com/blog/five9-pricing-breakdown" target="_blank" rel="noopener">[3]</a>, NICE CXone <a href="https://www.cloudtalk.io/blog/nice-cxone-pricing/" target="_blank" rel="noopener">[4]</a>. <strong>The implementation cost alone for an enterprise Five9 or NICE deployment ($50K–$500K+) exceeds AI4CC&apos;s entire $25,000 asking price — before a single month of subscription.</strong> AI4CC doesn&apos;t match every enterprise feature the majors have built over a decade — it matches the core a buyer would otherwise pay per seat, per month, forever, plus a setup fee to even begin.</p>
       </section>
 
       <section className="steps">
@@ -222,10 +235,11 @@ export default function HomePage() {
       .whatHow p{margin:0;color:#9eb3c4;line-height:1.7;font-size:.94rem}
 
       .compare{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
-      .compareTable{border:1px solid #19384d;border-radius:16px;margin-top:26px;width:100%;overflow:hidden}
-      .compareRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.3fr;border-bottom:1px solid #123047}
+      .compareScroll{margin-top:26px;overflow-x:auto;border:1px solid #19384d;border-radius:16px}
+      .compareTable{width:100%}
+      .compareRow{display:grid;grid-template-columns:150px repeat(4,140px) 170px;min-width:990px;border-bottom:1px solid #123047}
       .compareRow:last-child{border-bottom:none}
-      .compareRow span{padding:12px 14px;font-size:.8rem;color:#a9bcc9;display:flex;align-items:center;overflow-wrap:break-word;min-width:0}
+      .compareRow span{padding:12px 14px;font-size:.78rem;color:#a9bcc9;display:flex;align-items:center;overflow-wrap:break-word;min-width:0}
       .compareRow span:first-child{color:#c7d7e2;font-weight:700}
       .compareRow .hi{background:rgba(105,216,255,.07);color:#69d8ff;font-weight:800}
       .compareHead{background:rgba(255,255,255,.02)}
