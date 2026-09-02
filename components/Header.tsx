@@ -36,8 +36,8 @@ const NAV = [
   { href: '/flow-rewrite', label: 'Flow Rewrite' },
   { href: '/prompt-manager', label: 'Prompt Manager' },
   { href: '/knowledge-vault', label: 'Knowledge Vault' },
-  { href: '/templates',  label: 'Templates' },
-  { href: '/dashboard',  label: 'Dashboard' },
+  { href: '/templates',  label: 'Templates'      },
+  { href: '/dashboard',  label: 'Dashboard'      },
 ];
 
 export default function Header() {
@@ -82,9 +82,9 @@ export default function Header() {
           align-items: center;
           gap: 1rem;
           overflow: hidden;
-          background: rgba(6,17,31,.92);
+          background: rgba(7,26,60,.96);
           backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255,255,255,.08);
+          border-bottom: 1px solid rgba(255,255,255,.13);
         }
         :global(.brand) {
           display: flex;
@@ -97,18 +97,18 @@ export default function Header() {
           width: 30px;
           height: 30px;
           border-radius: 6px;
-          background: linear-gradient(135deg,#5bd3ff,#0078d4);
+          background: linear-gradient(135deg,#E8CB87,#D5AE55);
           display: grid;
           place-items: center;
           font-size: .65rem;
           font-weight: 900;
-          color: #06111f;
+          color: #071A3C;
           letter-spacing: .06em;
         }
         .brandText {
           font-size: .78rem;
           font-weight: 700;
-          color: #fff;
+          color: #EEF3FF;
           letter-spacing: .04em;
           white-space: nowrap;
         }
@@ -131,7 +131,7 @@ export default function Header() {
           flex: 0 0 auto;
           padding: 20px 0 4px;
           border-bottom: 1px solid transparent;
-          color: rgba(255,255,255,.5);
+          color: rgba(255,255,255,.58);
           font-size: .7rem;
           font-weight: 600;
           line-height: 1;
@@ -141,21 +141,21 @@ export default function Header() {
           white-space: nowrap;
         }
         :global(.navLink:hover) {
-          color: rgba(255,255,255,.78);
+          color: #EEF3FF;
           text-decoration: none;
         }
         :global(.navLink.active),
         :global(.navLink.active:visited) {
-          color: #5bd3ff;
-          border-bottom-color: #5bd3ff;
+          color: #E8CB87;
+          border-bottom-color: #D5AE55;
         }
         :global(.builderCta),
         :global(.builderCta:visited) {
           flex: 0 0 auto;
           padding: .55rem 1rem;
-          border-radius: 5px;
-          background: #5bd3ff;
-          color: #06111f;
+          border-radius: 6px;
+          background: #D5AE55;
+          color: #071A3C;
           font-size: .7rem;
           font-weight: 800;
           letter-spacing: .1em;
