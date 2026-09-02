@@ -9,7 +9,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 // Public marketing/sale surface — buyer-facing pages meant to be seen without a login.
-const PUBLIC_PATHS = new Set(['/', '/login', '/web-chat', '/acquisition', '/demo']);
+const PUBLIC_PATHS = new Set(['/', '/login', '/web-chat', '/acquisition', '/demo', '/partners']);
 // /api/intake/ authenticates itself via a shared secret header (see pages/api/intake/webhook.ts) —
 // it's called machine-to-machine by ElevenLabs, which can't carry a Supabase session cookie.
 // /api/public/ is deliberately read-only, minimal-field, no-auth — see pages/api/public/*.
