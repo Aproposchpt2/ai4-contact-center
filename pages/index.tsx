@@ -77,20 +77,44 @@ export default function HomePage() {
       <section className="hero">
         <div className="eyebrow">AI4 INTELLIGENT CONTACT CENTER (AI4CC) · APROPOS GROUP LLC</div>
         <h1>An AI that answers<br/>the phone. <span>For real.</span></h1>
-        <p className="lede">
-          A developed, production-deployed contact-center platform — 38 application surfaces spanning
-          multichannel communications, CRM/Lead workflow, Customer 360 and call-flow governance — with a
-          conversational AI voice layer the owner has tested end to end. The contact center stays the system
-          of record; the AI enhances the front door, it doesn&apos;t replace the control plane.
-        </p>
+        <div className="whatHow">
+          <div>
+            <small>WHAT IT DOES</small>
+            <p>Answers real inbound calls, runs a natural intake conversation, and turns every call into a
+              structured, qualified lead in a live CRM — automatically, with no agent typing notes afterward.</p>
+          </div>
+          <div>
+            <small>HOW IT'S DONE</small>
+            <p>38 application surfaces — flow authoring, omnichannel routing, Lead Management, Customer 360,
+              QA and governance — built as one platform with a conversational AI voice layer on top. The
+              contact center stays the system of record; the AI enhances the front door, it doesn&apos;t
+              replace the control plane.</p>
+          </div>
+        </div>
         <div className="ctaRow">
           <a href={PHONE_TEL} className="callCta">
             <span className="callLabel">Call it right now</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
           </a>
-          <a href="#proof" className="ghostCta">See a real call ↓</a>
+          <Link href="/demo" className="ghostCta">See the live demo →</Link>
           <Link href="/acquisition" className="ghostCta">Buyer walkthrough →</Link>
         </div>
+      </section>
+
+      <section className="compare">
+        <Title eyebrow="VS. THE MAJORS" title="The same core, without the seat fee" />
+        <div className="compareTable">
+          <div className="compareRow compareHead">
+            <span></span><span>Genesys Cloud CX</span><span>RingCentral RingCX</span><span className="hi">AI4CC</span>
+          </div>
+          <div className="compareRow"><span>Pricing model</span><span>$75–$240 / user / month</span><span>$65–$95 / agent / month</span><span className="hi">$25,000 one-time, own it outright</span></div>
+          <div className="compareRow"><span>Voice, SMS &amp; chat routing</span><span>✓</span><span>✓</span><span className="hi">✓</span></div>
+          <div className="compareRow"><span>Conversational AI intake</span><span>Add-on</span><span>Add-on</span><span className="hi">Built in, proven live</span></div>
+          <div className="compareRow"><span>CRM / Lead workflow</span><span>Third-party integration</span><span>Third-party integration</span><span className="hi">Native, included</span></div>
+          <div className="compareRow"><span>Per-minute voice charges</span><span>$0.009–$0.015/min</span><span>Varies by plan</span><span className="hi">No recurring fee to a vendor</span></div>
+          <div className="compareRow"><span>Ongoing vendor lock-in</span><span>Yes</span><span>Yes</span><span className="hi">None — you own the source</span></div>
+        </div>
+        <p className="compareNote">Genesys and RingCentral pricing per public 2026 sources <a href="https://www.platform28.com/blog/genesys-cloud-pricing-guide" target="_blank" rel="noopener">[1]</a> <a href="https://www.cloudtalk.io/blog/ringcentral-pricing/" target="_blank" rel="noopener">[2]</a> — a 20-seat team on either runs $15,600–$57,600/year in licensing alone, before AI4CC&apos;s $25,000 one-time cost ever recurs. AI4CC doesn&apos;t match every enterprise feature the majors have built over a decade — it matches the core a buyer would otherwise pay per seat, per month, forever.</p>
       </section>
 
       <section className="steps">
@@ -193,6 +217,24 @@ export default function HomePage() {
       .ghostCta{color:#c7dbe8;text-decoration:none;font-size:.85rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:2px}
       .ghostCta:hover{border-color:#69d8ff;color:#69d8ff}
 
+      .whatHow{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:0 0 36px;max-width:1000px}
+      .whatHow small{display:block;color:#69d8ff;font-size:.64rem;font-weight:900;letter-spacing:.14em;margin-bottom:10px}
+      .whatHow p{margin:0;color:#9eb3c4;line-height:1.7;font-size:.94rem}
+
+      .compare{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
+      .compareTable{border:1px solid #19384d;border-radius:16px;overflow:hidden;margin-top:26px}
+      .compareRow{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.3fr;border-bottom:1px solid #123047}
+      .compareRow:last-child{border-bottom:none}
+      .compareRow span{padding:14px 18px;font-size:.82rem;color:#a9bcc9;display:flex;align-items:center}
+      .compareRow span:first-child{color:#c7d7e2;font-weight:700}
+      .compareRow .hi{background:rgba(105,216,255,.07);color:#69d8ff;font-weight:800}
+      .compareHead{background:rgba(255,255,255,.02)}
+      .compareHead span{color:#718ba0;font-size:.66rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+      .compareHead .hi{color:#69d8ff}
+      .compareNote{margin:18px 0 0;color:#5c7284;font-size:.78rem;line-height:1.7;max-width:900px}
+      .compareNote a{color:#69d8ff;text-decoration:none}
+      .compareNote a:hover{text-decoration:underline}
+
       .steps{max-width:1240px;margin:0 auto;padding:24px 24px 72px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
       .step{border:1px solid #19384d;border-radius:14px;background:rgba(7,24,38,.72);padding:26px}
       .stepN{color:#3f5b70;font-size:.72rem;font-weight:900;letter-spacing:.14em}
@@ -240,6 +282,11 @@ export default function HomePage() {
         .capGrid{grid-template-columns:1fr 1fr}
         .split{grid-template-columns:1fr;gap:36px}
         .proofRow{grid-template-columns:1fr;gap:4px}
+        .whatHow{grid-template-columns:1fr}
+      }
+      @media(max-width:700px){
+        .compareTable{overflow-x:auto}
+        .compareRow{grid-template-columns:120px 100px 100px 130px;min-width:560px}
       }
       @media(max-width:600px){ .capGrid{grid-template-columns:1fr} }
     `}</style>
