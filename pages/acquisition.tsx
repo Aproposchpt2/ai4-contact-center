@@ -110,6 +110,7 @@ export default function AcquisitionPage() {
 
       <section className="closing">
         <h2>Ready to talk?</h2>
+        <p className="price">$25,000 <span>— asking price, full technology-asset sale</span></p>
         <p>Full technical diligence — repository, schema, deployment model, security posture, known-issues
           register and cost basis — is available under NDA via the Acquire.com listing.</p>
         <Link href="/" className="ghostCta">← Back to the platform overview</Link>
@@ -145,6 +146,8 @@ export default function AcquisitionPage() {
       .closing{max-width:700px;margin:0 auto;padding:24px 24px 110px;text-align:center}
       .closing h2{font-size:1.5rem;margin:0 0 12px;letter-spacing:-.02em}
       .closing p{color:#8ea2b3;line-height:1.7;font-size:.9rem;margin:0 0 26px}
+      .closing p.price{color:#69d8ff;font-size:1.3rem;font-weight:900;letter-spacing:-.01em;margin:0 0 12px}
+      .closing p.price span{color:#8ea2b3;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
       .ghostCta{color:#c7dbe8;text-decoration:none;font-size:.85rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,.25);padding-bottom:2px}
       .ghostCta:hover{border-color:#69d8ff;color:#69d8ff}
     `}</style>

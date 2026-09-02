@@ -114,6 +114,7 @@ export default function HomePage() {
 
       <section className="closing">
         <h2>Available for acquisition or white-label partnership</h2>
+        <p className="price">$25,000 <span>— asking price, full technology-asset sale</span></p>
         <p>AI4CC is a pre-revenue technology asset — offered on documented development cost and production
           maturity, not a revenue multiple. Full technical diligence, architecture documentation and a guided
           walkthrough are available under NDA.</p>
@@ -179,6 +180,8 @@ export default function HomePage() {
       .closing{max-width:900px;margin:0 auto;padding:24px 24px 110px;text-align:center}
       .closing h2{font-size:1.7rem;letter-spacing:-.02em;margin:0 0 14px}
       .closing p{color:#8ea2b3;line-height:1.7;font-size:.94rem;margin:0 0 30px}
+      .closing p.price{color:#69d8ff;font-size:1.4rem;font-weight:900;letter-spacing:-.01em;margin:0 0 14px}
+      .closing p.price span{color:#8ea2b3;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
       .closingCta{display:flex;justify-content:center}
 
       @media(max-width:900px){
