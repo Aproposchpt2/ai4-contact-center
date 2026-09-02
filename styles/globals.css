@@ -125,3 +125,13 @@ body .closeButton {
 body .afterCall {
   border-top-color: #1b3d52 !important;
 }
+
+/* Demo step 01 is a number to dial from the visitor's phone, not an in-app call action. */
+body .step > a.callCta {
+  pointer-events: none;
+  cursor: default;
+}
+
+body .step > a.callCta .callLabel {
+  display: none !important;
+}
