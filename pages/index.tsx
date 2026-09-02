@@ -222,10 +222,10 @@ export default function HomePage() {
       .whatHow p{margin:0;color:#9eb3c4;line-height:1.7;font-size:.94rem}
 
       .compare{max-width:1240px;margin:0 auto;padding:24px 24px 80px}
-      .compareTable{border:1px solid #19384d;border-radius:16px;margin-top:26px;overflow-x:auto}
-      .compareRow{display:grid;grid-template-columns:180px 170px 170px 220px;min-width:740px;border-bottom:1px solid #123047}
+      .compareTable{border:1px solid #19384d;border-radius:16px;margin-top:26px;width:100%;overflow:hidden}
+      .compareRow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1.3fr;border-bottom:1px solid #123047}
       .compareRow:last-child{border-bottom:none}
-      .compareRow span{padding:14px 18px;font-size:.82rem;color:#a9bcc9;display:flex;align-items:center}
+      .compareRow span{padding:12px 14px;font-size:.8rem;color:#a9bcc9;display:flex;align-items:center;overflow-wrap:break-word;min-width:0}
       .compareRow span:first-child{color:#c7d7e2;font-weight:700}
       .compareRow .hi{background:rgba(105,216,255,.07);color:#69d8ff;font-weight:800}
       .compareHead{background:rgba(255,255,255,.02)}
