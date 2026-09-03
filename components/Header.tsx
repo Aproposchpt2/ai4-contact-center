@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+
+type Theme = 'light' | 'black';
 
 const NAV = [
   { href: '/',           label: 'Home'      },
@@ -42,6 +45,20 @@ const NAV = [
 
 export default function Header() {
   const { pathname } = useRouter();
+  const [theme, setTheme] = useState<Theme>('black');
+
+  useEffect(() => {
+    const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'black';
+    setTheme(current);
+  }, []);
+
+  const applyTheme = (next: Theme) => {
+    setTheme(next);
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('ai4-theme', next); } catch (_) {}
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    themeMeta?.setAttribute('content', next === 'light' ? '#F4F2ED' : '#01050D');
+  };
 
   return (
     <>
@@ -62,6 +79,26 @@ export default function Header() {
             </Link>
           ))}
         </nav>
+
+        <div className="themeSwitch" role="group" aria-label="Color theme">
+          <button
+            type="button"
+            className={theme === 'light' ? 'themeOption activeTheme' : 'themeOption'}
+            aria-pressed={theme === 'light'}
+            onClick={() => applyTheme('light')}
+          >
+            ◐ LIGHT
+          </button>
+          <span className="themeDivider" aria-hidden="true">/</span>
+          <button
+            type="button"
+            className={theme === 'black' ? 'themeOption activeTheme' : 'themeOption'}
+            aria-pressed={theme === 'black'}
+            onClick={() => applyTheme('black')}
+          >
+            ◑ BLACK
+          </button>
+        </div>
 
         <Link href="/builder" className="builderCta">
           Open Builder →
@@ -109,10 +146,11 @@ export default function Header() {
           box-shadow: inset 0 0 0 1px rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.28);
         }
         .brandText {
-          font-size: .78rem;
-          font-weight: 700;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: .86rem;
+          font-weight: 400;
           color: #F5F7FA;
-          letter-spacing: .04em;
+          letter-spacing: .02em;
           white-space: nowrap;
         }
         .navRail {
@@ -152,6 +190,41 @@ export default function Header() {
           color: #E2CEA2;
           border-bottom-color: #C8A96B;
         }
+        .themeSwitch {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          gap: 2px;
+          padding: 3px;
+          border: 1px solid rgba(200,169,107,.24);
+          border-radius: 7px;
+          background: rgba(255,255,255,.025);
+        }
+        .themeOption {
+          min-height: 28px;
+          padding: 0 .52rem;
+          border: 1px solid transparent;
+          border-radius: 5px;
+          background: transparent;
+          color: #7D899C;
+          cursor: pointer;
+          font-size: .58rem;
+          font-weight: 800;
+          line-height: 1;
+          letter-spacing: .08em;
+          white-space: nowrap;
+        }
+        .themeOption:hover { color: #F5F7FA; }
+        .themeOption.activeTheme {
+          color: #E2CEA2;
+          border-color: rgba(200,169,107,.34);
+          background: rgba(200,169,107,.07);
+        }
+        .themeDivider {
+          color: rgba(125,137,156,.58);
+          font-size: .62rem;
+          user-select: none;
+        }
         :global(.builderCta),
         :global(.builderCta:visited) {
           flex: 0 0 auto;
@@ -172,14 +245,24 @@ export default function Header() {
           background: rgba(200,169,107,.08);
           color: #F5F7FA;
         }
-        @media (max-width: 1180px) {
+        @media (max-width: 1260px) {
           :global(.builderCta) { display: none; }
         }
+        @media (max-width: 820px) {
+          .themeOption { padding-inline: .42rem; }
+          .siteHeader { gap: .72rem; }
+        }
         @media (max-width: 700px) {
-          .siteHeader { gap: .7rem; padding-inline: .65rem; }
+          .siteHeader { gap: .55rem; padding-inline: .65rem; }
           .brandText { display: none; }
           .navRail { gap: 1rem; }
           :global(.navLink) { font-size: .66rem; letter-spacing: .08em; }
+          .themeOption { font-size: .54rem; padding-inline: .34rem; }
+        }
+        @media (max-width: 470px) {
+          .themeDivider { display: none; }
+          .themeSwitch { gap: 0; }
+          .themeOption { padding-inline: .3rem; }
         }
       `}</style>
     </>
