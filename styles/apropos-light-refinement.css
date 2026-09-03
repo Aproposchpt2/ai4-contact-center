@@ -1,0 +1,55 @@
+/*
+ * AI4 Contact Center — Platinum Executive readability refinements
+ * Keeps the light theme premium while improving data and proof-card hierarchy.
+ */
+
+html[data-theme="light"] body .compareRow span {
+  color: #526071 !important;
+}
+
+html[data-theme="light"] body .compareRow span:first-child {
+  color: #2F4058 !important;
+  font-weight: 700 !important;
+}
+
+html[data-theme="light"] body .compareHead span {
+  color: #66738A !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="light"] body .compareHead .hi,
+html[data-theme="light"] body .compareRow .hi {
+  color: #76591F !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="light"] body .compareNote {
+  color: #66738A !important;
+}
+
+html[data-theme="light"] body .proofRow span {
+  color: #66738A !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="light"] body .proofRow b {
+  color: #14213A !important;
+  font-weight: 600 !important;
+}
+
+html[data-theme="light"] body .proofRow.result b {
+  color: #76591F !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="light"] body .proofRow.result span {
+  color: #66738A !important;
+}
+
+html[data-theme="light"] body .whatHow p,
+html[data-theme="light"] body .proofHead p,
+html[data-theme="light"] body .step p,
+html[data-theme="light"] body .capCard p,
+html[data-theme="light"] body .closing p {
+  color: #4D5D70 !important;
+}
