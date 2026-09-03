@@ -1,21 +1,27 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; color-scheme: dark; }
 
 :root {
-  --apropos-navy: #071A3C;
-  --apropos-sapphire: #0F2A6A;
-  --apropos-gold: #D5AE55;
-  --apropos-gold-light: #E8CB87;
-  --apropos-text: #EEF3FF;
-  --apropos-muted: rgba(255,255,255,.58);
-  --apropos-border: rgba(255,255,255,.13);
-  --apropos-panel: rgba(255,255,255,.055);
-  --apropos-success: #3EE391;
-  --apropos-error: #FF7777;
+  --apropos-black: #01050D;
+  --apropos-midnight: #030A18;
+  --apropos-navy: #07142F;
+  --apropos-panel: #0A1933;
+  --apropos-panel-elevated: #102544;
+  --apropos-sapphire: #173F91;
+  --apropos-platinum: #F5F7FA;
+  --apropos-text: #F5F7FA;
+  --apropos-secondary: #B9C3D2;
+  --apropos-muted: #7D899C;
+  --apropos-gold: #C8A96B;
+  --apropos-gold-light: #E2CEA2;
+  --apropos-border: rgba(200,169,107,.18);
+  --apropos-border-soft: rgba(255,255,255,.09);
+  --apropos-success: #58C99D;
+  --apropos-error: #E67C7C;
 }
 
 body {
-  background: var(--apropos-navy);
+  background: var(--apropos-black);
   color: var(--apropos-text);
   font-family: Arial, sans-serif !important;
   font-size: 14px;
@@ -25,7 +31,7 @@ body {
 h1, h2, h3, .mc-title {
   font-family: Georgia, 'Times New Roman', serif !important;
   font-weight: 400;
-  color: var(--apropos-text);
+  color: var(--apropos-platinum);
 }
 
 h1 { font-size: 28px; }
@@ -43,183 +49,290 @@ textarea {
   border-radius: 6px;
 }
 
-button {
-  border-color: var(--apropos-gold) !important;
-}
-
 input,
 select,
 textarea {
-  background: rgba(255,255,255,.04) !important;
+  background: rgba(255,255,255,.035) !important;
   color: var(--apropos-text) !important;
-  border-color: var(--apropos-border) !important;
+  border-color: var(--apropos-border-soft) !important;
 }
 
-/* Federal Ops Command Center visual baseline: navy is the dominant canvas. */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(200,169,107,.56) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(200,169,107,.10);
+}
+
+/* Black Sapphire is intentionally near-black first, blue second. */
 .mc-shell {
   min-height: 100vh;
-  background: var(--apropos-navy);
+  background:
+    radial-gradient(900px 520px at 84% -8%, rgba(23,63,145,.14), transparent 62%),
+    linear-gradient(180deg, var(--apropos-black) 0%, var(--apropos-midnight) 48%, var(--apropos-black) 100%);
 }
 
 body .page {
-  background: var(--apropos-navy) !important;
-  color: var(--apropos-text) !important;
+  background:
+    radial-gradient(900px 560px at 82% 4%, rgba(23,63,145,.14), transparent 64%),
+    radial-gradient(700px 440px at 14% 30%, rgba(200,169,107,.045), transparent 68%),
+    linear-gradient(180deg, #01050D 0%, #030A18 44%, #01050D 100%) !important;
+  color: var(--apropos-platinum) !important;
 }
 
 .mc-grid { position: relative; }
-
 .mc-grid::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(232,203,135,.10) 1px, transparent 1px);
-  background-size: 26px 26px;
-  opacity: .08;
+  background-image: radial-gradient(rgba(226,206,162,.085) 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: .055;
 }
 
-.mc-card {
-  background: var(--apropos-panel);
-  border: 1px solid var(--apropos-border);
+.mc-card,
+body .card,
+body .panel,
+body .tile,
+body .surface {
+  background: linear-gradient(155deg, rgba(10,25,51,.94), rgba(3,10,24,.96)) !important;
+  border: 1px solid var(--apropos-border-soft) !important;
   border-radius: 12px;
-  backdrop-filter: blur(4px);
+  box-shadow: 0 24px 70px rgba(0,0,0,.22);
 }
 
-.mc-title {
-  letter-spacing: -0.02em;
-  line-height: 1.06;
-}
-
+.mc-title { letter-spacing: -0.02em; line-height: 1.06; }
 .mc-hero-overlay {
-  background: rgba(7,26,60,.88);
-  border: 1px solid rgba(213,174,85,.30);
+  background: linear-gradient(150deg, rgba(3,10,24,.94), rgba(7,20,47,.82)) !important;
+  border: 1px solid rgba(200,169,107,.24);
   border-radius: 12px;
   backdrop-filter: blur(6px);
 }
 
-/* Apropos Group brand overrides for shared navigation and CTA surfaces. */
+/* Shared navigation: dark, minimal, acquisition-grade. */
 body .siteHeader {
-  background: rgba(7,26,60,.98) !important;
-  border-bottom-color: var(--apropos-border) !important;
+  background: rgba(1,5,13,.965) !important;
+  border-bottom-color: rgba(200,169,107,.14) !important;
+  box-shadow: 0 12px 36px rgba(0,0,0,.22) !important;
 }
 
 body .brandMark {
-  background: linear-gradient(135deg, var(--apropos-gold-light), var(--apropos-gold)) !important;
-  color: var(--apropos-navy) !important;
+  background: linear-gradient(145deg,#07142F,#030A18) !important;
+  color: var(--apropos-gold-light) !important;
+  border: 1px solid rgba(200,169,107,.58) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 8px 24px rgba(0,0,0,.28) !important;
 }
-
-body .brandText { color: var(--apropos-text) !important; }
-
-body .navLink { color: var(--apropos-muted) !important; }
-body .navLink:hover { color: var(--apropos-text) !important; }
+body .brandText { color: var(--apropos-platinum) !important; }
+body .navLink { color: #8F9CAF !important; }
+body .navLink:hover { color: var(--apropos-platinum) !important; }
 body .navLink.active,
 body .navLink.active:visited {
   color: var(--apropos-gold-light) !important;
   border-bottom-color: var(--apropos-gold) !important;
 }
 
+/* Keep the header action refined; reserve bright contrast for real conversion CTAs. */
 body .builderCta,
-body .builderCta:visited,
+body .builderCta:visited {
+  background: transparent !important;
+  color: var(--apropos-gold-light) !important;
+  border: 1px solid rgba(200,169,107,.48) !important;
+  box-shadow: none !important;
+}
+body .builderCta:hover { background: rgba(200,169,107,.08) !important; color: var(--apropos-platinum) !important; }
+
+/* Homepage acquisition presentation. */
+body .hero {
+  position: relative;
+  padding-top: 104px !important;
+  padding-bottom: 72px !important;
+}
+body .hero::before {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  right: 0;
+  top: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(23,63,145,.18), rgba(23,63,145,.04) 46%, transparent 70%);
+  filter: blur(12px);
+  pointer-events: none;
+  opacity: .7;
+}
+body .hero > * { position: relative; z-index: 1; }
+body .hero .eyebrow,
+body .whatHow small,
+body .proofHead small,
+body .titleBlock small,
+body .capCard small {
+  color: var(--apropos-gold) !important;
+}
+body .hero h1 {
+  color: var(--apropos-platinum) !important;
+  text-shadow: 0 10px 46px rgba(0,0,0,.32);
+}
+body .hero h1 span { color: var(--apropos-gold-light) !important; }
+body .whatHow p,
+body .proofHead p,
+body .step p,
+body .capCard p,
+body .closing p { color: var(--apropos-secondary) !important; }
+
 body .callCta,
 body .callCta:visited,
 a.callCta.small,
 a.callCta.small:visited {
-  background: var(--apropos-gold) !important;
-  color: var(--apropos-navy) !important;
-  border-color: var(--apropos-gold) !important;
-  box-shadow: 0 0 0 1px rgba(213,174,85,.35), 0 18px 40px -12px rgba(213,174,85,.20) !important;
+  background: var(--apropos-platinum) !important;
+  color: var(--apropos-midnight) !important;
+  border: 1px solid rgba(255,255,255,.72) !important;
+  box-shadow: 0 18px 42px -18px rgba(245,247,250,.32), 0 20px 55px rgba(0,0,0,.28) !important;
 }
-
-body .builderCta:hover,
 body .callCta:hover,
 a.callCta.small:hover {
-  color: var(--apropos-navy) !important;
-  filter: brightness(1.05);
+  color: var(--apropos-black) !important;
+  background: #FFFFFF !important;
+  transform: translateY(-1px);
 }
 
-/* Common product UI surfaces. */
-body .card,
-body .panel,
-body .tile,
-body .surface {
-  border-color: var(--apropos-border) !important;
+body .buyerCta,
+body .buyerCta:visited {
+  background: rgba(200,169,107,.075) !important;
+  color: var(--apropos-gold-light) !important;
+  border-color: rgba(200,169,107,.48) !important;
+  box-shadow: none !important;
+}
+body .buyerCta:hover {
+  background: rgba(200,169,107,.13) !important;
+  border-color: var(--apropos-gold) !important;
+  color: var(--apropos-platinum) !important;
+}
+body .buyerCta.secondary,
+body .buyerCta.secondary:visited {
+  background: rgba(255,255,255,.025) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  color: var(--apropos-secondary) !important;
 }
 
+body .compareScroll,
+body .step,
+body .proofCard,
+body .capCard {
+  background: linear-gradient(155deg, rgba(10,25,51,.78), rgba(3,10,24,.9)) !important;
+  border-color: rgba(255,255,255,.09) !important;
+  box-shadow: 0 20px 55px rgba(0,0,0,.18);
+}
+body .step:hover,
+body .capCard:hover {
+  border-color: rgba(200,169,107,.40) !important;
+}
+body .stepN { color: rgba(200,169,107,.58) !important; }
+body .step h3,
+body .capCard h3,
+body .proofRow b { color: var(--apropos-platinum) !important; }
+body .capLink,
+body .compareNote a { color: var(--apropos-gold-light) !important; }
+body .compareRow { border-bottom-color: rgba(255,255,255,.07) !important; }
+body .compareRow span { color: #9EABBE !important; }
+body .compareRow span:first-child { color: #D5DBE4 !important; }
+body .compareRow .hi {
+  background: linear-gradient(90deg, rgba(200,169,107,.08), rgba(23,63,145,.09)) !important;
+  color: var(--apropos-gold-light) !important;
+}
+body .compareHead { background: rgba(255,255,255,.018) !important; }
+body .compareHead span { color: #7D899C !important; }
+body .compareHead .hi { color: var(--apropos-gold) !important; }
+body .compareNote { color: #748196 !important; }
+body .proofRow { border-bottom-color: rgba(255,255,255,.07) !important; }
+body .proofRow span { color: #8490A3 !important; }
+body .proofRow.result {
+  background: linear-gradient(90deg, rgba(200,169,107,.075), rgba(23,63,145,.08)) !important;
+}
+body .proofRow.result b { color: var(--apropos-gold-light) !important; }
+body .checkList li { color: #D5DBE4 !important; }
+body .checkList li::before { color: var(--apropos-success) !important; }
+body .checkList.roadmap li::before { color: var(--apropos-gold) !important; }
+body .closing {
+  position: relative;
+  margin-top: 26px !important;
+}
+body .closing::before {
+  content: "";
+  position: absolute;
+  inset: -30px -34px 45px;
+  z-index: 0;
+  border: 1px solid rgba(200,169,107,.16);
+  background: linear-gradient(145deg, rgba(200,169,107,.045), rgba(7,20,47,.40), rgba(1,5,13,.65));
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgba(0,0,0,.28);
+}
+body .closing > * { position: relative; z-index: 1; }
+body .closing p.price { color: var(--apropos-gold-light) !important; }
+body .closing p.price span { color: #8E9AAF !important; }
+
+body .badge,
+body .pill { border-color: rgba(200,169,107,.30) !important; }
 body .eyebrow,
 body .kicker,
 body .label,
-body small {
-  color: var(--apropos-muted);
-}
+body small { color: var(--apropos-muted); }
 
-body .badge,
-body .pill {
-  border-color: rgba(213,174,85,.35) !important;
-}
-
-/* Acquisition closing CTA is rendered by Next Link outside the page's styled-jsx scope. */
+/* Acquisition closing CTA is rendered outside the page's styled-jsx scope. */
 a.callCta.small,
 a.callCta.small:visited {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: .35rem;
   padding: 13px 22px;
-  border-radius: 12px;
+  border-radius: 9px;
   text-decoration: none;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .04em;
 }
 
-/* Live demo drawer: Apropos institutional treatment. */
+/* Live demo drawer follows the same acquisition-grade treatment. */
 body .drawerBackdrop {
-  background: rgba(2,8,15,.78) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  background: rgba(1,5,13,.86) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
 }
-
 body .demoDrawer {
-  background: var(--apropos-navy) !important;
+  background: linear-gradient(180deg,#030A18,#01050D) !important;
   color: var(--apropos-text) !important;
-  border-left-color: rgba(213,174,85,.34) !important;
-  box-shadow: -24px 0 70px rgba(0,0,0,.52) !important;
+  border-left-color: rgba(200,169,107,.26) !important;
+  box-shadow: -28px 0 90px rgba(0,0,0,.62) !important;
 }
-
 body .drawerHead,
-body .drawerBody {
-  background: var(--apropos-navy) !important;
-}
-
-body .drawerHead { border-bottom-color: var(--apropos-border) !important; }
-body .drawerBody p { color: var(--apropos-muted) !important; }
+body .drawerBody { background: transparent !important; }
+body .drawerHead { border-bottom-color: var(--apropos-border-soft) !important; }
+body .drawerBody p { color: var(--apropos-secondary) !important; }
 body .drawerBody .role,
 body .drawerBody strong { color: var(--apropos-text) !important; }
-
 body .naturalCallout {
-  background: rgba(15,42,106,.38) !important;
-  border-color: rgba(213,174,85,.40) !important;
+  background: linear-gradient(145deg, rgba(10,25,51,.90), rgba(3,10,24,.96)) !important;
+  border-color: rgba(200,169,107,.28) !important;
 }
-
 body .naturalCallout strong,
 body .drawerHead small,
 body .afterCall small { color: var(--apropos-gold-light) !important; }
-
 body .naturalCallout span,
-body .afterCall p { color: var(--apropos-muted) !important; }
-
+body .afterCall p { color: var(--apropos-secondary) !important; }
 body .closeButton {
-  background: rgba(15,42,106,.62) !important;
-  border-color: rgba(213,174,85,.40) !important;
-  color: var(--apropos-text) !important;
+  background: transparent !important;
+  border-color: rgba(200,169,107,.34) !important;
+  color: var(--apropos-gold-light) !important;
 }
-
-body .afterCall { border-top-color: var(--apropos-border) !important; }
+body .afterCall { border-top-color: var(--apropos-border-soft) !important; }
 
 /* Demo step 01 is a number to dial from the visitor's phone, not an in-app call action. */
-body .step > a.callCta {
-  pointer-events: none;
-  cursor: default;
-}
-
+body .step > a.callCta { pointer-events: none; cursor: default; }
 body .step > a.callCta .callLabel { display: none !important; }
+
+@media (max-width: 700px) {
+  body .hero::before { width: 340px; height: 340px; top: 40px; opacity: .5; }
+  body .closing::before { inset: -20px -10px 55px; }
+}
