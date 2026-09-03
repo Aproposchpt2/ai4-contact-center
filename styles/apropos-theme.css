@@ -1,0 +1,312 @@
+/*
+ * AI4 Contact Center — Apropos Group theme system
+ * Black Sapphire is the default acquisition presentation.
+ * Platinum Executive is the optional light presentation.
+ */
+
+:root,
+html[data-theme="black"] {
+  color-scheme: dark;
+  --theme-canvas: #01050D;
+  --theme-section: #030A18;
+  --theme-surface: #0A1933;
+  --theme-elevated: #102544;
+  --theme-text: #F5F7FA;
+  --theme-secondary: #B9C3D2;
+  --theme-muted: #7D899C;
+  --theme-accent: #C8A96B;
+  --theme-accent-light: #E2CEA2;
+  --theme-sapphire: #173F91;
+  --theme-border: rgba(200,169,107,.18);
+  --theme-border-soft: rgba(255,255,255,.09);
+  --theme-header: rgba(1,5,13,.965);
+  --theme-input: rgba(255,255,255,.035);
+  --theme-shadow: 0 24px 70px rgba(0,0,0,.22);
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --theme-canvas: #F4F2ED;
+  --theme-section: #FAF9F6;
+  --theme-surface: #FFFFFF;
+  --theme-elevated: #F0EDE6;
+  --theme-text: #07142F;
+  --theme-secondary: #526071;
+  --theme-muted: #758094;
+  --theme-accent: #A8874E;
+  --theme-accent-light: #7D622F;
+  --theme-sapphire: #173F91;
+  --theme-border: rgba(7,20,47,.14);
+  --theme-border-soft: rgba(7,20,47,.10);
+  --theme-header: rgba(250,249,246,.97);
+  --theme-input: rgba(7,20,47,.035);
+  --theme-shadow: 0 22px 60px rgba(7,20,47,.08);
+}
+
+/* Apropos typography is authoritative across every application surface. */
+body,
+body * {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+body h1,
+body h2,
+body h3,
+body h4,
+body h5,
+body h6,
+body .mc-title,
+body .display,
+body .displayText,
+body .display-title,
+body .heroTitle,
+body .hero-title,
+body .sectionTitle,
+body .section-title,
+body .brandText {
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-weight: 400;
+}
+
+body code,
+body pre,
+body kbd,
+body samp {
+  font-family: "Courier New", Courier, monospace !important;
+}
+
+html,
+body {
+  background: var(--theme-canvas) !important;
+  color: var(--theme-text) !important;
+  transition: background-color .22s ease, color .22s ease;
+}
+
+body a { color: var(--theme-accent-light); }
+body small,
+body .muted { color: var(--theme-muted); }
+
+body input,
+body select,
+body textarea {
+  background: var(--theme-input) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border-soft) !important;
+}
+
+/* Shared canvas and navigation respond to the theme switch everywhere. */
+body .page,
+body .mc-shell,
+body main {
+  color: var(--theme-text) !important;
+}
+
+body .siteHeader {
+  background: var(--theme-header) !important;
+  border-bottom-color: var(--theme-border) !important;
+}
+
+body .brandText { color: var(--theme-text) !important; }
+body .navLink { color: var(--theme-muted) !important; }
+body .navLink:hover { color: var(--theme-text) !important; }
+body .navLink.active,
+body .navLink.active:visited {
+  color: var(--theme-accent-light) !important;
+  border-bottom-color: var(--theme-accent) !important;
+}
+
+body .builderCta,
+body .builderCta:visited {
+  color: var(--theme-accent-light) !important;
+  border-color: color-mix(in srgb, var(--theme-accent) 55%, transparent) !important;
+}
+
+body .themeSwitch {
+  background: color-mix(in srgb, var(--theme-surface) 84%, transparent) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: none !important;
+}
+body .themeOption {
+  color: var(--theme-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+body .themeOption.activeTheme {
+  color: var(--theme-text) !important;
+  background: color-mix(in srgb, var(--theme-accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--theme-accent) 42%, transparent) !important;
+}
+
+/* Common product surfaces. */
+body .card,
+body .panel,
+body .tile,
+body .surface,
+body .mc-card,
+body .step,
+body .proofCard,
+body .capCard,
+body .compareScroll,
+body .dashboard-mock,
+body .naturalCallout,
+body .demoDrawer {
+  border-color: var(--theme-border-soft) !important;
+  box-shadow: var(--theme-shadow) !important;
+}
+
+/* Platinum Executive light presentation. */
+html[data-theme="light"] body .page,
+html[data-theme="light"] body .mc-shell,
+html[data-theme="light"] body main {
+  background:
+    radial-gradient(900px 520px at 84% -8%, rgba(23,63,145,.07), transparent 62%),
+    radial-gradient(720px 460px at 10% 26%, rgba(168,135,78,.065), transparent 68%),
+    linear-gradient(180deg, #F4F2ED 0%, #FAF9F6 48%, #F4F2ED 100%) !important;
+}
+
+html[data-theme="light"] body section {
+  color: var(--theme-text) !important;
+}
+
+html[data-theme="light"] body .card,
+html[data-theme="light"] body .panel,
+html[data-theme="light"] body .tile,
+html[data-theme="light"] body .surface,
+html[data-theme="light"] body .mc-card,
+html[data-theme="light"] body .step,
+html[data-theme="light"] body .proofCard,
+html[data-theme="light"] body .capCard,
+html[data-theme="light"] body .compareScroll,
+html[data-theme="light"] body .dashboard-mock,
+html[data-theme="light"] body .naturalCallout,
+html[data-theme="light"] body .demoDrawer,
+html[data-theme="light"] body .drawerHead,
+html[data-theme="light"] body .drawerBody {
+  background: var(--theme-surface) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: var(--theme-shadow) !important;
+}
+
+html[data-theme="light"] body .hero::before {
+  background: radial-gradient(circle, rgba(23,63,145,.10), rgba(168,135,78,.035) 48%, transparent 70%) !important;
+}
+
+html[data-theme="light"] body h1,
+html[data-theme="light"] body h2,
+html[data-theme="light"] body h3,
+html[data-theme="light"] body h4,
+html[data-theme="light"] body h5,
+html[data-theme="light"] body h6,
+html[data-theme="light"] body .hero h1,
+html[data-theme="light"] body .step h3,
+html[data-theme="light"] body .capCard h3,
+html[data-theme="light"] body .proofRow b,
+html[data-theme="light"] body .drawerBody strong,
+html[data-theme="light"] body .drawerBody .role {
+  color: var(--theme-text) !important;
+}
+
+html[data-theme="light"] body p,
+html[data-theme="light"] body li,
+html[data-theme="light"] body td,
+html[data-theme="light"] body .whatHow p,
+html[data-theme="light"] body .proofHead p,
+html[data-theme="light"] body .step p,
+html[data-theme="light"] body .capCard p,
+html[data-theme="light"] body .closing p,
+html[data-theme="light"] body .drawerBody p,
+html[data-theme="light"] body .naturalCallout span,
+html[data-theme="light"] body .afterCall p {
+  color: var(--theme-secondary) !important;
+}
+
+html[data-theme="light"] body .eyebrow,
+html[data-theme="light"] body .kicker,
+html[data-theme="light"] body .label,
+html[data-theme="light"] body .tag,
+html[data-theme="light"] body .whatHow small,
+html[data-theme="light"] body .proofHead small,
+html[data-theme="light"] body .titleBlock small,
+html[data-theme="light"] body .capCard small,
+html[data-theme="light"] body .capLink,
+html[data-theme="light"] body .compareNote a,
+html[data-theme="light"] body .hero h1 span,
+html[data-theme="light"] body .closing p.price {
+  color: var(--theme-accent-light) !important;
+}
+
+html[data-theme="light"] body .compareRow,
+html[data-theme="light"] body .proofRow,
+html[data-theme="light"] body .afterCall,
+html[data-theme="light"] body footer {
+  border-color: var(--theme-border-soft) !important;
+}
+
+html[data-theme="light"] body .compareRow span,
+html[data-theme="light"] body .compareHead span,
+html[data-theme="light"] body .proofRow span,
+html[data-theme="light"] body .compareNote,
+html[data-theme="light"] body .closing p.price span {
+  color: var(--theme-muted) !important;
+}
+
+html[data-theme="light"] body .compareRow span:first-child,
+html[data-theme="light"] body .checkList li {
+  color: var(--theme-secondary) !important;
+}
+
+html[data-theme="light"] body .compareRow .hi,
+html[data-theme="light"] body .proofRow.result {
+  background: linear-gradient(90deg, rgba(168,135,78,.09), rgba(23,63,145,.055)) !important;
+  color: var(--theme-accent-light) !important;
+}
+
+html[data-theme="light"] body .callCta,
+html[data-theme="light"] body .callCta:visited,
+html[data-theme="light"] body a.callCta.small,
+html[data-theme="light"] body a.callCta.small:visited {
+  background: #07142F !important;
+  color: #F5F7FA !important;
+  border-color: #07142F !important;
+  box-shadow: 0 18px 42px -18px rgba(7,20,47,.30) !important;
+}
+
+html[data-theme="light"] body .buyerCta,
+html[data-theme="light"] body .buyerCta:visited {
+  background: rgba(168,135,78,.08) !important;
+  color: #7D622F !important;
+  border-color: rgba(168,135,78,.42) !important;
+}
+
+html[data-theme="light"] body .buyerCta.secondary,
+html[data-theme="light"] body .buyerCta.secondary:visited {
+  background: rgba(7,20,47,.025) !important;
+  color: #526071 !important;
+  border-color: rgba(7,20,47,.16) !important;
+}
+
+html[data-theme="light"] body .closing::before {
+  background: linear-gradient(145deg, rgba(168,135,78,.055), rgba(255,255,255,.82), rgba(240,237,230,.90)) !important;
+  border-color: rgba(168,135,78,.18) !important;
+  box-shadow: 0 28px 70px rgba(7,20,47,.07) !important;
+}
+
+html[data-theme="light"] body .drawerBackdrop {
+  background: rgba(7,20,47,.30) !important;
+}
+
+html[data-theme="light"] body footer {
+  background: #EEEAE2 !important;
+  color: var(--theme-secondary) !important;
+}
+html[data-theme="light"] body footer a,
+html[data-theme="light"] body footer p,
+html[data-theme="light"] body footer span {
+  color: var(--theme-secondary) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body { transition: none; }
+}
