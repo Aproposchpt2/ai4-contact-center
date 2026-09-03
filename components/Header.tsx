@@ -82,9 +82,10 @@ export default function Header() {
           align-items: center;
           gap: 1rem;
           overflow: hidden;
-          background: rgba(7,26,60,.96);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255,255,255,.13);
+          background: rgba(1,5,13,.965);
+          backdrop-filter: blur(14px);
+          border-bottom: 1px solid rgba(200,169,107,.14);
+          box-shadow: 0 12px 36px rgba(0,0,0,.22);
         }
         :global(.brand) {
           display: flex;
@@ -97,18 +98,20 @@ export default function Header() {
           width: 30px;
           height: 30px;
           border-radius: 6px;
-          background: linear-gradient(135deg,#E8CB87,#D5AE55);
+          background: linear-gradient(145deg,#07142F,#030A18);
+          border: 1px solid rgba(200,169,107,.58);
           display: grid;
           place-items: center;
           font-size: .65rem;
           font-weight: 900;
-          color: #071A3C;
+          color: #E2CEA2;
           letter-spacing: .06em;
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.28);
         }
         .brandText {
           font-size: .78rem;
           font-weight: 700;
-          color: #EEF3FF;
+          color: #F5F7FA;
           letter-spacing: .04em;
           white-space: nowrap;
         }
@@ -131,7 +134,7 @@ export default function Header() {
           flex: 0 0 auto;
           padding: 20px 0 4px;
           border-bottom: 1px solid transparent;
-          color: rgba(255,255,255,.58);
+          color: #8F9CAF;
           font-size: .7rem;
           font-weight: 600;
           line-height: 1;
@@ -141,21 +144,22 @@ export default function Header() {
           white-space: nowrap;
         }
         :global(.navLink:hover) {
-          color: #EEF3FF;
+          color: #F5F7FA;
           text-decoration: none;
         }
         :global(.navLink.active),
         :global(.navLink.active:visited) {
-          color: #E8CB87;
-          border-bottom-color: #D5AE55;
+          color: #E2CEA2;
+          border-bottom-color: #C8A96B;
         }
         :global(.builderCta),
         :global(.builderCta:visited) {
           flex: 0 0 auto;
           padding: .55rem 1rem;
           border-radius: 6px;
-          background: #D5AE55;
-          color: #071A3C;
+          background: transparent;
+          color: #E2CEA2;
+          border: 1px solid rgba(200,169,107,.48);
           font-size: .7rem;
           font-weight: 800;
           letter-spacing: .1em;
@@ -165,7 +169,8 @@ export default function Header() {
         }
         :global(.builderCta:hover) {
           text-decoration: none;
-          filter: brightness(1.05);
+          background: rgba(200,169,107,.08);
+          color: #F5F7FA;
         }
         @media (max-width: 1180px) {
           :global(.builderCta) { display: none; }
