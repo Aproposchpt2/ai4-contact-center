@@ -159,12 +159,15 @@ export default function Header() {
           display: flex;
           align-items: center;
           gap: 1.35rem;
+          padding-left: 4px;
+          scroll-padding-left: 4px;
           overflow-x: auto;
           overflow-y: hidden;
           overscroll-behavior-x: contain;
           scrollbar-width: none;
           -webkit-overflow-scrolling: touch;
-          mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+          mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 12px), transparent 100%);
+          -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 12px), transparent 100%);
         }
         .navRail::-webkit-scrollbar { display: none; }
         :global(.navLink),
