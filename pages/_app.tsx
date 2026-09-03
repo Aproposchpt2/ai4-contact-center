@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import '../styles/globals.css';
 import '../styles/apropos-theme.css';
+import '../styles/apropos-light-refinement.css';
 
 const THEME_BOOTSTRAP = `(function(){try{var saved=localStorage.getItem('ai4-theme');document.documentElement.dataset.theme=saved==='light'?'light':'black';}catch(e){document.documentElement.dataset.theme='black';}})();`;
 
