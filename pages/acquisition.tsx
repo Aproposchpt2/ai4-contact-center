@@ -54,7 +54,7 @@ const SECTIONS: Section[] = [
     n: '06',
     eyebrow: 'CONVERSATIONAL AI POSITION',
     title: 'Proven end to end — call it yourself',
-    body: `The AI4CC Business Intake Agent answers real inbound calls, runs a structured voice interview, and hands the result to the platform's own webhook — which creates the lead. Owner-tested end to end, live, on a real phone number. Call ${PHONE_DISPLAY} and watch it happen.`,
+    body: `The live ElevenLabs conversational agent answers real inbound calls, runs a structured voice interview, and posts the result through the platform webhook into native Customer 360 and Lead Management. Owner-tested end to end. Call ${PHONE_DISPLAY} and watch the lead appear.`,
     link: { href: PHONE_TEL, label: `Call ${PHONE_DISPLAY}` },
   },
   {

@@ -9,7 +9,7 @@ const PHONE_TEL = 'tel:+17253305102';
 const STEPS = [
   { n: '01', title: 'You call', body: 'Dial in on a real phone line. No app, no waiting on hold — the AI picks up immediately.' },
   { n: '02', title: 'It interviews you', body: 'A natural voice conversation — name, business, what you need, urgency — the same information a trained intake rep would gather.' },
-  { n: '03', title: 'A lead appears', body: 'The moment the call ends, a structured, qualified lead lands in the CRM automatically — no data entry, no follow-up gap.' },
+  { n: '03', title: 'A lead appears', body: 'The moment the call ends, the ElevenLabs webhook writes a structured, qualified lead into native Lead Management and Customer 360 — no data entry, no follow-up gap.' },
 ];
 
 const PLATFORM_PAGES = [
@@ -48,7 +48,7 @@ export default function HomePage() {
   return <>
     <Head>
       <title>AI4 Contact Center — AI-Native Contact Center Platform</title>
-      <meta name="description" content="AI4 Intelligent Contact Center: multichannel CRM, Customer 360 and a validated conversational-AI voice layer. Call (725) 330-5102 and talk to the live agent yourself." />
+      <meta name="description" content="AI4 Intelligent Contact Center: live ElevenLabs voice agent with webhook into native Lead Management and Customer 360. Call (725) 330-5102." />
     </Head>
     <Header />
     <main className="page">
@@ -64,9 +64,9 @@ export default function HomePage() {
           <div>
             <small>HOW IT'S DONE</small>
             <p>38 application surfaces — flow authoring, omnichannel routing, Lead Management, Customer 360,
-              QA and governance — built as one platform with a conversational AI voice layer on top. The
-              contact center stays the system of record; the AI enhances the front door, it doesn&apos;t
-              replace the control plane.</p>
+              QA and governance — built as one platform. An ElevenLabs conversational agent handles the live
+              voice front door and posts structured results back through webhooks. The contact center stays
+              the system of record.</p>
           </div>
         </div>
         <div className="ctaRow">
