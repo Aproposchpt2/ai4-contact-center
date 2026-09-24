@@ -8,6 +8,21 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# The marketing site now lives at stellaruc.com (primary domain). The legacy hostname redirects
+# there for pages, but /api/* is kept on the legacy host: the ElevenLabs intake tools and other
+# machine callers post to it and do not follow redirects. Order matters: first match wins.
+[[redirects]]
+  from = "https://ai4contactcenter.aproposgroupllc.com/api/*"
+  to = "/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://ai4contactcenter.aproposgroupllc.com/*"
+  to = "https://stellaruc.com/:splat"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
