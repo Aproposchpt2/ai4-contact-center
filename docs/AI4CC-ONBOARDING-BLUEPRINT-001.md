@@ -7,6 +7,19 @@
 
 ---
 
+## Progress log
+
+| Date | Change | Where |
+|---|---|---|
+| 2026-09-24 | Intake webhook: tenant + actor from a verified per-tenant key; hard-coded tenant removed | PR #29 (merged) |
+| 2026-09-24 | **Route isolation audit of all 117 API files:** ~65 stateless, 28 tenant-scoped, 24 needed fixes (chat used "oldest tenant"; `/api/public/*` hard-coded to Apropos; `parse-flow-ai` spent your OpenAI key for any login; prompts/knowledge in module memory; intents/runtime/versioning-branch|merge use JSON files) | audit, findings below |
+| 2026-09-24 | Host-based tenancy (`{slug}.<root>`), per-tenant membership checks, chat tenant by host, public/marketing paths blocked on tenant hosts, tenant context + branding + core-module nav, role check on flow writes, OpenAI path limited to members | PR #30 (open — needs a signed-in click-through before merge) |
+| 2026-09-24 | `supabase/baseline/00_ai4cc_baseline.sql` (27 tables, RLS, policies, lead RPCs, helper functions, anon hardening) exported so new projects can be built from the repo. **Not yet applied to any project.** | PR #30 |
+| 2026-09-24 | `scripts/provision-tenant.mjs` + vertical queue templates (dry-run by default, rollback on failure) | PR #30 |
+| 2026-09-24 | Infra runbook for stellaruc.com (Supabase, Netlify, Cloudflare Worker, staged trial) | `docs/AI4CC-STELLARUC-INFRA-RUNBOOK.md` |
+
+**Still open after this work:** telephony backend not audited; prompts/knowledge/intents/runtime pages not tenant-safe (hidden from tenant nav; rebuild on tenant tables later); per-tenant AI quota for `parse-flow-ai`; `error.message` leakage in ~60 stateless routes (low risk); customer guides G1–G13 not yet written; ElevenLabs/Twilio provisioning still manual; billing/metering not built.
+
 ## 0. Bottom line
 
 The marketing promise (Campaign Handoff doc) is: **keep your number → forward calls → Apropos configures AI4CC → the customer gets a customized dashboard.** That is a *managed-service* promise, and the right onboarding model is:
@@ -50,7 +63,7 @@ Read these before promising a date. Items 1–4 are engineering work that must l
 
 ### 2.1 Naming
 
-- **Pattern:** `{slug}.ai4contactcenter.aproposgroupllc.com` — e.g. `acme-plumbing.ai4contactcenter.aproposgroupllc.com`.
+- **Pattern (updated 2026-09-24):** `{slug}.stellaruc.com` — e.g. `acme-plumbing.stellaruc.com` (Cloudflare Worker forwards to the app; see the infra runbook). The earlier `…ai4contactcenter.aproposgroupllc.com` form is superseded.
 - **Source of truth:** `ai4cc_tenants.slug` (already exists). Display branding from `ai4cc_branding` (`product_name`, `company_name`, `logo_url`, `support_email`, `settings`).
 - **Slug rules:** lowercase `a–z0–9-`, 3–32 chars, no leading/trailing hyphen, unique, chosen from the legal business name (`Acme Plumbing LLC` → `acme-plumbing`). Automated validation.
 - **Reserved (block):** `www, api, app, admin, demo, live, platform, partners, login, ops, ops-console, mail, status, support, docs, help, staging, test, dev, stellar, ai4cc`.
