@@ -48,19 +48,22 @@ export async function resolveMembership(
 
   const { data: rows, error: rowsErr } = await admin
     .from('ai4cc_tenant_members')
-    .select('tenant_id, role, created_at, ai4cc_tenants!inner(slug, status)')
+    .select('tenant_id, role, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: true });
   if (rowsErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${rowsErr.message}`);
-  const active = (rows ?? []).filter((r) => {
-    const t = r.ai4cc_tenants as unknown as { status: string } | { status: string }[];
-    return (Array.isArray(t) ? t[0]?.status : t?.status) === 'active';
-  });
+  if (!rows || rows.length === 0) throw new Error('AI4CC_NO_TENANT');
+
+  const { data: tenants, error: tenantsErr } = await admin
+    .from('ai4cc_tenants')
+    .select('id, slug, status')
+    .in('id', rows.map((r) => r.tenant_id));
+  if (tenantsErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${tenantsErr.message}`);
+  const activeById = new Map((tenants ?? []).filter((t) => t.status === 'active').map((t) => [t.id as string, t.slug as string]));
+
+  const active = rows.filter((r) => activeById.has(r.tenant_id as string));
   if (active.length === 0) throw new Error('AI4CC_NO_TENANT');
-  const home = active.find((r) => {
-    const t = r.ai4cc_tenants as unknown as { slug: string } | { slug: string }[];
-    return (Array.isArray(t) ? t[0]?.slug : t?.slug) === HOME_TENANT_SLUG;
-  });
+  const home = active.find((r) => activeById.get(r.tenant_id as string) === HOME_TENANT_SLUG);
   const chosen = home ?? active[0];
   return { tenantId: chosen.tenant_id as string, role: chosen.role as string };
 }
