@@ -12,8 +12,15 @@ export const RESERVED_SLUGS = new Set([
 
 export const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])$/;
 
+// Staging and production share the stellaruc.com zone (one Cloudflare Worker routes by prefix).
+// Staging workspaces are {stg-name}.stellaruc.com; production slugs may never start with "stg-",
+// and a staging app only accepts "stg-" slugs, so the two environments cannot collide or leak.
+export const STAGING_PREFIX = 'stg-';
+const isStagingApp = () => process.env.AI4CC_ENVIRONMENT === 'staging';
+
 export function isValidTenantSlug(slug: string): boolean {
-  return SLUG_RE.test(slug) && !slug.includes('--') && !RESERVED_SLUGS.has(slug);
+  if (!SLUG_RE.test(slug) || slug.includes('--') || RESERVED_SLUGS.has(slug)) return false;
+  return slug.startsWith(STAGING_PREFIX) === isStagingApp();
 }
 
 function rootDomains(): string[] {
