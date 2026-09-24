@@ -1,7 +1,7 @@
 import type { NextApiRequest } from 'next';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
-import { tenantSlugFromHost } from '@/lib/tenantHost';
+import { effectiveHost, tenantSlugFromHost } from '@/lib/tenantHost';
 
 // The tenant whose users may sign in on a bare (non-tenant) host such as the legacy
 // ai4contactcenter.aproposgroupllc.com. Everyone else signs in on their own {slug}.<root> host.
@@ -11,9 +11,12 @@ function headerValue(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
 }
 
+export function requestHost(req: NextApiRequest): string | null {
+  return effectiveHost((name) => headerValue(req.headers[name]));
+}
+
 export function requestTenantSlug(req: NextApiRequest): string | null {
-  const host = headerValue(req.headers['x-forwarded-host']) ?? headerValue(req.headers.host);
-  return tenantSlugFromHost(host);
+  return tenantSlugFromHost(requestHost(req));
 }
 
 // Resolves which tenant this signed-in user is acting in.

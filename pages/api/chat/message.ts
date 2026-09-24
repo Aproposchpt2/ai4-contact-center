@@ -4,7 +4,7 @@ import { generateGuidance, type AssistSession } from '@/lib/agentAssistEngine';
 import { generateQAReport } from '@/lib/qualityAssuranceEngine';
 import { selectRuntimeRoute } from '@/lib/runtimeRouting';
 import { resolveRuntimeFlowAuthority, runtimeEnvironment } from '@/lib/runtimeFlowDeployment';
-import { HOME_TENANT_SLUG, requestTenantSlug } from '@/lib/ai4ccServer';
+import { HOME_TENANT_SLUG, requestHost, requestTenantSlug } from '@/lib/ai4ccServer';
 
 type ChatBody = { action?: 'message' | 'end'; sessionId?: string; visitorId?: string; message?: string };
 
@@ -18,8 +18,7 @@ function storage() {
 function validateOrigin(req: NextApiRequest) {
   if (process.env.NODE_ENV !== 'production') return;
   const origin = req.headers.origin;
-  const fwd = req.headers['x-forwarded-host'];
-  const host = (Array.isArray(fwd) ? fwd[0] : fwd) ?? req.headers.host;
+  const host = requestHost(req);
   if (!origin || !host || new URL(origin).host !== host) throw new Error('Invalid web chat origin');
 }
 

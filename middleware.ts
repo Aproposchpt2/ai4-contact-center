@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
-import { isBlockedOnTenantHost, tenantSlugFromHost } from '@/lib/tenantHost';
+import { effectiveHost, isBlockedOnTenantHost, tenantSlugFromHost } from '@/lib/tenantHost';
 
 const DEMO_SESSION_COOKIE = 'ai4cc_demo_started_at';
 
@@ -8,8 +8,7 @@ export async function middleware(request: NextRequest) {
   // Customer workspaces ({slug}.<root domain>): no sales/marketing pages, no Apropos data mirrors,
   // and the root URL goes straight to the workspace. Tenant membership itself is enforced
   // server-side per request (lib/ai4ccServer.ts), never from anything the browser sends.
-  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  const onTenantHost = tenantSlugFromHost(host) !== null;
+  const onTenantHost = tenantSlugFromHost(effectiveHost((name) => request.headers.get(name))) !== null;
   if (onTenantHost) {
     const { pathname } = request.nextUrl;
     if (isBlockedOnTenantHost(pathname)) return new NextResponse('Not found', { status: 404 });
