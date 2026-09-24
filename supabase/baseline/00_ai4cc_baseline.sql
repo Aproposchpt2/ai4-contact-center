@@ -7,6 +7,802 @@
 create extension if not exists pgcrypto;
 create extension if not exists citext;
 
+create table public.ai4cc_agent_assist_events (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid not null,
+  agent_id uuid,
+  detected_intent text,
+  sentiment text,
+  escalation_risk text,
+  suggested_replies jsonb not null default '[]'::jsonb,
+  kb_grounding jsonb not null default '[]'::jsonb,
+  compliance_alerts jsonb not null default '[]'::jsonb,
+  next_best_actions jsonb not null default '[]'::jsonb,
+  model_info jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_agents (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  auth_user_id uuid,
+  site_id uuid,
+  name text not null,
+  email text,
+  status text not null default 'offline'::text,
+  skills text[] not null default '{}'::text[],
+  channels text[] not null default '{}'::text[],
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_audit_logs (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid,
+  actor_user_id uuid,
+  action text not null,
+  resource_type text,
+  resource_id text,
+  payload jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_branding (
+  tenant_id uuid not null,
+  product_name text,
+  company_name text,
+  logo_url text,
+  primary_domain text,
+  support_email text,
+  settings jsonb not null default '{}'::jsonb,
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_compliance_events (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid,
+  rule_code text,
+  severity text not null default 'info'::text,
+  status text not null default 'open'::text,
+  finding text not null,
+  evidence jsonb not null default '{}'::jsonb,
+  detected_at timestamp with time zone not null default now(),
+  resolved_at timestamp with time zone
+);
+
+create table public.ai4cc_contacts (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  first_name text,
+  last_name text,
+  display_name text,
+  company_name text,
+  email text,
+  phone text,
+  preferred_channel text,
+  lead_source text,
+  lead_score integer not null default 0,
+  priority text not null default 'normal'::text,
+  sms_consent boolean not null default false,
+  email_consent boolean not null default false,
+  do_not_contact boolean not null default false,
+  tags text[] not null default '{}'::text[],
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_deployments (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  flow_version_id uuid not null,
+  environment text not null,
+  status text not null default 'deployed'::text,
+  provider text not null default 'internal'::text,
+  provider_reference text,
+  snapshot jsonb not null default '{}'::jsonb,
+  deployed_by uuid,
+  deployed_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_flow_versions (
+  id uuid not null default gen_random_uuid(),
+  flow_id uuid not null,
+  version integer not null,
+  definition jsonb not null,
+  parser_engine text not null default 'rules'::text,
+  validation_status text not null default 'pending'::text,
+  validation_report jsonb not null default '{}'::jsonb,
+  notes text,
+  created_by uuid,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_flows (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  name text not null,
+  description text,
+  source_text text,
+  channel text not null default 'voice'::text,
+  status text not null default 'draft'::text,
+  current_version integer not null default 1,
+  created_by uuid,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_integrations (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  provider text not null,
+  integration_type text not null,
+  display_name text not null,
+  status text not null default 'configured'::text,
+  config jsonb not null default '{}'::jsonb,
+  secret_reference text,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_interactions (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  channel text not null,
+  direction text not null default 'inbound'::text,
+  external_id text,
+  customer_identifier text,
+  queue_id uuid,
+  agent_id uuid,
+  flow_version_id uuid,
+  status text not null default 'open'::text,
+  started_at timestamp with time zone not null default now(),
+  ended_at timestamp with time zone,
+  metadata jsonb not null default '{}'::jsonb
+);
+
+create table public.ai4cc_kb_articles (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  title text not null,
+  body text not null,
+  tags text[] not null default '{}'::text[],
+  intent text,
+  language text not null default 'en'::text,
+  status text not null default 'published'::text,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_lead_activities (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  lead_id uuid not null,
+  contact_id uuid,
+  interaction_id uuid,
+  activity_type text not null,
+  direction text,
+  subject text,
+  body text,
+  outcome text,
+  actor_user_id uuid,
+  actor_agent_id uuid,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_lead_tasks (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  lead_id uuid not null,
+  contact_id uuid,
+  assigned_agent_id uuid,
+  title text not null,
+  description text,
+  task_type text not null default 'follow_up'::text,
+  due_at timestamp with time zone,
+  priority text not null default 'normal'::text,
+  status text not null default 'pending'::text,
+  completed_at timestamp with time zone,
+  completed_by uuid,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_leads (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  contact_id uuid not null,
+  originating_interaction_id uuid,
+  originating_channel text,
+  originating_queue_id uuid,
+  originating_agent_id uuid,
+  title text not null,
+  service_interest text,
+  description text,
+  pipeline_stage text not null default 'new'::text,
+  status text not null default 'open'::text,
+  priority text not null default 'normal'::text,
+  score integer not null default 0,
+  estimated_value numeric(14,2) not null default 0,
+  probability integer not null default 0,
+  expected_close_date date,
+  assigned_agent_id uuid,
+  next_action text,
+  next_follow_up timestamp with time zone,
+  last_contacted_at timestamp with time zone,
+  converted_at timestamp with time zone,
+  lost_reason text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_qa_scores (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid not null,
+  agent_id uuid,
+  quality_score numeric,
+  compliance_score numeric,
+  flow_adherence_score numeric,
+  sentiment_score numeric,
+  flags text[] not null default '{}'::text[],
+  scoring_method text not null default 'rules'::text,
+  scorecard jsonb not null default '{}'::jsonb,
+  scored_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_queues (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  site_id uuid,
+  name text not null,
+  code text not null,
+  channel text not null default 'voice'::text,
+  skills text[] not null default '{}'::text[],
+  priority integer not null default 100,
+  capacity integer,
+  overflow_queue_id uuid,
+  status text not null default 'active'::text,
+  settings jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_routing_decisions (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid,
+  intent text,
+  priority text,
+  selected_queue_id uuid,
+  selected_site_id uuid,
+  overflow_used boolean not null default false,
+  estimated_wait_seconds integer,
+  reason text,
+  input jsonb not null default '{}'::jsonb,
+  decided_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_sites (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  name text not null,
+  code text not null,
+  timezone text,
+  status text not null default 'active'::text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_tenant_members (
+  tenant_id uuid not null,
+  user_id uuid not null,
+  role text not null default 'operator'::text,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_tenants (
+  id uuid not null default gen_random_uuid(),
+  name text not null,
+  slug text not null,
+  status text not null default 'active'::text,
+  timezone text not null default 'America/Los_Angeles'::text,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_transcripts (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid not null,
+  speaker text,
+  sequence_no integer not null default 0,
+  content text not null,
+  started_at timestamp with time zone,
+  ended_at timestamp with time zone,
+  sentiment numeric,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_voice_destination_deployments (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  destination_id uuid not null,
+  destination_version_id uuid not null,
+  environment text not null,
+  status text not null default 'deployed'::text,
+  snapshot jsonb not null default '{}'::jsonb,
+  deployed_by uuid,
+  deployed_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_voice_destination_versions (
+  id uuid not null default gen_random_uuid(),
+  destination_id uuid not null,
+  version integer not null,
+  definition jsonb not null default '{}'::jsonb,
+  validation_status text not null default 'pending'::text,
+  validation_report jsonb not null default '{}'::jsonb,
+  notes text,
+  created_by uuid,
+  created_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_voice_destinations (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  name text not null,
+  description text,
+  destination_type text not null,
+  status text not null default 'draft'::text,
+  current_version integer not null default 1,
+  created_by uuid,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_voicemail_messages (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  interaction_id uuid not null,
+  destination_id uuid,
+  destination_version_id uuid,
+  call_sid text not null,
+  recording_sid text,
+  recording_url text,
+  caller_identifier text,
+  duration_seconds integer,
+  transcription text,
+  transcription_status text not null default 'pending'::text,
+  callback_status text not null default 'new'::text,
+  assigned_queue_id uuid,
+  assigned_agent_id uuid,
+  received_at timestamp with time zone not null default now(),
+  reviewed_at timestamp with time zone,
+  resolved_at timestamp with time zone,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now()
+);
+
+create table public.ai4cc_wfm_forecasts (
+  id uuid not null default gen_random_uuid(),
+  tenant_id uuid not null,
+  site_id uuid,
+  queue_id uuid,
+  channel text,
+  interval_start timestamp with time zone not null,
+  interval_end timestamp with time zone not null,
+  predicted_volume integer not null,
+  predicted_aht_seconds integer,
+  required_agents integer not null,
+  sla_risk text,
+  method text not null default 'rules'::text,
+  model_info jsonb not null default '{}'::jsonb,
+  created_at timestamp with time zone not null default now()
+);
+
+alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_status_check CHECK ((status = ANY (ARRAY['offline'::text, 'available'::text, 'busy'::text, 'away'::text, 'inactive'::text])));
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_tenant_id_email_key UNIQUE (tenant_id, email);
+
+alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_branding add constraint ai4cc_branding_pkey PRIMARY KEY (tenant_id);
+
+alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_severity_check CHECK ((severity = ANY (ARRAY['info'::text, 'warning'::text, 'critical'::text])));
+
+alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_status_check CHECK ((status = ANY (ARRAY['open'::text, 'reviewed'::text, 'resolved'::text, 'false_positive'::text])));
+
+alter table public.ai4cc_contacts add constraint ai4cc_contacts_lead_score_check CHECK (((lead_score >= 0) AND (lead_score <= 100)));
+
+alter table public.ai4cc_contacts add constraint ai4cc_contacts_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_contacts add constraint ai4cc_contacts_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_environment_check CHECK ((environment = ANY (ARRAY['dev'::text, 'qa'::text, 'staging'::text, 'production'::text])));
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'deployed'::text, 'failed'::text, 'rolled_back'::text])));
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_flow_id_version_key UNIQUE (flow_id, version);
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_parser_engine_check CHECK ((parser_engine = ANY (ARRAY['rules'::text, 'ai'::text, 'imported'::text, 'manual'::text])));
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_validation_status_check CHECK ((validation_status = ANY (ARRAY['pending'::text, 'passed'::text, 'failed'::text, 'warning'::text])));
+
+alter table public.ai4cc_flows add constraint ai4cc_flows_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_flows add constraint ai4cc_flows_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'validated'::text, 'published'::text, 'archived'::text])));
+
+alter table public.ai4cc_integrations add constraint ai4cc_integrations_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_integrations add constraint ai4cc_integrations_status_check CHECK ((status = ANY (ARRAY['configured'::text, 'active'::text, 'inactive'::text, 'error'::text])));
+
+alter table public.ai4cc_integrations add constraint ai4cc_integrations_tenant_id_provider_display_name_key UNIQUE (tenant_id, provider, display_name);
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_channel_check CHECK ((channel = ANY (ARRAY['voice'::text, 'chat'::text, 'email'::text, 'sms'::text, 'social'::text, 'simulation'::text])));
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_direction_check CHECK ((direction = ANY (ARRAY['inbound'::text, 'outbound'::text, 'internal'::text])));
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_status_check CHECK ((status = ANY (ARRAY['open'::text, 'queued'::text, 'active'::text, 'completed'::text, 'abandoned'::text, 'failed'::text])));
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_tenant_id_channel_external_id_key UNIQUE (tenant_id, channel, external_id);
+
+alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'published'::text, 'archived'::text])));
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])));
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_pipeline_stage_check CHECK ((pipeline_stage = ANY (ARRAY['new'::text, 'qualified'::text, 'contacted'::text, 'follow_up'::text, 'opportunity'::text, 'converted'::text, 'lost'::text, 'nurture'::text])));
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_probability_check CHECK (((probability >= 0) AND (probability <= 100)));
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_score_check CHECK (((score >= 0) AND (score <= 100)));
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_status_check CHECK ((status = ANY (ARRAY['open'::text, 'won'::text, 'lost'::text, 'closed'::text])));
+
+alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_scoring_method_check CHECK ((scoring_method = ANY (ARRAY['rules'::text, 'ai'::text, 'human'::text, 'hybrid'::text])));
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])));
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_tenant_id_code_key UNIQUE (tenant_id, code);
+
+alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_sites add constraint ai4cc_sites_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_sites add constraint ai4cc_sites_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])));
+
+alter table public.ai4cc_sites add constraint ai4cc_sites_tenant_id_code_key UNIQUE (tenant_id, code);
+
+alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_pkey PRIMARY KEY (tenant_id, user_id);
+
+alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_role_check CHECK ((role = ANY (ARRAY['owner'::text, 'admin'::text, 'supervisor'::text, 'operator'::text, 'agent'::text, 'viewer'::text])));
+
+alter table public.ai4cc_tenants add constraint ai4cc_tenants_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_tenants add constraint ai4cc_tenants_slug_key UNIQUE (slug);
+
+alter table public.ai4cc_tenants add constraint ai4cc_tenants_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text, 'suspended'::text])));
+
+alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_environment_check CHECK ((environment = ANY (ARRAY['dev'::text, 'qa'::text, 'staging'::text, 'production'::text])));
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_status_check CHECK ((status = ANY (ARRAY['deployed'::text, 'rolled_back'::text, 'retired'::text, 'failed'::text])));
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_destination_id_version_key UNIQUE (destination_id, version);
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_id_destination_id_key UNIQUE (id, destination_id);
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_validation_status_check CHECK ((validation_status = ANY (ARRAY['pending'::text, 'passed'::text, 'blocked'::text])));
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_version_check CHECK ((version > 0));
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_current_version_check CHECK ((current_version > 0));
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_destination_type_check CHECK ((destination_type = ANY (ARRAY['say'::text, 'voicemail'::text])));
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'active'::text, 'retired'::text])));
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_tenant_id_name_key UNIQUE (tenant_id, name);
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_callback_status_check CHECK ((callback_status = ANY (ARRAY['new'::text, 'reviewed'::text, 'callback_pending'::text, 'resolved'::text])));
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_tenant_id_recording_sid_key UNIQUE (tenant_id, recording_sid);
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_transcription_status_check CHECK ((transcription_status = ANY (ARRAY['pending'::text, 'completed'::text, 'failed'::text, 'not_requested'::text])));
+
+alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_pkey PRIMARY KEY (id);
+
+alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_auth_user_id_fkey FOREIGN KEY (auth_user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_agents add constraint ai4cc_agents_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_branding add constraint ai4cc_branding_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_contacts add constraint ai4cc_contacts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_deployed_by_fkey FOREIGN KEY (deployed_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_flow_version_id_fkey FOREIGN KEY (flow_version_id) REFERENCES ai4cc_flow_versions(id) ON DELETE RESTRICT;
+
+alter table public.ai4cc_deployments add constraint ai4cc_deployments_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_flow_id_fkey FOREIGN KEY (flow_id) REFERENCES ai4cc_flows(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_flows add constraint ai4cc_flows_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_flows add constraint ai4cc_flows_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_integrations add constraint ai4cc_integrations_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_flow_version_id_fkey FOREIGN KEY (flow_version_id) REFERENCES ai4cc_flow_versions(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_queue_id_fkey FOREIGN KEY (queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_interactions add constraint ai4cc_interactions_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_actor_agent_id_fkey FOREIGN KEY (actor_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_lead_id_fkey FOREIGN KEY (lead_id) REFERENCES ai4cc_leads(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_lead_id_fkey FOREIGN KEY (lead_id) REFERENCES ai4cc_leads(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_originating_agent_id_fkey FOREIGN KEY (originating_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_originating_interaction_id_fkey FOREIGN KEY (originating_interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_originating_queue_id_fkey FOREIGN KEY (originating_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_leads add constraint ai4cc_leads_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_overflow_queue_id_fkey FOREIGN KEY (overflow_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_queues add constraint ai4cc_queues_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_selected_queue_id_fkey FOREIGN KEY (selected_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_selected_site_id_fkey FOREIGN KEY (selected_site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_sites add constraint ai4cc_sites_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_version_fk FOREIGN KEY (destination_version_id, destination_id) REFERENCES ai4cc_voice_destination_versions(id, destination_id) ON DELETE RESTRICT;
+
+alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_assigned_queue_id_fkey FOREIGN KEY (assigned_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_destination_version_id_fkey FOREIGN KEY (destination_version_id) REFERENCES ai4cc_voice_destination_versions(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_queue_id_fkey FOREIGN KEY (queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
+
+alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
+
+CREATE INDEX ai4cc_assist_interaction_idx ON public.ai4cc_agent_assist_events USING btree (interaction_id, created_at DESC);
+
+CREATE INDEX ai4cc_agents_tenant_idx ON public.ai4cc_agents USING btree (tenant_id);
+
+CREATE INDEX ai4cc_audit_tenant_created_idx ON public.ai4cc_audit_logs USING btree (tenant_id, created_at DESC);
+
+CREATE INDEX ai4cc_compliance_interaction_idx ON public.ai4cc_compliance_events USING btree (interaction_id, detected_at DESC);
+
+CREATE INDEX ai4cc_contacts_email_idx ON public.ai4cc_contacts USING btree (tenant_id, lower(email)) WHERE (email IS NOT NULL);
+
+CREATE INDEX ai4cc_contacts_phone_idx ON public.ai4cc_contacts USING btree (tenant_id, phone) WHERE (phone IS NOT NULL);
+
+CREATE INDEX ai4cc_contacts_tenant_idx ON public.ai4cc_contacts USING btree (tenant_id, updated_at DESC);
+
+CREATE INDEX ai4cc_flow_versions_flow_idx ON public.ai4cc_flow_versions USING btree (flow_id, version DESC);
+
+CREATE INDEX ai4cc_flows_tenant_idx ON public.ai4cc_flows USING btree (tenant_id, updated_at DESC);
+
+CREATE INDEX ai4cc_interactions_tenant_started_idx ON public.ai4cc_interactions USING btree (tenant_id, started_at DESC);
+
+CREATE INDEX ai4cc_lead_activities_lead_idx ON public.ai4cc_lead_activities USING btree (tenant_id, lead_id, created_at DESC);
+
+CREATE INDEX ai4cc_lead_tasks_due_idx ON public.ai4cc_lead_tasks USING btree (tenant_id, status, due_at);
+
+CREATE INDEX ai4cc_leads_origin_idx ON public.ai4cc_leads USING btree (tenant_id, originating_interaction_id) WHERE (originating_interaction_id IS NOT NULL);
+
+CREATE INDEX ai4cc_leads_tenant_stage_idx ON public.ai4cc_leads USING btree (tenant_id, pipeline_stage, updated_at DESC);
+
+CREATE UNIQUE INDEX ai4cc_leads_tenant_origin_unique_idx ON public.ai4cc_leads USING btree (tenant_id, originating_interaction_id) WHERE (originating_interaction_id IS NOT NULL);
+
+CREATE INDEX ai4cc_qa_interaction_idx ON public.ai4cc_qa_scores USING btree (interaction_id, scored_at DESC);
+
+CREATE INDEX ai4cc_queues_tenant_idx ON public.ai4cc_queues USING btree (tenant_id);
+
+CREATE INDEX ai4cc_routing_interaction_idx ON public.ai4cc_routing_decisions USING btree (interaction_id, decided_at DESC);
+
+CREATE INDEX ai4cc_members_user_idx ON public.ai4cc_tenant_members USING btree (user_id);
+
+CREATE INDEX ai4cc_transcripts_interaction_idx ON public.ai4cc_transcripts USING btree (interaction_id, sequence_no);
+
+CREATE INDEX ai4cc_voice_destination_deployments_lookup_idx ON public.ai4cc_voice_destination_deployments USING btree (tenant_id, environment, deployed_at DESC);
+
+CREATE UNIQUE INDEX ai4cc_voice_destination_one_active_idx ON public.ai4cc_voice_destination_deployments USING btree (tenant_id, destination_id, environment) WHERE (status = 'deployed'::text);
+
+CREATE INDEX ai4cc_voice_destination_versions_destination_idx ON public.ai4cc_voice_destination_versions USING btree (destination_id, version DESC);
+
+CREATE INDEX ai4cc_voice_destinations_tenant_idx ON public.ai4cc_voice_destinations USING btree (tenant_id, updated_at DESC);
+
+CREATE INDEX ai4cc_voicemail_messages_interaction_idx ON public.ai4cc_voicemail_messages USING btree (interaction_id, received_at DESC);
+
+CREATE INDEX ai4cc_voicemail_messages_tenant_status_idx ON public.ai4cc_voicemail_messages USING btree (tenant_id, callback_status, received_at DESC);
+
+CREATE INDEX ai4cc_wfm_tenant_interval_idx ON public.ai4cc_wfm_forecasts USING btree (tenant_id, interval_start);
+
+alter table public.ai4cc_agent_assist_events enable row level security;
+
+alter table public.ai4cc_agents enable row level security;
+
+alter table public.ai4cc_audit_logs enable row level security;
+
+alter table public.ai4cc_branding enable row level security;
+
+alter table public.ai4cc_compliance_events enable row level security;
+
+alter table public.ai4cc_contacts enable row level security;
+
+alter table public.ai4cc_deployments enable row level security;
+
+alter table public.ai4cc_flow_versions enable row level security;
+
+alter table public.ai4cc_flows enable row level security;
+
+alter table public.ai4cc_integrations enable row level security;
+
+alter table public.ai4cc_interactions enable row level security;
+
+alter table public.ai4cc_kb_articles enable row level security;
+
+alter table public.ai4cc_lead_activities enable row level security;
+
+alter table public.ai4cc_lead_tasks enable row level security;
+
+alter table public.ai4cc_leads enable row level security;
+
+alter table public.ai4cc_qa_scores enable row level security;
+
+alter table public.ai4cc_queues enable row level security;
+
+alter table public.ai4cc_routing_decisions enable row level security;
+
+alter table public.ai4cc_sites enable row level security;
+
+alter table public.ai4cc_tenant_members enable row level security;
+
+alter table public.ai4cc_tenants enable row level security;
+
+alter table public.ai4cc_transcripts enable row level security;
+
+alter table public.ai4cc_voice_destination_deployments enable row level security;
+
+alter table public.ai4cc_voice_destination_versions enable row level security;
+
+alter table public.ai4cc_voice_destinations enable row level security;
+
+alter table public.ai4cc_voicemail_messages enable row level security;
+
+alter table public.ai4cc_wfm_forecasts enable row level security;
+
+-- ---- Lead lifecycle functions and updated_at trigger function (need the tables above) ----
 CREATE OR REPLACE FUNCTION public.ai4cc_create_lead_from_interaction(p_tenant_id uuid, p_actor_user_id uuid, p_interaction_id uuid, p_identifier_type text, p_identifier_value text, p_email text, p_phone text, p_contact_name text, p_company_name text, p_title text, p_service_interest text, p_description text, p_pipeline_stage text, p_priority text, p_score integer, p_estimated_value numeric, p_probability integer, p_next_action text, p_next_follow_up timestamp with time zone)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -968,801 +1764,6 @@ end;
 $function$
 ;
 
-create table public.ai4cc_agent_assist_events (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid not null,
-  agent_id uuid,
-  detected_intent text,
-  sentiment text,
-  escalation_risk text,
-  suggested_replies jsonb not null default '[]'::jsonb,
-  kb_grounding jsonb not null default '[]'::jsonb,
-  compliance_alerts jsonb not null default '[]'::jsonb,
-  next_best_actions jsonb not null default '[]'::jsonb,
-  model_info jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_agents (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  auth_user_id uuid,
-  site_id uuid,
-  name text not null,
-  email text,
-  status text not null default 'offline'::text,
-  skills text[] not null default '{}'::text[],
-  channels text[] not null default '{}'::text[],
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_audit_logs (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid,
-  actor_user_id uuid,
-  action text not null,
-  resource_type text,
-  resource_id text,
-  payload jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_branding (
-  tenant_id uuid not null,
-  product_name text,
-  company_name text,
-  logo_url text,
-  primary_domain text,
-  support_email text,
-  settings jsonb not null default '{}'::jsonb,
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_compliance_events (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid,
-  rule_code text,
-  severity text not null default 'info'::text,
-  status text not null default 'open'::text,
-  finding text not null,
-  evidence jsonb not null default '{}'::jsonb,
-  detected_at timestamp with time zone not null default now(),
-  resolved_at timestamp with time zone
-);
-
-create table public.ai4cc_contacts (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  first_name text,
-  last_name text,
-  display_name text,
-  company_name text,
-  email text,
-  phone text,
-  preferred_channel text,
-  lead_source text,
-  lead_score integer not null default 0,
-  priority text not null default 'normal'::text,
-  sms_consent boolean not null default false,
-  email_consent boolean not null default false,
-  do_not_contact boolean not null default false,
-  tags text[] not null default '{}'::text[],
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_deployments (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  flow_version_id uuid not null,
-  environment text not null,
-  status text not null default 'deployed'::text,
-  provider text not null default 'internal'::text,
-  provider_reference text,
-  snapshot jsonb not null default '{}'::jsonb,
-  deployed_by uuid,
-  deployed_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_flow_versions (
-  id uuid not null default gen_random_uuid(),
-  flow_id uuid not null,
-  version integer not null,
-  definition jsonb not null,
-  parser_engine text not null default 'rules'::text,
-  validation_status text not null default 'pending'::text,
-  validation_report jsonb not null default '{}'::jsonb,
-  notes text,
-  created_by uuid,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_flows (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  name text not null,
-  description text,
-  source_text text,
-  channel text not null default 'voice'::text,
-  status text not null default 'draft'::text,
-  current_version integer not null default 1,
-  created_by uuid,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_integrations (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  provider text not null,
-  integration_type text not null,
-  display_name text not null,
-  status text not null default 'configured'::text,
-  config jsonb not null default '{}'::jsonb,
-  secret_reference text,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_interactions (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  channel text not null,
-  direction text not null default 'inbound'::text,
-  external_id text,
-  customer_identifier text,
-  queue_id uuid,
-  agent_id uuid,
-  flow_version_id uuid,
-  status text not null default 'open'::text,
-  started_at timestamp with time zone not null default now(),
-  ended_at timestamp with time zone,
-  metadata jsonb not null default '{}'::jsonb
-);
-
-create table public.ai4cc_kb_articles (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  title text not null,
-  body text not null,
-  tags text[] not null default '{}'::text[],
-  intent text,
-  language text not null default 'en'::text,
-  status text not null default 'published'::text,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_lead_activities (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  lead_id uuid not null,
-  contact_id uuid,
-  interaction_id uuid,
-  activity_type text not null,
-  direction text,
-  subject text,
-  body text,
-  outcome text,
-  actor_user_id uuid,
-  actor_agent_id uuid,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_lead_tasks (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  lead_id uuid not null,
-  contact_id uuid,
-  assigned_agent_id uuid,
-  title text not null,
-  description text,
-  task_type text not null default 'follow_up'::text,
-  due_at timestamp with time zone,
-  priority text not null default 'normal'::text,
-  status text not null default 'pending'::text,
-  completed_at timestamp with time zone,
-  completed_by uuid,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_leads (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  contact_id uuid not null,
-  originating_interaction_id uuid,
-  originating_channel text,
-  originating_queue_id uuid,
-  originating_agent_id uuid,
-  title text not null,
-  service_interest text,
-  description text,
-  pipeline_stage text not null default 'new'::text,
-  status text not null default 'open'::text,
-  priority text not null default 'normal'::text,
-  score integer not null default 0,
-  estimated_value numeric(14,2) not null default 0,
-  probability integer not null default 0,
-  expected_close_date date,
-  assigned_agent_id uuid,
-  next_action text,
-  next_follow_up timestamp with time zone,
-  last_contacted_at timestamp with time zone,
-  converted_at timestamp with time zone,
-  lost_reason text,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_qa_scores (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid not null,
-  agent_id uuid,
-  quality_score numeric,
-  compliance_score numeric,
-  flow_adherence_score numeric,
-  sentiment_score numeric,
-  flags text[] not null default '{}'::text[],
-  scoring_method text not null default 'rules'::text,
-  scorecard jsonb not null default '{}'::jsonb,
-  scored_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_queues (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  site_id uuid,
-  name text not null,
-  code text not null,
-  channel text not null default 'voice'::text,
-  skills text[] not null default '{}'::text[],
-  priority integer not null default 100,
-  capacity integer,
-  overflow_queue_id uuid,
-  status text not null default 'active'::text,
-  settings jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_routing_decisions (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid,
-  intent text,
-  priority text,
-  selected_queue_id uuid,
-  selected_site_id uuid,
-  overflow_used boolean not null default false,
-  estimated_wait_seconds integer,
-  reason text,
-  input jsonb not null default '{}'::jsonb,
-  decided_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_sites (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  name text not null,
-  code text not null,
-  timezone text,
-  status text not null default 'active'::text,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_tenant_members (
-  tenant_id uuid not null,
-  user_id uuid not null,
-  role text not null default 'operator'::text,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_tenants (
-  id uuid not null default gen_random_uuid(),
-  name text not null,
-  slug text not null,
-  status text not null default 'active'::text,
-  timezone text not null default 'America/Los_Angeles'::text,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_transcripts (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid not null,
-  speaker text,
-  sequence_no integer not null default 0,
-  content text not null,
-  started_at timestamp with time zone,
-  ended_at timestamp with time zone,
-  sentiment numeric,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_voice_destination_deployments (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  destination_id uuid not null,
-  destination_version_id uuid not null,
-  environment text not null,
-  status text not null default 'deployed'::text,
-  snapshot jsonb not null default '{}'::jsonb,
-  deployed_by uuid,
-  deployed_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_voice_destination_versions (
-  id uuid not null default gen_random_uuid(),
-  destination_id uuid not null,
-  version integer not null,
-  definition jsonb not null default '{}'::jsonb,
-  validation_status text not null default 'pending'::text,
-  validation_report jsonb not null default '{}'::jsonb,
-  notes text,
-  created_by uuid,
-  created_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_voice_destinations (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  name text not null,
-  description text,
-  destination_type text not null,
-  status text not null default 'draft'::text,
-  current_version integer not null default 1,
-  created_by uuid,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_voicemail_messages (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  interaction_id uuid not null,
-  destination_id uuid,
-  destination_version_id uuid,
-  call_sid text not null,
-  recording_sid text,
-  recording_url text,
-  caller_identifier text,
-  duration_seconds integer,
-  transcription text,
-  transcription_status text not null default 'pending'::text,
-  callback_status text not null default 'new'::text,
-  assigned_queue_id uuid,
-  assigned_agent_id uuid,
-  received_at timestamp with time zone not null default now(),
-  reviewed_at timestamp with time zone,
-  resolved_at timestamp with time zone,
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now(),
-  updated_at timestamp with time zone not null default now()
-);
-
-create table public.ai4cc_wfm_forecasts (
-  id uuid not null default gen_random_uuid(),
-  tenant_id uuid not null,
-  site_id uuid,
-  queue_id uuid,
-  channel text,
-  interval_start timestamp with time zone not null,
-  interval_end timestamp with time zone not null,
-  predicted_volume integer not null,
-  predicted_aht_seconds integer,
-  required_agents integer not null,
-  sla_risk text,
-  method text not null default 'rules'::text,
-  model_info jsonb not null default '{}'::jsonb,
-  created_at timestamp with time zone not null default now()
-);
-
-alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_status_check CHECK ((status = ANY (ARRAY['offline'::text, 'available'::text, 'busy'::text, 'away'::text, 'inactive'::text])));
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_tenant_id_email_key UNIQUE (tenant_id, email);
-
-alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_branding add constraint ai4cc_branding_pkey PRIMARY KEY (tenant_id);
-
-alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_severity_check CHECK ((severity = ANY (ARRAY['info'::text, 'warning'::text, 'critical'::text])));
-
-alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_status_check CHECK ((status = ANY (ARRAY['open'::text, 'reviewed'::text, 'resolved'::text, 'false_positive'::text])));
-
-alter table public.ai4cc_contacts add constraint ai4cc_contacts_lead_score_check CHECK (((lead_score >= 0) AND (lead_score <= 100)));
-
-alter table public.ai4cc_contacts add constraint ai4cc_contacts_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_contacts add constraint ai4cc_contacts_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_environment_check CHECK ((environment = ANY (ARRAY['dev'::text, 'qa'::text, 'staging'::text, 'production'::text])));
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'deployed'::text, 'failed'::text, 'rolled_back'::text])));
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_flow_id_version_key UNIQUE (flow_id, version);
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_parser_engine_check CHECK ((parser_engine = ANY (ARRAY['rules'::text, 'ai'::text, 'imported'::text, 'manual'::text])));
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_validation_status_check CHECK ((validation_status = ANY (ARRAY['pending'::text, 'passed'::text, 'failed'::text, 'warning'::text])));
-
-alter table public.ai4cc_flows add constraint ai4cc_flows_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_flows add constraint ai4cc_flows_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'validated'::text, 'published'::text, 'archived'::text])));
-
-alter table public.ai4cc_integrations add constraint ai4cc_integrations_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_integrations add constraint ai4cc_integrations_status_check CHECK ((status = ANY (ARRAY['configured'::text, 'active'::text, 'inactive'::text, 'error'::text])));
-
-alter table public.ai4cc_integrations add constraint ai4cc_integrations_tenant_id_provider_display_name_key UNIQUE (tenant_id, provider, display_name);
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_channel_check CHECK ((channel = ANY (ARRAY['voice'::text, 'chat'::text, 'email'::text, 'sms'::text, 'social'::text, 'simulation'::text])));
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_direction_check CHECK ((direction = ANY (ARRAY['inbound'::text, 'outbound'::text, 'internal'::text])));
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_status_check CHECK ((status = ANY (ARRAY['open'::text, 'queued'::text, 'active'::text, 'completed'::text, 'abandoned'::text, 'failed'::text])));
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_tenant_id_channel_external_id_key UNIQUE (tenant_id, channel, external_id);
-
-alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'published'::text, 'archived'::text])));
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])));
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_pipeline_stage_check CHECK ((pipeline_stage = ANY (ARRAY['new'::text, 'qualified'::text, 'contacted'::text, 'follow_up'::text, 'opportunity'::text, 'converted'::text, 'lost'::text, 'nurture'::text])));
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_priority_check CHECK ((priority = ANY (ARRAY['low'::text, 'normal'::text, 'high'::text, 'urgent'::text])));
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_probability_check CHECK (((probability >= 0) AND (probability <= 100)));
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_score_check CHECK (((score >= 0) AND (score <= 100)));
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_status_check CHECK ((status = ANY (ARRAY['open'::text, 'won'::text, 'lost'::text, 'closed'::text])));
-
-alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_scoring_method_check CHECK ((scoring_method = ANY (ARRAY['rules'::text, 'ai'::text, 'human'::text, 'hybrid'::text])));
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])));
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_tenant_id_code_key UNIQUE (tenant_id, code);
-
-alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_sites add constraint ai4cc_sites_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_sites add constraint ai4cc_sites_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text])));
-
-alter table public.ai4cc_sites add constraint ai4cc_sites_tenant_id_code_key UNIQUE (tenant_id, code);
-
-alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_pkey PRIMARY KEY (tenant_id, user_id);
-
-alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_role_check CHECK ((role = ANY (ARRAY['owner'::text, 'admin'::text, 'supervisor'::text, 'operator'::text, 'agent'::text, 'viewer'::text])));
-
-alter table public.ai4cc_tenants add constraint ai4cc_tenants_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_tenants add constraint ai4cc_tenants_slug_key UNIQUE (slug);
-
-alter table public.ai4cc_tenants add constraint ai4cc_tenants_status_check CHECK ((status = ANY (ARRAY['active'::text, 'inactive'::text, 'suspended'::text])));
-
-alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_environment_check CHECK ((environment = ANY (ARRAY['dev'::text, 'qa'::text, 'staging'::text, 'production'::text])));
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_status_check CHECK ((status = ANY (ARRAY['deployed'::text, 'rolled_back'::text, 'retired'::text, 'failed'::text])));
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_destination_id_version_key UNIQUE (destination_id, version);
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_id_destination_id_key UNIQUE (id, destination_id);
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_validation_status_check CHECK ((validation_status = ANY (ARRAY['pending'::text, 'passed'::text, 'blocked'::text])));
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_version_check CHECK ((version > 0));
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_current_version_check CHECK ((current_version > 0));
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_destination_type_check CHECK ((destination_type = ANY (ARRAY['say'::text, 'voicemail'::text])));
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_status_check CHECK ((status = ANY (ARRAY['draft'::text, 'active'::text, 'retired'::text])));
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_tenant_id_name_key UNIQUE (tenant_id, name);
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_callback_status_check CHECK ((callback_status = ANY (ARRAY['new'::text, 'reviewed'::text, 'callback_pending'::text, 'resolved'::text])));
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_tenant_id_recording_sid_key UNIQUE (tenant_id, recording_sid);
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_transcription_status_check CHECK ((transcription_status = ANY (ARRAY['pending'::text, 'completed'::text, 'failed'::text, 'not_requested'::text])));
-
-alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_pkey PRIMARY KEY (id);
-
-alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_agent_assist_events add constraint ai4cc_agent_assist_events_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_auth_user_id_fkey FOREIGN KEY (auth_user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_agents add constraint ai4cc_agents_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_audit_logs add constraint ai4cc_audit_logs_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_branding add constraint ai4cc_branding_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_compliance_events add constraint ai4cc_compliance_events_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_contacts add constraint ai4cc_contacts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_deployed_by_fkey FOREIGN KEY (deployed_by) REFERENCES auth.users(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_flow_version_id_fkey FOREIGN KEY (flow_version_id) REFERENCES ai4cc_flow_versions(id) ON DELETE RESTRICT;
-
-alter table public.ai4cc_deployments add constraint ai4cc_deployments_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_flow_versions add constraint ai4cc_flow_versions_flow_id_fkey FOREIGN KEY (flow_id) REFERENCES ai4cc_flows(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_flows add constraint ai4cc_flows_created_by_fkey FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_flows add constraint ai4cc_flows_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_integrations add constraint ai4cc_integrations_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_flow_version_id_fkey FOREIGN KEY (flow_version_id) REFERENCES ai4cc_flow_versions(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_queue_id_fkey FOREIGN KEY (queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_interactions add constraint ai4cc_interactions_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_kb_articles add constraint ai4cc_kb_articles_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_actor_agent_id_fkey FOREIGN KEY (actor_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_lead_id_fkey FOREIGN KEY (lead_id) REFERENCES ai4cc_leads(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_lead_activities add constraint ai4cc_lead_activities_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_lead_id_fkey FOREIGN KEY (lead_id) REFERENCES ai4cc_leads(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_lead_tasks add constraint ai4cc_lead_tasks_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_contact_id_fkey FOREIGN KEY (contact_id) REFERENCES ai4cc_contacts(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_originating_agent_id_fkey FOREIGN KEY (originating_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_originating_interaction_id_fkey FOREIGN KEY (originating_interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_originating_queue_id_fkey FOREIGN KEY (originating_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_leads add constraint ai4cc_leads_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_agent_id_fkey FOREIGN KEY (agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_qa_scores add constraint ai4cc_qa_scores_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_overflow_queue_id_fkey FOREIGN KEY (overflow_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_queues add constraint ai4cc_queues_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_selected_queue_id_fkey FOREIGN KEY (selected_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_selected_site_id_fkey FOREIGN KEY (selected_site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_routing_decisions add constraint ai4cc_routing_decisions_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_sites add constraint ai4cc_sites_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_tenant_members add constraint ai4cc_tenant_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_transcripts add constraint ai4cc_transcripts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voice_destination_deployments add constraint ai4cc_voice_destination_deployments_version_fk FOREIGN KEY (destination_version_id, destination_id) REFERENCES ai4cc_voice_destination_versions(id, destination_id) ON DELETE RESTRICT;
-
-alter table public.ai4cc_voice_destination_versions add constraint ai4cc_voice_destination_versions_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voice_destinations add constraint ai4cc_voice_destinations_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_assigned_agent_id_fkey FOREIGN KEY (assigned_agent_id) REFERENCES ai4cc_agents(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_assigned_queue_id_fkey FOREIGN KEY (assigned_queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_destination_id_fkey FOREIGN KEY (destination_id) REFERENCES ai4cc_voice_destinations(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_destination_version_id_fkey FOREIGN KEY (destination_version_id) REFERENCES ai4cc_voice_destination_versions(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_interaction_id_fkey FOREIGN KEY (interaction_id) REFERENCES ai4cc_interactions(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_voicemail_messages add constraint ai4cc_voicemail_messages_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_queue_id_fkey FOREIGN KEY (queue_id) REFERENCES ai4cc_queues(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_site_id_fkey FOREIGN KEY (site_id) REFERENCES ai4cc_sites(id) ON DELETE SET NULL;
-
-alter table public.ai4cc_wfm_forecasts add constraint ai4cc_wfm_forecasts_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES ai4cc_tenants(id) ON DELETE CASCADE;
-
-CREATE INDEX ai4cc_assist_interaction_idx ON public.ai4cc_agent_assist_events USING btree (interaction_id, created_at DESC);
-
-CREATE INDEX ai4cc_agents_tenant_idx ON public.ai4cc_agents USING btree (tenant_id);
-
-CREATE INDEX ai4cc_audit_tenant_created_idx ON public.ai4cc_audit_logs USING btree (tenant_id, created_at DESC);
-
-CREATE INDEX ai4cc_compliance_interaction_idx ON public.ai4cc_compliance_events USING btree (interaction_id, detected_at DESC);
-
-CREATE INDEX ai4cc_contacts_email_idx ON public.ai4cc_contacts USING btree (tenant_id, lower(email)) WHERE (email IS NOT NULL);
-
-CREATE INDEX ai4cc_contacts_phone_idx ON public.ai4cc_contacts USING btree (tenant_id, phone) WHERE (phone IS NOT NULL);
-
-CREATE INDEX ai4cc_contacts_tenant_idx ON public.ai4cc_contacts USING btree (tenant_id, updated_at DESC);
-
-CREATE INDEX ai4cc_flow_versions_flow_idx ON public.ai4cc_flow_versions USING btree (flow_id, version DESC);
-
-CREATE INDEX ai4cc_flows_tenant_idx ON public.ai4cc_flows USING btree (tenant_id, updated_at DESC);
-
-CREATE INDEX ai4cc_interactions_tenant_started_idx ON public.ai4cc_interactions USING btree (tenant_id, started_at DESC);
-
-CREATE INDEX ai4cc_lead_activities_lead_idx ON public.ai4cc_lead_activities USING btree (tenant_id, lead_id, created_at DESC);
-
-CREATE INDEX ai4cc_lead_tasks_due_idx ON public.ai4cc_lead_tasks USING btree (tenant_id, status, due_at);
-
-CREATE INDEX ai4cc_leads_origin_idx ON public.ai4cc_leads USING btree (tenant_id, originating_interaction_id) WHERE (originating_interaction_id IS NOT NULL);
-
-CREATE INDEX ai4cc_leads_tenant_stage_idx ON public.ai4cc_leads USING btree (tenant_id, pipeline_stage, updated_at DESC);
-
-CREATE UNIQUE INDEX ai4cc_leads_tenant_origin_unique_idx ON public.ai4cc_leads USING btree (tenant_id, originating_interaction_id) WHERE (originating_interaction_id IS NOT NULL);
-
-CREATE INDEX ai4cc_qa_interaction_idx ON public.ai4cc_qa_scores USING btree (interaction_id, scored_at DESC);
-
-CREATE INDEX ai4cc_queues_tenant_idx ON public.ai4cc_queues USING btree (tenant_id);
-
-CREATE INDEX ai4cc_routing_interaction_idx ON public.ai4cc_routing_decisions USING btree (interaction_id, decided_at DESC);
-
-CREATE INDEX ai4cc_members_user_idx ON public.ai4cc_tenant_members USING btree (user_id);
-
-CREATE INDEX ai4cc_transcripts_interaction_idx ON public.ai4cc_transcripts USING btree (interaction_id, sequence_no);
-
-CREATE INDEX ai4cc_voice_destination_deployments_lookup_idx ON public.ai4cc_voice_destination_deployments USING btree (tenant_id, environment, deployed_at DESC);
-
-CREATE UNIQUE INDEX ai4cc_voice_destination_one_active_idx ON public.ai4cc_voice_destination_deployments USING btree (tenant_id, destination_id, environment) WHERE (status = 'deployed'::text);
-
-CREATE INDEX ai4cc_voice_destination_versions_destination_idx ON public.ai4cc_voice_destination_versions USING btree (destination_id, version DESC);
-
-CREATE INDEX ai4cc_voice_destinations_tenant_idx ON public.ai4cc_voice_destinations USING btree (tenant_id, updated_at DESC);
-
-CREATE INDEX ai4cc_voicemail_messages_interaction_idx ON public.ai4cc_voicemail_messages USING btree (interaction_id, received_at DESC);
-
-CREATE INDEX ai4cc_voicemail_messages_tenant_status_idx ON public.ai4cc_voicemail_messages USING btree (tenant_id, callback_status, received_at DESC);
-
-CREATE INDEX ai4cc_wfm_tenant_interval_idx ON public.ai4cc_wfm_forecasts USING btree (tenant_id, interval_start);
-
-alter table public.ai4cc_agent_assist_events enable row level security;
-
-alter table public.ai4cc_agents enable row level security;
-
-alter table public.ai4cc_audit_logs enable row level security;
-
-alter table public.ai4cc_branding enable row level security;
-
-alter table public.ai4cc_compliance_events enable row level security;
-
-alter table public.ai4cc_contacts enable row level security;
-
-alter table public.ai4cc_deployments enable row level security;
-
-alter table public.ai4cc_flow_versions enable row level security;
-
-alter table public.ai4cc_flows enable row level security;
-
-alter table public.ai4cc_integrations enable row level security;
-
-alter table public.ai4cc_interactions enable row level security;
-
-alter table public.ai4cc_kb_articles enable row level security;
-
-alter table public.ai4cc_lead_activities enable row level security;
-
-alter table public.ai4cc_lead_tasks enable row level security;
-
-alter table public.ai4cc_leads enable row level security;
-
-alter table public.ai4cc_qa_scores enable row level security;
-
-alter table public.ai4cc_queues enable row level security;
-
-alter table public.ai4cc_routing_decisions enable row level security;
-
-alter table public.ai4cc_sites enable row level security;
-
-alter table public.ai4cc_tenant_members enable row level security;
-
-alter table public.ai4cc_tenants enable row level security;
-
-alter table public.ai4cc_transcripts enable row level security;
-
-alter table public.ai4cc_voice_destination_deployments enable row level security;
-
-alter table public.ai4cc_voice_destination_versions enable row level security;
-
-alter table public.ai4cc_voice_destinations enable row level security;
-
-alter table public.ai4cc_voicemail_messages enable row level security;
-
-alter table public.ai4cc_wfm_forecasts enable row level security;
-
 -- ---- RLS helper functions (referenced by the policies below) ----
 create schema if not exists ai4cc_private;
 grant usage on schema ai4cc_private to authenticated;
@@ -1913,6 +1914,28 @@ CREATE TRIGGER ai4cc_integrations_updated_at BEFORE UPDATE ON public.ai4cc_integ
 CREATE TRIGGER ai4cc_kb_articles_updated_at BEFORE UPDATE ON public.ai4cc_kb_articles FOR EACH ROW EXECUTE FUNCTION ai4cc_set_updated_at();
 
 CREATE TRIGGER ai4cc_tenants_updated_at BEFORE UPDATE ON public.ai4cc_tenants FOR EACH ROW EXECUTE FUNCTION ai4cc_set_updated_at();
+
+-- ---- Phone number -> tenant mapping (added after the production export) ----
+-- The telephony backend resolves the dialed number (Twilio "To") to a tenant here. A number that
+-- is not active in this table must not be served (no default tenant).
+create table public.ai4cc_phone_numbers (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references public.ai4cc_tenants(id) on delete cascade,
+  e164 text not null unique check (e164 ~ '^\+[1-9][0-9]{6,14}$'),
+  provider text not null default 'twilio' check (provider in ('twilio', 'elevenlabs')),
+  purpose text not null default 'inbound' check (purpose in ('inbound', 'sms', 'both')),
+  status text not null default 'active' check (status in ('active', 'inactive')),
+  flow_id uuid references public.ai4cc_flows(id) on delete set null,
+  agent_ref text,
+  created_at timestamptz not null default now()
+);
+create index ai4cc_phone_numbers_tenant_idx on public.ai4cc_phone_numbers (tenant_id);
+alter table public.ai4cc_phone_numbers enable row level security;
+create policy ai4cc_phone_numbers_member on public.ai4cc_phone_numbers as permissive for select to public
+  using (ai4cc_private.is_tenant_member(tenant_id));
+create policy ai4cc_phone_numbers_admin on public.ai4cc_phone_numbers as permissive for all to public
+  using (ai4cc_private.has_tenant_role(tenant_id, array['owner'::text, 'admin'::text]))
+  with check (ai4cc_private.has_tenant_role(tenant_id, array['owner'::text, 'admin'::text]));
 
 -- ---- Hardening for new projects ----
 -- Every access path in this app uses the service role (server) or authenticated users through

@@ -7,18 +7,22 @@
 // reaches the origin directly cannot pick a tenant host. Tenant membership is still verified
 // server-side on every request; this header only selects which workspace the user is signing in to.
 //
-// Worker variables (Settings > Variables): ORIGIN_URL (e.g. https://stellaruc-prod.netlify.app or
-// the app's own custom domain), EDGE_SECRET (secret).
+// Staging and production share this zone: hosts whose first label starts with "stg-" go to the
+// staging app (STAGING_ORIGIN_URL / STAGING_EDGE_SECRET); everything else goes to production.
+//
+// Worker variables: ORIGIN_URL, EDGE_SECRET, STAGING_ORIGIN_URL, STAGING_EDGE_SECRET (secrets).
 
 export default {
   async fetch(request, env) {
     const incoming = new URL(request.url);
-    const origin = new URL(env.ORIGIN_URL);
+    const staging = incoming.hostname.startsWith('stg-');
+    const origin = new URL(staging ? env.STAGING_ORIGIN_URL : env.ORIGIN_URL);
+    const edgeSecret = staging ? env.STAGING_EDGE_SECRET : env.EDGE_SECRET;
 
     const target = new URL(incoming.pathname + incoming.search, origin);
     const headers = new Headers(request.headers);
     headers.set('x-ai4cc-forwarded-host', incoming.host);
-    headers.set('x-ai4cc-edge-key', env.EDGE_SECRET);
+    headers.set('x-ai4cc-edge-key', edgeSecret);
 
     const upstream = await fetch(target, {
       method: request.method,

@@ -43,3 +43,15 @@ test('effectiveHost prefers the edge-forwarded host, honoring the edge secret wh
   assert.equal(effectiveHost(h({ 'x-ai4cc-forwarded-host': 'a.stellaruc.com', 'x-ai4cc-edge-key': 's3', host: 'site.netlify.app' })), 'a.stellaruc.com');
   delete process.env.AI4CC_EDGE_SECRET;
 });
+
+test('staging and production slug namespaces are disjoint', () => {
+  delete process.env.AI4CC_ENVIRONMENT;
+  assert.equal(isValidTenantSlug('stg-acme'), false);
+  assert.equal(tenantSlugFromHost('stg-acme.stellaruc.com'), null);
+  process.env.AI4CC_ENVIRONMENT = 'staging';
+  assert.equal(isValidTenantSlug('stg-acme'), true);
+  assert.equal(isValidTenantSlug('acme'), false);
+  assert.equal(tenantSlugFromHost('stg-acme.stellaruc.com'), 'stg-acme');
+  assert.equal(tenantSlugFromHost('acme.stellaruc.com'), null);
+  delete process.env.AI4CC_ENVIRONMENT;
+});

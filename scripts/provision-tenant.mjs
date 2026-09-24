@@ -12,7 +12,9 @@
 //
 // intake.json: { name, slug, owner_email, timezone?, company_name?, product_name?, support_email?,
 //                vertical?: home_services|property_management|automotive|general,
-//                modules?: "core"|"all"|["/path",...], root_domain?: "stellaruc.com" }
+//                modules?: "core"|"all"|["/path",...], root_domain?: "stellaruc.com",
+//                phone_numbers?: ["+15555550100", ...] (E.164; each becomes an active inbound number) }
+// Staging workspaces must use a "stg-" slug and run with AI4CC_ENVIRONMENT=staging (see lib/tenantHost.ts).
 
 import { createClient } from '@supabase/supabase-js';
 import { createHash, randomBytes } from 'node:crypto';
@@ -48,6 +50,10 @@ try { new Intl.DateTimeFormat('en-US', { timeZone: timezone }); } catch { proble
 const modules = intake.modules ?? 'core';
 const modulesOk = modules === 'core' || modules === 'all' || (Array.isArray(modules) && modules.every((m) => typeof m === 'string' && m.startsWith('/')));
 if (!modulesOk) problems.push('modules must be "core", "all" or an array of paths');
+const phoneNumbers = intake.phone_numbers ?? [];
+if (!Array.isArray(phoneNumbers) || !phoneNumbers.every((p) => typeof p === 'string' && /^\+[1-9][0-9]{6,14}$/.test(p))) {
+  problems.push('phone_numbers must be an array of E.164 strings like +15555550100');
+}
 if (problems.length) {
   console.error('Intake problems:\n - ' + problems.join('\n - '));
   process.exit(2);
@@ -131,6 +137,13 @@ try {
   }
   const { error: mErr } = await db.from('ai4cc_tenant_members').insert({ tenant_id: tenantId, user_id: ownerId, role: 'owner' });
   if (mErr) throw new Error(`ai4cc_tenant_members: ${mErr.message}`);
+
+  if (phoneNumbers.length) {
+    const { error: pErr } = await db
+      .from('ai4cc_phone_numbers')
+      .insert(phoneNumbers.map((e164) => ({ tenant_id: tenantId, e164, provider: 'twilio', purpose: 'inbound', status: 'active' })));
+    if (pErr) throw new Error(`ai4cc_phone_numbers: ${pErr.message}`);
+  }
 
   const intakeKey = randomBytes(32).toString('hex');
   await ins('ai4cc_integrations', {
