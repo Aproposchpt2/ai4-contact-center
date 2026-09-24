@@ -1,4 +1,10 @@
 // Host-based tenant resolution. Pure and edge-runtime safe (used by middleware and API routes).
+// Hostname map (stellaruc.com):
+//   stellaruc.com, www            public promotional site
+//   app.<root>                    generic customer entry: finds a workspace, holds no customer data
+//   {client}.<root>               one customer's tenant workspace (this file's "tenant host")
+//   admin.<root>, admin-staging   internal operator console
+//   api.<root>, api-staging       telephony backend (separate Netlify site, not this app)
 // A tenant host looks like `{slug}.{root}` where root is one of AI4CC_TENANT_ROOT_DOMAINS
 // (comma-separated, default "stellaruc.com"). Exactly one label is allowed in front of the root.
 
@@ -7,7 +13,7 @@ const DEFAULT_ROOTS = 'stellaruc.com';
 export const RESERVED_SLUGS = new Set([
   'www', 'api', 'app', 'admin', 'demo', 'live', 'platform', 'partners', 'login', 'ops',
   'ops-console', 'mail', 'status', 'support', 'docs', 'help', 'staging', 'test', 'dev',
-  'stellar', 'ai4cc', 'ai4', 'billing', 'cdn', 'static', 'assets', 'auth', 'sso', 'webhooks',
+  'stellar', 'ai4cc', 'ai4', 'billing', 'cdn', 'static', 'assets', 'auth', 'sso', 'webhooks', 'find-workspace',
 ]);
 
 export const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])$/;
@@ -19,13 +25,18 @@ export const STAGING_PREFIX = 'stg-';
 const isStagingApp = () => process.env.AI4CC_ENVIRONMENT === 'staging';
 
 export function isValidTenantSlug(slug: string): boolean {
-  // "api-*" hostnames (e.g. api-staging.stellaruc.com) are service endpoints, never workspaces.
-  if (!SLUG_RE.test(slug) || slug.includes('--') || RESERVED_SLUGS.has(slug) || slug.startsWith('api-')) return false;
+  // "api-*" / "admin-*" hostnames (api-staging, admin-staging) are service hosts, never workspaces.
+  if (!SLUG_RE.test(slug) || slug.includes('--') || RESERVED_SLUGS.has(slug)) return false;
+  if (slug.startsWith('api-') || slug.startsWith('admin-')) return false;
   return slug.startsWith(STAGING_PREFIX) === isStagingApp();
 }
 
 function normalizeHost(hostHeader: string): string {
   return hostHeader.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+}
+
+export function primaryRootDomain(): string {
+  return rootDomains()[0] ?? DEFAULT_ROOTS;
 }
 
 function rootDomains(): string[] {
@@ -64,8 +75,24 @@ export function isOperatorHost(hostHeader: string | undefined | null): boolean {
   if (!hostHeader) return false;
   const host = normalizeHost(hostHeader);
   const configured = process.env.AI4CC_OPERATOR_HOSTS;
-  const hosts = configured ? configured.split(',').map((h) => h.trim().toLowerCase()).filter(Boolean) : rootDomains().map((r) => `admin.${r}`);
+  const hosts = configured ? configured.split(',').map((h) => h.trim().toLowerCase()).filter(Boolean) : rootDomains().flatMap((r) => [`admin.${r}`, `admin-staging.${r}`]);
   return hosts.includes(host);
+}
+
+// Generic customer entry host (default app.<root>; override with AI4CC_APP_HOSTS). It serves only
+// the workspace finder; customers do their real work on their own {client}.<root> host.
+export function isAppHost(hostHeader: string | undefined | null): boolean {
+  if (!hostHeader) return false;
+  const host = normalizeHost(hostHeader);
+  const configured = process.env.AI4CC_APP_HOSTS;
+  const hosts = configured ? configured.split(',').map((h) => h.trim().toLowerCase()).filter(Boolean) : rootDomains().map((r) => `app.${r}`);
+  return hosts.includes(host);
+}
+
+export const APP_HOST_PUBLIC_PATHS = ['/find-workspace', '/api/workspaces/resolve'];
+
+export function isAllowedOnAppHost(pathname: string): boolean {
+  return APP_HOST_PUBLIC_PATHS.includes(pathname);
 }
 
 // Everything a public visitor could use must not exist on the operator console.
