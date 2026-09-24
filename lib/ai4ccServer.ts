@@ -1,6 +1,69 @@
 import type { NextApiRequest } from 'next';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
+import { tenantSlugFromHost } from '@/lib/tenantHost';
+
+// The tenant whose users may sign in on a bare (non-tenant) host such as the legacy
+// ai4contactcenter.aproposgroupllc.com. Everyone else signs in on their own {slug}.<root> host.
+export const HOME_TENANT_SLUG = process.env.AI4CC_HOME_TENANT_SLUG ?? 'apropos-group';
+
+function headerValue(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+export function requestTenantSlug(req: NextApiRequest): string | null {
+  const host = headerValue(req.headers['x-forwarded-host']) ?? headerValue(req.headers.host);
+  return tenantSlugFromHost(host);
+}
+
+// Resolves which tenant this signed-in user is acting in.
+//  - Tenant host (slug.<root>): the tenant is the host's tenant, and the user MUST be a member of
+//    it. Unknown, suspended and not-a-member all return the same error so slugs can't be probed.
+//  - Bare host: the home tenant if the user belongs to it, otherwise their oldest membership.
+export async function resolveMembership(
+  admin: SupabaseClient,
+  userId: string,
+  req: NextApiRequest,
+): Promise<{ tenantId: string; role: string }> {
+  const slug = requestTenantSlug(req);
+
+  if (slug) {
+    const { data: tenant, error } = await admin
+      .from('ai4cc_tenants')
+      .select('id, status')
+      .eq('slug', slug)
+      .maybeSingle();
+    if (error) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${error.message}`);
+    if (!tenant || tenant.status !== 'active') throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    const { data: m, error: mErr } = await admin
+      .from('ai4cc_tenant_members')
+      .select('tenant_id, role')
+      .eq('tenant_id', tenant.id)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (mErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${mErr.message}`);
+    if (!m) throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    return { tenantId: m.tenant_id as string, role: m.role as string };
+  }
+
+  const { data: rows, error: rowsErr } = await admin
+    .from('ai4cc_tenant_members')
+    .select('tenant_id, role, created_at, ai4cc_tenants!inner(slug, status)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+  if (rowsErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${rowsErr.message}`);
+  const active = (rows ?? []).filter((r) => {
+    const t = r.ai4cc_tenants as unknown as { status: string } | { status: string }[];
+    return (Array.isArray(t) ? t[0]?.status : t?.status) === 'active';
+  });
+  if (active.length === 0) throw new Error('AI4CC_NO_TENANT');
+  const home = active.find((r) => {
+    const t = r.ai4cc_tenants as unknown as { slug: string } | { slug: string }[];
+    return (Array.isArray(t) ? t[0]?.slug : t?.slug) === HOME_TENANT_SLUG;
+  });
+  const chosen = home ?? active[0];
+  return { tenantId: chosen.tenant_id as string, role: chosen.role as string };
+}
 
 export type Ai4ccServerContext = {
   admin: SupabaseClient;
@@ -42,29 +105,20 @@ export async function requireAi4ccContext(req: NextApiRequest): Promise<Ai4ccSer
 
   if (!user) throw new Error('AI4CC_NOT_AUTHENTICATED');
 
-  const { data: membership, error: membershipError } = await admin
-    .from('ai4cc_tenant_members')
-    .select('tenant_id, role')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (membershipError) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${membershipError.message}`);
-  if (!membership) throw new Error('AI4CC_NO_TENANT');
+  const membership = await resolveMembership(admin, user.id, req);
 
   return {
     admin,
     userId: user.id,
-    tenantId: membership.tenant_id as string,
-    role: membership.role as string,
+    tenantId: membership.tenantId,
+    role: membership.role,
   };
 }
 
 export function apiErrorStatus(error: unknown): number {
   const message = error instanceof Error ? error.message : String(error);
   if (message === 'AI4CC_NOT_AUTHENTICATED') return 401;
-  if (message === 'AI4CC_NO_TENANT') return 403;
+  if (message === 'AI4CC_NO_TENANT' || message === 'AI4CC_NOT_TENANT_MEMBER') return 403;
   if (message === 'AI4CC_STORAGE_NOT_CONFIGURED') return 503;
   return 500;
 }
@@ -73,7 +127,8 @@ export function apiErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (message === 'AI4CC_NOT_AUTHENTICATED') return 'Not authenticated';
   if (message === 'AI4CC_NO_TENANT') return 'No AI4 Contact Center tenant membership found';
+  if (message === 'AI4CC_NOT_TENANT_MEMBER') return 'You do not have access to this workspace';
   if (message === 'AI4CC_STORAGE_NOT_CONFIGURED') return 'Canonical Supabase storage is not configured';
-  if (message.startsWith('AI4CC_MEMBERSHIP_ERROR:')) return message.slice('AI4CC_MEMBERSHIP_ERROR:'.length);
+  if (message.startsWith('AI4CC_MEMBERSHIP_ERROR:')) return 'Could not verify workspace membership';
   return message;
 }

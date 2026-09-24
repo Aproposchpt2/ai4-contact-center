@@ -4,6 +4,7 @@ import { generateGuidance, type AssistSession } from '@/lib/agentAssistEngine';
 import { generateQAReport } from '@/lib/qualityAssuranceEngine';
 import { selectRuntimeRoute } from '@/lib/runtimeRouting';
 import { resolveRuntimeFlowAuthority, runtimeEnvironment } from '@/lib/runtimeFlowDeployment';
+import { HOME_TENANT_SLUG, requestTenantSlug } from '@/lib/ai4ccServer';
 
 type ChatBody = { action?: 'message' | 'end'; sessionId?: string; visitorId?: string; message?: string };
 
@@ -17,18 +18,21 @@ function storage() {
 function validateOrigin(req: NextApiRequest) {
   if (process.env.NODE_ENV !== 'production') return;
   const origin = req.headers.origin;
-  const host = req.headers.host;
+  const fwd = req.headers['x-forwarded-host'];
+  const host = (Array.isArray(fwd) ? fwd[0] : fwd) ?? req.headers.host;
   if (!origin || !host || new URL(origin).host !== host) throw new Error('Invalid web chat origin');
 }
 
 function validSessionId(value: string) { return /^[A-Za-z0-9_-]{8,80}$/.test(value); }
 function sentimentValue(sentiment: 'negative' | 'neutral' | 'positive') { return sentiment === 'negative' ? -0.7 : sentiment === 'positive' ? 0.7 : 0; }
 
-async function runtimeContext() {
+async function runtimeContext(req: NextApiRequest) {
   const admin = storage();
-  const { data: tenant, error: tenantError } = await admin.from('ai4cc_tenants').select('id,name').order('created_at', { ascending: true }).limit(1).maybeSingle();
+  // The chat widget belongs to the tenant whose host it is served from (bare host = home tenant).
+  const slug = requestTenantSlug(req) ?? HOME_TENANT_SLUG;
+  const { data: tenant, error: tenantError } = await admin.from('ai4cc_tenants').select('id,name').eq('slug', slug).eq('status', 'active').maybeSingle();
   if (tenantError) throw tenantError;
-  if (!tenant) throw new Error('No AI4CC tenant is configured');
+  if (!tenant) throw new Error('Web chat is not available');
 
   const environment = runtimeEnvironment();
   const [queueResult, agentResult, activeResult, flowAuthority] = await Promise.all([
@@ -53,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const body = (req.body ?? {}) as ChatBody;
     const sessionId = body.sessionId?.trim() ?? '';
     if (!validSessionId(sessionId)) return res.status(400).json({ error: 'A valid chat session id is required' });
-    const ctx = await runtimeContext();
+    const ctx = await runtimeContext(req);
     const externalId = `webchat:${sessionId}`;
     const visitorId = (body.visitorId?.trim() || `visitor-${sessionId.slice(0, 8)}`).slice(0, 120);
     const { data: existing, error: existingError } = await ctx.admin.from('ai4cc_interactions').select('id,status,flow_version_id').eq('tenant_id', ctx.tenant.id).eq('channel', 'chat').eq('external_id', externalId).maybeSingle();
@@ -120,6 +124,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ ok: true, interactionId: interaction.id, sessionId, status: 'active', reply, route: { intent: guidance.detectedIntent, priority: guidance.state.escalationRisk === 'high' ? 'high' : 'normal', escalationRisk: guidance.state.escalationRisk, queue: route.queue, agent: route.agent, reason: route.reason, estimatedWaitSeconds: route.estimatedWaitSeconds }, qa: { quality: score.qualityScore, compliance: score.complianceScore, adherence: score.flowAdherenceScore, sentiment: score.sentimentScore }, flowAuthority: ctx.flowAuthority ? { versionId: ctx.flowAuthority.versionId, deploymentId: ctx.flowAuthority.deploymentId, authority: ctx.flowAuthority.authority, environment: ctx.flowAuthority.environment } : null });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Web chat request failed';
-    return res.status(message === 'Invalid web chat origin' ? 403 : 500).json({ error: message });
+    if (message === 'Invalid web chat origin') return res.status(403).json({ error: message });
+    if (message === 'Web chat is not available') return res.status(404).json({ error: message });
+    console.error('[chat] failed', error);
+    return res.status(500).json({ error: 'Web chat request failed' });
   }
 }
