@@ -23,6 +23,7 @@ test('slug validation', () => {
   assert.equal(isValidTenantSlug('a--b'), false);
   assert.equal(isValidTenantSlug('acme-2'), true);
   assert.equal(isValidTenantSlug('admin'), false);
+  assert.equal(isValidTenantSlug('api-staging'), false);
 });
 
 test('marketing and Apropos-data paths are blocked on tenant hosts', () => {

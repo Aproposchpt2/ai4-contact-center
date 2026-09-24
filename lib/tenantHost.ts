@@ -19,7 +19,8 @@ export const STAGING_PREFIX = 'stg-';
 const isStagingApp = () => process.env.AI4CC_ENVIRONMENT === 'staging';
 
 export function isValidTenantSlug(slug: string): boolean {
-  if (!SLUG_RE.test(slug) || slug.includes('--') || RESERVED_SLUGS.has(slug)) return false;
+  // "api-*" hostnames (e.g. api-staging.stellaruc.com) are service endpoints, never workspaces.
+  if (!SLUG_RE.test(slug) || slug.includes('--') || RESERVED_SLUGS.has(slug) || slug.startsWith('api-')) return false;
   return slug.startsWith(STAGING_PREFIX) === isStagingApp();
 }
 
