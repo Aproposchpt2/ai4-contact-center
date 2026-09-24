@@ -11,6 +11,19 @@
 # The marketing site now lives at stellaruc.com (primary domain). The legacy hostname redirects
 # there for pages, but /api/* is kept on the legacy host: the ElevenLabs intake tools and other
 # machine callers post to it and do not follow redirects. Order matters: first match wins.
+# CANARY (temporary)
+[[redirects]]
+  from = "https://deploy-preview-31--ai4-contact-center.netlify.app/api/*"
+  to = "/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://deploy-preview-31--ai4-contact-center.netlify.app/*"
+  to = "https://stellaruc.com/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "https://ai4contactcenter.aproposgroupllc.com/api/*"
   to = "/api/:splat"
