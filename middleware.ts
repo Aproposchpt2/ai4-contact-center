@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
-import { effectiveHost, isBlockedOnTenantHost, tenantSlugFromHost } from '@/lib/tenantHost';
+import { effectiveHost, isBlockedOnOperatorHost, isBlockedOnTenantHost, isOperatorHost, tenantSlugFromHost } from '@/lib/tenantHost';
 
 const DEMO_SESSION_COOKIE = 'ai4cc_demo_started_at';
 
@@ -8,7 +8,22 @@ export async function middleware(request: NextRequest) {
   // Customer workspaces ({slug}.<root domain>): no sales/marketing pages, no Apropos data mirrors,
   // and the root URL goes straight to the workspace. Tenant membership itself is enforced
   // server-side per request (lib/ai4ccServer.ts), never from anything the browser sends.
-  const onTenantHost = tenantSlugFromHost(effectiveHost((name) => request.headers.get(name))) !== null;
+  const host = effectiveHost((name) => request.headers.get(name));
+  const onTenantHost = tenantSlugFromHost(host) !== null;
+
+  // Operator console (admin.<root>): staff only. Nothing public except /login; the home tenant's
+  // owner/admin role is enforced server-side (resolveMembership) for every data request.
+  const onOperatorHost = isOperatorHost(host);
+  if (onOperatorHost) {
+    const { pathname } = request.nextUrl;
+    if (isBlockedOnOperatorHost(pathname)) return new NextResponse('Not found', { status: 404 });
+    if (pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/ops-console';
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (onTenantHost) {
     const { pathname } = request.nextUrl;
     if (isBlockedOnTenantHost(pathname)) return new NextResponse('Not found', { status: 404 });
@@ -19,8 +34,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = await updateSession(request);
-  if (onTenantHost) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  const response = await updateSession(request, { onlyLoginIsPublic: onOperatorHost });
+  if (onTenantHost || onOperatorHost) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
   if (request.nextUrl.pathname === '/demo') {
     const referer = request.headers.get('referer');

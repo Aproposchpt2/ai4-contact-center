@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost } from '../lib/tenantHost.ts';
+import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost } from '../lib/tenantHost.ts';
 
 test('resolves a single-label tenant host under the default root', () => {
   assert.equal(tenantSlugFromHost('acme-plumbing.stellaruc.com'), 'acme-plumbing');
@@ -55,4 +55,27 @@ test('staging and production slug namespaces are disjoint', () => {
   assert.equal(tenantSlugFromHost('stg-acme.stellaruc.com'), 'stg-acme');
   assert.equal(tenantSlugFromHost('acme.stellaruc.com'), null);
   delete process.env.AI4CC_ENVIRONMENT;
+});
+
+test('operator console host', () => {
+  delete process.env.AI4CC_OPERATOR_HOSTS;
+  assert.equal(isOperatorHost('admin.stellaruc.com'), true);
+  assert.equal(isOperatorHost('Admin.StellarUC.com:443'), true);
+  assert.equal(isOperatorHost('acme.stellaruc.com'), false);
+  assert.equal(isOperatorHost('admin.evil.com'), false);
+  assert.equal(isOperatorHost('x.admin.stellaruc.com'), false);
+  assert.equal(tenantSlugFromHost('admin.stellaruc.com'), null); // reserved: never a workspace
+  process.env.AI4CC_OPERATOR_HOSTS = 'ops.example.com';
+  assert.equal(isOperatorHost('ops.example.com'), true);
+  assert.equal(isOperatorHost('admin.stellaruc.com'), false);
+  delete process.env.AI4CC_OPERATOR_HOSTS;
+});
+
+test('operator host blocks every public surface', () => {
+  for (const p of ['/acquisition', '/demo', '/partners', '/live/leads', '/platform/x', '/api/public/leads', '/web-chat', '/api/chat/message', '/api/intake/webhook']) {
+    assert.equal(isBlockedOnOperatorHost(p), true, p);
+  }
+  for (const p of ['/ops-console', '/dashboard', '/login', '/lead-management', '/api/mission-control/status']) {
+    assert.equal(isBlockedOnOperatorHost(p), false, p);
+  }
 });
