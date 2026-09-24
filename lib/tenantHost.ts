@@ -24,6 +24,10 @@ export function isValidTenantSlug(slug: string): boolean {
   return slug.startsWith(STAGING_PREFIX) === isStagingApp();
 }
 
+function normalizeHost(hostHeader: string): string {
+  return hostHeader.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+}
+
 function rootDomains(): string[] {
   return (process.env.AI4CC_TENANT_ROOT_DOMAINS ?? DEFAULT_ROOTS)
     .split(',')
@@ -44,7 +48,7 @@ export function effectiveHost(get: (name: string) => string | undefined | null):
 
 export function tenantSlugFromHost(hostHeader: string | undefined | null): string | null {
   if (!hostHeader) return null;
-  const host = hostHeader.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+  const host = normalizeHost(hostHeader);
   for (const root of rootDomains()) {
     if (!host.endsWith(`.${root}`)) continue;
     const label = host.slice(0, -(root.length + 1));
@@ -52,6 +56,31 @@ export function tenantSlugFromHost(hostHeader: string | undefined | null): strin
     return isValidTenantSlug(label) ? label : null;
   }
   return null;
+}
+
+// Operator console hosts (default admin.<root>): staff-only. Set AI4CC_OPERATOR_HOSTS to a
+// comma-separated list of full hostnames to override.
+export function isOperatorHost(hostHeader: string | undefined | null): boolean {
+  if (!hostHeader) return false;
+  const host = normalizeHost(hostHeader);
+  const configured = process.env.AI4CC_OPERATOR_HOSTS;
+  const hosts = configured ? configured.split(',').map((h) => h.trim().toLowerCase()).filter(Boolean) : rootDomains().map((r) => `admin.${r}`);
+  return hosts.includes(host);
+}
+
+// Everything a public visitor could use must not exist on the operator console.
+export function isBlockedOnOperatorHost(pathname: string): boolean {
+  return (
+    pathname === '/acquisition' ||
+    pathname === '/partners' ||
+    pathname === '/demo' ||
+    pathname === '/web-chat' ||
+    pathname.startsWith('/platform/') ||
+    pathname.startsWith('/live/') ||
+    pathname.startsWith('/api/public/') ||
+    pathname.startsWith('/api/chat/') ||
+    pathname.startsWith('/api/intake/')
+  );
 }
 
 // Paths that belong to the marketing / Apropos-internal surface and must never be served on a

@@ -1,7 +1,7 @@
 import type { NextApiRequest } from 'next';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
-import { effectiveHost, tenantSlugFromHost } from '@/lib/tenantHost';
+import { effectiveHost, isOperatorHost, tenantSlugFromHost } from '@/lib/tenantHost';
 
 // The tenant whose users may sign in on a bare (non-tenant) host such as the legacy
 // ai4contactcenter.aproposgroupllc.com. Everyone else signs in on their own {slug}.<root> host.
@@ -29,6 +29,23 @@ export async function resolveMembership(
   req: NextApiRequest,
 ): Promise<{ tenantId: string; role: string }> {
   const slug = requestTenantSlug(req);
+
+  // Operator console: only owners/admins of the home tenant, acting in the home tenant.
+  if (isOperatorHost(requestHost(req))) {
+    const { data: home, error: homeErr } = await admin.from('ai4cc_tenants').select('id, status').eq('slug', HOME_TENANT_SLUG).maybeSingle();
+    if (homeErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${homeErr.message}`);
+    if (!home || home.status !== 'active') throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    const { data: op, error: opErr } = await admin
+      .from('ai4cc_tenant_members')
+      .select('tenant_id, role')
+      .eq('tenant_id', home.id)
+      .eq('user_id', userId)
+      .in('role', ['owner', 'admin'])
+      .maybeSingle();
+    if (opErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${opErr.message}`);
+    if (!op) throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    return { tenantId: op.tenant_id as string, role: op.role as string };
+  }
 
   if (slug) {
     const { data: tenant, error } = await admin

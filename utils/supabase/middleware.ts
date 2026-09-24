@@ -23,7 +23,7 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest, options: { onlyLoginIsPublic?: boolean } = {}) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
@@ -41,7 +41,8 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  if (isPublicPath(request.nextUrl.pathname)) return supabaseResponse;
+  const publicPath = options.onlyLoginIsPublic ? request.nextUrl.pathname === '/login' : isPublicPath(request.nextUrl.pathname);
+  if (publicPath) return supabaseResponse;
 
   const { data: { user } } = await supabase.auth.getUser();
   if (user) return supabaseResponse;
