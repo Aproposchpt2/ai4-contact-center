@@ -3,6 +3,23 @@
 **Status:** draft 2026-09-24 · companion to `AI4CC-ONBOARDING-BLUEPRINT-001.md`
 **Confirmed by Jeff 2026-09-24:** Supabase organization `STELLAR-SAAS-PRODUCTION` with two projects — production `vqrqyanqsiqzsmlhytaz` and staging `hvzauakkhlivzeqatfqm`. Jeff has another agent building out the Supabase side; do not touch those projects until he says so. Telephony backend: `Aproposchpt2/ai-contact-center-os-backend` (api.aproposgroupllc.com, Netlify Functions). DNS: `stellaruc.com` is on Cloudflare (no records yet); Netlify DNS is not needed because the Worker in §4 routes every host.
 
+## Hostname map (locked by Jeff 2026-09-24)
+
+| Function | Host | Served by | State |
+|---|---|---|---|
+| Promotional website | `stellaruc.com` (primary), `www` redirects to it | web app (Netlify `ai4-contact-center`) | **live**; legacy `ai4contactcenter.aproposgroupllc.com` pages 301 here, its `/api/*` stays put |
+| Customer entry (generic) | `app.stellaruc.com` | web app | code on PR #30 (workspace finder only); DNS/alias not yet added |
+| Customer workspace | `{client}.stellaruc.com` | web app via Cloudflare Worker | code on PR #30; Worker not deployed |
+| Internal command center | `admin.stellaruc.com` | web app | DNS + alias live; operator-only rules on PR #30 (until merged it still shows the public site) |
+| Staging command center | `admin-staging.stellaruc.com` | staging web app | operator rules on PR #30; DNS/alias not yet added |
+| Production backend API | `api.stellaruc.com` | telephony backend (Netlify `ai-contact-center-os-backend`) | not yet added |
+| Staging backend API | `api-staging.stellaruc.com` | should be a separate staging backend | DNS + alias live, **but currently points at the production backend** |
+| Help center / status page | `help.`, `status.` | future | reserved names only |
+
+**app vs. workspace:** `app.stellaruc.com` is the generic entry. It holds no customer data and no session; it asks for a workspace name and sends the user to `{client}.stellaruc.com/login`, where they sign in. Each customer's real work — leads, calls, dashboard — lives only on that customer's own host. Sessions are host-only cookies, so one workspace's session is never sent to another.
+
+Reserved (never a workspace name): app, admin, admin-*, api, api-*, www, help, status, and the other names in `lib/tenantHost.ts`.
+
 ## 0. Why a new Supabase organization matters (VERIFIED)
 
 The current AI4CC project (`pwvstaigtdrccirdvqka`) is a **shared database**: besides the 27 `ai4cc_*` tables it holds Contract Brief (`cbrief_*`), BODA, FCP, ASTB, NSR, SAM contractor data and a set of un-prefixed legacy tables. The AI4CC app runs with that project's **service-role key**, so any bug in a tenant-scoped route can reach every product's data. A separate org/project per environment removes that blast radius. **Rule for the new projects: only `ai4cc_*` objects, and only the SaaS app's service key.**
