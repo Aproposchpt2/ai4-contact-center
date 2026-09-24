@@ -11,7 +11,7 @@ The current AI4CC project (`pwvstaigtdrccirdvqka`) is a **shared database**: bes
 
 | Piece | Staging | Production |
 |---|---|---|
-| Supabase project | `stellaruc-staging` | `stellaruc-prod` |
+| Supabase project | STELLAR-SAAS-STAGING (`hvzauakkhlivzeqatfqm`) | STELLAR-SAAS-PRODUCTION (`vqrqyanqsiqzsmlhytaz`) |
 | Netlify site (same repo) | deploys branch `staging` only | deploys `main` |
 | Customer hosts | `stg-{name}.stellaruc.com` (slugs must start with `stg-`; set `AI4CC_ENVIRONMENT=staging`) | `{slug}.stellaruc.com` (slugs may NOT start with `stg-`) |
 | Cloudflare Worker | one Worker for the zone; hosts starting `stg-` go to the staging origin, all others to production | same Worker |
