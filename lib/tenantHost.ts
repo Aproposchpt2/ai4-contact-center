@@ -23,6 +23,17 @@ function rootDomains(): string[] {
     .filter(Boolean);
 }
 
+// The host the customer actually typed. Behind the Cloudflare Worker (which proxies
+// *.<root> to the Netlify site) it arrives in x-ai4cc-forwarded-host; when AI4CC_EDGE_SECRET is
+// set, that header is honored only together with a matching x-ai4cc-edge-key. Membership is still
+// verified server-side, so a spoofed host can never grant access to another tenant's data.
+export function effectiveHost(get: (name: string) => string | undefined | null): string | null {
+  const forwarded = get('x-ai4cc-forwarded-host');
+  const secret = process.env.AI4CC_EDGE_SECRET;
+  if (forwarded && (!secret || get('x-ai4cc-edge-key') === secret)) return forwarded;
+  return get('x-forwarded-host') ?? get('host') ?? null;
+}
+
 export function tenantSlugFromHost(hostHeader: string | undefined | null): string | null {
   if (!hostHeader) return null;
   const host = hostHeader.split(',')[0].trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');

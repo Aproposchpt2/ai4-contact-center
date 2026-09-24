@@ -1,0 +1,33 @@
+{
+  "home_services": {
+    "queues": [
+      { "code": "EMERGENCY", "name": "Emergency / On-Call", "channel": "voice", "skills": ["emergency"], "priority": 10, "capacity": 5 },
+      { "code": "SCHEDULING", "name": "Scheduling & Estimates", "channel": "omnichannel", "skills": ["scheduling", "sales"], "priority": 50, "capacity": 10 },
+      { "code": "BILLING", "name": "Billing", "channel": "omnichannel", "skills": ["billing"], "priority": 100, "capacity": 5 },
+      { "code": "GENERAL", "name": "General", "channel": "omnichannel", "skills": ["general"], "priority": 200, "capacity": 10 }
+    ]
+  },
+  "property_management": {
+    "queues": [
+      { "code": "EMERGENCY_MAINT", "name": "Emergency Maintenance", "channel": "voice", "skills": ["emergency", "maintenance"], "priority": 10, "capacity": 5 },
+      { "code": "MAINTENANCE", "name": "Maintenance Requests", "channel": "omnichannel", "skills": ["maintenance"], "priority": 60, "capacity": 10 },
+      { "code": "LEASING", "name": "Leasing", "channel": "omnichannel", "skills": ["leasing", "sales"], "priority": 80, "capacity": 10 },
+      { "code": "ACCOUNTING", "name": "Accounting & Payments", "channel": "omnichannel", "skills": ["billing"], "priority": 120, "capacity": 5 }
+    ]
+  },
+  "automotive": {
+    "queues": [
+      { "code": "SERVICE_APPT", "name": "Service Appointments", "channel": "omnichannel", "skills": ["scheduling", "service"], "priority": 50, "capacity": 10 },
+      { "code": "STATUS", "name": "Vehicle Status", "channel": "omnichannel", "skills": ["service"], "priority": 100, "capacity": 10 },
+      { "code": "PARTS", "name": "Parts", "channel": "voice", "skills": ["parts"], "priority": 120, "capacity": 5 },
+      { "code": "MANAGER", "name": "Service Manager", "channel": "voice", "skills": ["escalation"], "priority": 20, "capacity": 3 }
+    ]
+  },
+  "general": {
+    "queues": [
+      { "code": "SALES", "name": "Sales", "channel": "omnichannel", "skills": ["sales"], "priority": 50, "capacity": 10 },
+      { "code": "SUPPORT", "name": "Support", "channel": "omnichannel", "skills": ["support"], "priority": 100, "capacity": 10 },
+      { "code": "GENERAL", "name": "General", "channel": "omnichannel", "skills": ["general"], "priority": 200, "capacity": 10 }
+    ]
+  }
+}

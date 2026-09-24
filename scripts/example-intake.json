@@ -1,0 +1,11 @@
+{
+  "name": "Fictitious Plumbing Co",
+  "slug": "fictitious-plumbing",
+  "owner_email": "owner@example.invalid",
+  "timezone": "America/Los_Angeles",
+  "company_name": "Fictitious Plumbing Co",
+  "product_name": "Call Center",
+  "support_email": "support@example.invalid",
+  "vertical": "home_services",
+  "modules": "core"
+}

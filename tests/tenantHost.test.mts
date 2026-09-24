@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug } from '../lib/tenantHost.ts';
+import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost } from '../lib/tenantHost.ts';
 
 test('resolves a single-label tenant host under the default root', () => {
   assert.equal(tenantSlugFromHost('acme-plumbing.stellaruc.com'), 'acme-plumbing');
@@ -32,4 +32,14 @@ test('marketing and Apropos-data paths are blocked on tenant hosts', () => {
   for (const p of ['/dashboard', '/lead-management', '/api/lead-management', '/web-chat', '/login', '/api/chat/message']) {
     assert.equal(isBlockedOnTenantHost(p), false, p);
   }
+});
+
+test('effectiveHost prefers the edge-forwarded host, honoring the edge secret when configured', () => {
+  const h = (o: Record<string, string>) => (n: string) => o[n];
+  delete process.env.AI4CC_EDGE_SECRET;
+  assert.equal(effectiveHost(h({ 'x-ai4cc-forwarded-host': 'a.stellaruc.com', host: 'site.netlify.app' })), 'a.stellaruc.com');
+  process.env.AI4CC_EDGE_SECRET = 's3';
+  assert.equal(effectiveHost(h({ 'x-ai4cc-forwarded-host': 'a.stellaruc.com', host: 'site.netlify.app' })), 'site.netlify.app');
+  assert.equal(effectiveHost(h({ 'x-ai4cc-forwarded-host': 'a.stellaruc.com', 'x-ai4cc-edge-key': 's3', host: 'site.netlify.app' })), 'a.stellaruc.com');
+  delete process.env.AI4CC_EDGE_SECRET;
 });
