@@ -10,8 +10,9 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 // Public marketing/sale surface — buyer-facing pages meant to be seen without a login.
 const PUBLIC_PATHS = new Set(['/', '/login', '/web-chat', '/acquisition', '/demo', '/partners']);
-// /api/intake/ authenticates itself via a shared secret header (see pages/api/intake/webhook.ts) —
-// it's called machine-to-machine by ElevenLabs, which can't carry a Supabase session cookie.
+// /api/intake/ authenticates itself with a per-tenant `x-ai4cc-intake-key` header that also selects
+// the tenant (see pages/api/intake/webhook.ts) — called machine-to-machine by ElevenLabs, which
+// can't carry a Supabase session cookie.
 // /api/public/ is deliberately read-only, minimal-field, no-auth — see pages/api/public/*.
 // /platform/ holds the public capability detail pages linked from the homepage.
 // /live/ holds public read-only mirrors of real CRM data (see pages/live/*), backed only
