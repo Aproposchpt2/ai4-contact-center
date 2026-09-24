@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'black';
 
+type WorkspaceContext = {
+  tenant: { name: string; slug: string };
+  branding: { productName: string | null; companyName: string | null; logoUrl: string | null } | null;
+  modules: string[] | 'all';
+};
+
 const NAV = [
   { href: '/',           label: 'Home'      },
   { href: '/builder',    label: 'Builder'   },
@@ -46,6 +52,26 @@ const NAV = [
 export default function Header() {
   const { pathname } = useRouter();
   const [theme, setTheme] = useState<Theme>('black');
+  const [workspace, setWorkspace] = useState<WorkspaceContext | null>(null);
+
+  // Signed-in tenant members get their workspace branding and module set. Public visitors get a
+  // 401 here and simply keep the default header.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/tenant/context', { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((ctx) => { if (!cancelled && ctx) setWorkspace(ctx as WorkspaceContext); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleNav = workspace && workspace.modules !== 'all'
+    ? NAV.filter(({ href }) => (workspace.modules as string[]).includes(href))
+    : NAV;
+  const showBuilderCta = !workspace || workspace.modules === 'all' || workspace.modules.includes('/builder');
+  const brandName = workspace?.branding?.companyName || workspace?.tenant.name || null;
+  const brandProduct = workspace?.branding?.productName || 'Contact Center';
+  const brandInitials = brandName ? brandName.replace(/[^A-Za-z0-9 ]/g, '').split(/[ ]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'CC' : 'AI4';
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'black';
@@ -64,12 +90,17 @@ export default function Header() {
     <>
       <header className="siteHeader">
         <Link href="/" className="brand">
-          <span className="brandMark">AI4</span>
-          <span className="brandText">Contact Center</span>
+          {workspace?.branding?.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={workspace.branding.logoUrl} alt={brandName ?? 'Logo'} height={30} style={{ height: 30, width: 'auto' }} />
+          ) : (
+            <span className="brandMark">{brandInitials}</span>
+          )}
+          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Contact Center'}</span>
         </Link>
 
         <nav className="navRail" aria-label="Primary navigation">
-          {NAV.map(({ href, label }) => (
+          {visibleNav.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -100,9 +131,11 @@ export default function Header() {
           </button>
         </div>
 
-        <Link href="/builder" className="builderCta">
-          Open Builder →
-        </Link>
+        {showBuilderCta && (
+          <Link href="/builder" className="builderCta">
+            Open Builder →
+          </Link>
+        )}
       </header>
 
       <style jsx>{`

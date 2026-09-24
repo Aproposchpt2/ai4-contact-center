@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { resolveMembership, apiErrorStatus, apiErrorMessage } from '@/lib/ai4ccServer';
 import { createClient } from '@supabase/supabase-js';
 
 type Result = { ok: true } | { error: string };
@@ -26,16 +27,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   const user = userData.user;
   if (userError || !user) return res.status(401).json({ error: 'Not authenticated' });
 
-  const { data: membership, error: membershipError } = await admin
-    .from('ai4cc_tenant_members')
-    .select('tenant_id, role')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (membershipError) return res.status(500).json({ error: membershipError.message });
-  if (!membership) return res.status(403).json({ error: 'No AI4 Contact Center tenant membership found' });
+  let membership: { tenant_id: string; role: string };
+  try {
+    const m = await resolveMembership(admin, user.id, req);
+    membership = { tenant_id: m.tenantId, role: m.role };
+  } catch (error) {
+    return res.status(apiErrorStatus(error)).json({ error: apiErrorMessage(error) });
+  }
 
   const { data: flow, error: flowLookupError } = await admin
     .from('ai4cc_flows')

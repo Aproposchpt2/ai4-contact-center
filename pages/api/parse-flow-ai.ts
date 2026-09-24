@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { parseCallFlow, ParsedCallFlow } from '@/lib/parser';
+import { requireAi4ccContext } from '@/lib/ai4ccServer';
 
 type ErrorResponse = { error: string };
 type SuccessResponse = ParsedCallFlow & { engine: 'ai' | 'rules' };
@@ -44,8 +45,14 @@ export default async function handler(
 
   const { text } = req.body as { text?: string };
   if (!text?.trim()) return res.status(400).json({ error: 'text field is required' });
+  if (text.length > 8000) return res.status(413).json({ error: 'text is too long' });
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  // The paid model call is limited to signed-in tenant members; everyone else gets the free
+  // rule-based parser below.
+  let apiKey = process.env.OPENAI_API_KEY;
+  if (apiKey) {
+    try { await requireAi4ccContext(req); } catch { apiKey = undefined; }
+  }
 
   // ── AI path ──────────────────────────────────────────────────────────────
   if (apiKey) {
