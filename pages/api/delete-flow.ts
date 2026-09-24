@@ -31,6 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   try {
     const m = await resolveMembership(admin, user.id, req);
     membership = { tenant_id: m.tenantId, role: m.role };
+    if (!['owner', 'admin', 'supervisor', 'operator'].includes(m.role)) {
+      return res.status(403).json({ error: 'Your role cannot change flows' });
+    }
   } catch (error) {
     return res.status(apiErrorStatus(error)).json({ error: apiErrorMessage(error) });
   }
