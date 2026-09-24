@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost } from '../lib/tenantHost.ts';
+import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost, isAppHost, isAllowedOnAppHost, primaryRootDomain } from '../lib/tenantHost.ts';
 
 test('resolves a single-label tenant host under the default root', () => {
   assert.equal(tenantSlugFromHost('acme-plumbing.stellaruc.com'), 'acme-plumbing');
@@ -78,4 +78,23 @@ test('operator host blocks every public surface', () => {
   for (const p of ['/ops-console', '/dashboard', '/login', '/lead-management', '/api/mission-control/status']) {
     assert.equal(isBlockedOnOperatorHost(p), false, p);
   }
+});
+
+test('hostname map: app, admin, admin-staging, api hosts are never workspaces', () => {
+  delete process.env.AI4CC_APP_HOSTS; delete process.env.AI4CC_OPERATOR_HOSTS;
+  for (const h of ['app', 'admin', 'admin-staging', 'api', 'api-staging', 'www', 'help', 'status']) {
+    assert.equal(tenantSlugFromHost(`${h}.stellaruc.com`), null, h);
+  }
+  assert.equal(tenantSlugFromHost('level-community.stellaruc.com'), 'level-community');
+  assert.equal(isAppHost('app.stellaruc.com'), true);
+  assert.equal(isAppHost('level-community.stellaruc.com'), false);
+  assert.equal(isOperatorHost('admin-staging.stellaruc.com'), true);
+  assert.equal(isOperatorHost('app.stellaruc.com'), false);
+  assert.equal(primaryRootDomain(), 'stellaruc.com');
+});
+
+test('app host serves only the workspace finder', () => {
+  assert.equal(isAllowedOnAppHost('/find-workspace'), true);
+  assert.equal(isAllowedOnAppHost('/api/workspaces/resolve'), true);
+  for (const p of ['/', '/dashboard', '/lead-management', '/api/lead-management', '/api/public/leads', '/login']) assert.equal(isAllowedOnAppHost(p), false, p);
 });

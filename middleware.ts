@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
-import { effectiveHost, isBlockedOnOperatorHost, isBlockedOnTenantHost, isOperatorHost, tenantSlugFromHost } from '@/lib/tenantHost';
+import { effectiveHost, isAllowedOnAppHost, isAppHost, isBlockedOnOperatorHost, isBlockedOnTenantHost, isOperatorHost, tenantSlugFromHost, APP_HOST_PUBLIC_PATHS } from '@/lib/tenantHost';
 
 const DEMO_SESSION_COOKIE = 'ai4cc_demo_started_at';
 
@@ -10,6 +10,18 @@ export async function middleware(request: NextRequest) {
   // server-side per request (lib/ai4ccServer.ts), never from anything the browser sends.
   const host = effectiveHost((name) => request.headers.get(name));
   const onTenantHost = tenantSlugFromHost(host) !== null;
+
+  // Generic customer entry (app.<root>): only the workspace finder exists here.
+  const onAppHost = isAppHost(host);
+  if (onAppHost) {
+    const { pathname } = request.nextUrl;
+    if (pathname === '/') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/find-workspace';
+      return NextResponse.redirect(url);
+    }
+    if (!isAllowedOnAppHost(pathname)) return new NextResponse('Not found', { status: 404 });
+  }
 
   // Operator console (admin.<root>): staff only. Nothing public except /login; the home tenant's
   // owner/admin role is enforced server-side (resolveMembership) for every data request.
@@ -34,8 +46,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = await updateSession(request, { onlyLoginIsPublic: onOperatorHost });
-  if (onTenantHost || onOperatorHost) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+  const response = await updateSession(request, {
+    publicPaths: onOperatorHost ? ['/login'] : onAppHost ? APP_HOST_PUBLIC_PATHS : undefined,
+  });
+  if (onTenantHost || onOperatorHost || onAppHost) response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
   if (request.nextUrl.pathname === '/demo') {
     const referer = request.headers.get('referer');
