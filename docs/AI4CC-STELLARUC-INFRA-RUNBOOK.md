@@ -1,7 +1,7 @@
 # AI4CC-STELLARUC-INFRA-RUNBOOK — stellaruc.com SaaS environment
 
 **Status:** draft 2026-09-24 · companion to `AI4CC-ONBOARDING-BLUEPRINT-001.md`
-**Assumption to confirm:** the two new Supabase projects are **staging** and **production** for the SaaS (customer workspaces on `{slug}.stellaruc.com`). If they are something else (e.g. control-plane vs. data), tell me and §1 changes.
+**Confirmed by Jeff 2026-09-24:** Supabase organization `STELLAR-SAAS-PRODUCTION` with two projects — production `vqrqyanqsiqzsmlhytaz` and staging `hvzauakkhlivzeqatfqm`. Jeff has another agent building out the Supabase side; do not touch those projects until he says so. Telephony backend: `Aproposchpt2/ai-contact-center-os-backend` (api.aproposgroupllc.com, Netlify Functions). DNS: `stellaruc.com` is on Cloudflare (no records yet); Netlify DNS is not needed because the Worker in §4 routes every host.
 
 ## 0. Why a new Supabase organization matters (VERIFIED)
 
@@ -13,10 +13,10 @@ The current AI4CC project (`pwvstaigtdrccirdvqka`) is a **shared database**: bes
 |---|---|---|
 | Supabase project | `stellaruc-staging` | `stellaruc-prod` |
 | Netlify site (same repo) | deploys branch `staging` only | deploys `main` |
-| Customer hosts | `{slug}.staging.stellaruc.com` (one label under `staging`; set `AI4CC_TENANT_ROOT_DOMAINS=staging.stellaruc.com` on this site) | `{slug}.stellaruc.com` |
-| Cloudflare Worker | `stellaruc-tenant-staging` | `stellaruc-tenant-prod` |
+| Customer hosts | `stg-{name}.stellaruc.com` (slugs must start with `stg-`; set `AI4CC_ENVIRONMENT=staging`) | `{slug}.stellaruc.com` (slugs may NOT start with `stg-`) |
+| Cloudflare Worker | one Worker for the zone; hosts starting `stg-` go to the staging origin, all others to production | same Worker |
 
-Note on Cloudflare Universal SSL: it covers `stellaruc.com` and `*.stellaruc.com` only. `*.staging.stellaruc.com` (two levels) needs Advanced Certificate Manager. **Cheaper alternative:** use `{slug}-stg.stellaruc.com`… or simply test staging on one hostname `staging.stellaruc.com` plus header override. Decide before buying ACM.
+Decision (mine, 2026-09-24, per "you decide"): staging and production share the single-label namespace under `stellaruc.com`, separated by the `stg-` prefix. Cloudflare Universal SSL covers `*.stellaruc.com` (one label) at no cost, so no Advanced Certificate Manager is needed. The app enforces the split (`lib/tenantHost.ts`): a production app rejects `stg-` slugs and a staging app rejects everything else.
 
 Keep the existing `ai4-contact-center` Netlify site as the Apropos demo/acquisition site until you decide otherwise (billing note from memory: each extra auto-deploying site adds per-deploy cost; staging deploys from its own branch so main pushes deploy once per site).
 
@@ -37,7 +37,8 @@ Keep the existing `ai4-contact-center` Netlify site as the Apropos demo/acquisit
 |---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | prod project | staging project | database |
 | `AI4CC_TENANT_ROOT_DOMAINS` | `stellaruc.com` | staging root | which hosts are tenant hosts |
-| `AI4CC_HOME_TENANT_SLUG` | your own workspace slug | same | bare-host default tenant |
+| `AI4CC_HOME_TENANT_SLUG` | `apropos` (decided) | `stg-apropos` | bare-host default tenant |
+| `AI4CC_ENVIRONMENT` | (unset) | `staging` | slug namespace rule |
 | `AI4CC_EDGE_SECRET` | random, same as Worker `EDGE_SECRET` | separate | trust the Worker's forwarded host |
 | `AI4CC_INTAKE_ALLOW_UNKEYED` | `false` | `false` | webhook requires a per-tenant key (new projects have no legacy demo agent) |
 | `AI4CC_BACKEND_URL` | telephony backend | staging backend | see §6 |
@@ -47,7 +48,7 @@ Keep the existing `ai4-contact-center` Netlify site as the Apropos demo/acquisit
 
 1. DNS: proxied (orange-cloud) records `stellaruc.com` and `*` pointing at any placeholder (e.g. `A 192.0.2.1`); the Worker answers, so the target is never used.
 2. SSL/TLS mode **Full**. Universal SSL already covers `*.stellaruc.com`.
-3. Deploy `infra/cloudflare-tenant-worker.js`; variables `ORIGIN_URL` (the Netlify site URL) and secret `EDGE_SECRET`; routes `*.stellaruc.com/*` (customer workspaces). The bare `stellaruc.com/*` can route to the same Worker (the app shows the marketing site there because no tenant slug is present).
+3. Deploy `infra/cloudflare-tenant-worker.js`; variables `ORIGIN_URL`, `EDGE_SECRET`, `STAGING_ORIGIN_URL`, `STAGING_EDGE_SECRET` (secrets); routes `*.stellaruc.com/*` (customer workspaces). The bare `stellaruc.com/*` can route to the same Worker (the app shows the marketing site there because no tenant slug is present). Not deployed yet: the Netlify origins do not exist until the Supabase side hands over keys.
 4. Caching: **bypass everything** (all pages are per-user).
 5. WAF rate limits: `POST /api/intake/webhook` and `POST /api/chat/message` (per IP), and `/login`.
 6. Email DNS for Resend (SPF/DKIM/DMARC) on `stellaruc.com`.
@@ -59,9 +60,15 @@ Keep the existing `ai4-contact-center` Netlify site as the Apropos demo/acquisit
 - Twilio number bought only after Owner approval; attached to that agent.
 - Recording/AI disclosure wording approved by the customer/counsel before go-live.
 
-## 6. Open dependency: the telephony backend
+## 6. Telephony backend (audited 2026-09-24, commit 30ee393)
 
-`AI4CC_BACKEND_URL` (default `https://api.aproposgroupllc.com`) hosts the Twilio voice/SMS webhooks. I have not seen that repository. Before phone traffic for customers can go through it, it must (a) map the dialed number → tenant, (b) use the new project's database, and (c) never fall back to a default tenant. **Tell me the repo name and I'll audit it the same way as the web app.** Note: the ElevenLabs-native path (agent → webhook tools) does not depend on it.
+Netlify Functions: `twilio-voice`, `twilio-messaging` and three health functions. Twilio signatures are validated; one deployment served exactly one tenant (`AI4CC_TENANT_ID`) and nothing mapped a dialed number to a tenant.
+
+- **Done (draft PR #10 on the backend repo, not merged):** `src/lib/tenantResolution.ts` resolves the tenant per call — known CallSid stays with its tenant, else the dialed number via `ai4cc_phone_numbers`, else the legacy env tenant only while `AI4CC_ALLOW_ENV_TENANT_FALLBACK` is not `false`. Unmapped numbers are refused. Legacy databases without the table keep today's behavior. 6 unit tests.
+- **New multi-tenant backend sites** (staging and production): unset `AI4CC_TENANT_ID`, set `AI4CC_ALLOW_ENV_TENANT_FALLBACK=false`, point `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` at the matching new project, set `TWILIO_AUTH_TOKEN`. Each Twilio number's webhooks go to that site.
+- `ai4cc_phone_numbers` is in the web app baseline and `scripts/provision-tenant.mjs` registers numbers from `phone_numbers` in the intake file.
+- **Still open:** the web app's channel-status page reads tenant details from the backend `/health` (now tenant-free on multi-tenant sites); `src/routes/*` (undeployed Express API, no auth) should be deleted; if a proxy ever fronts the API, Twilio signature validation must use the public URL.
+- Moving to new projects re-keys everything tied to the old tenant UUID (`AI4CC_TENANT_ID`, ElevenLabs webhook keys, Twilio numbers).
 
 ## 7. Staged test onboarding (dry run, fictitious customer)
 
@@ -74,10 +81,8 @@ Keep the existing `ai4-contact-center` Netlify site as the Apropos demo/acquisit
 7. Optional: one Twilio test number → call forwarded from a personal phone.
 8. Generate/deliver guides (blueprint §7), run the go-live checklist (§8), then delete the fictitious tenants.
 
-## 8. Decisions needed from you
+## 8. Status and remaining decisions
 
-1. Are the two Supabase projects staging + production? (see top)
-2. Staging hostnames: buy ACM, or use a single `staging.stellaruc.com`?
-3. Telephony backend repository name.
-4. Home tenant slug for your own workspace on the new stack.
-5. Pricing shape (still open from the blueprint).
+Decided: projects (see top), Cloudflare-only DNS with the Worker, `stg-` staging namespace, home slug `apropos`.
+Waiting on Jeff / the Supabase agent: keys and applying `supabase/baseline/00_ai4cc_baseline.sql` (validated locally on PGlite: applies clean, 28 tables, RLS isolation test passes, anon denied).
+Still open: pricing shape; whether staging gets its own Twilio number; Cloudflare Worker deployment (blocked on Netlify origins).
