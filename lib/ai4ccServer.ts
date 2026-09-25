@@ -2,6 +2,7 @@ import type { NextApiRequest } from 'next';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { effectiveHost, isOperatorHost, tenantSlugFromHost } from '@/lib/tenantHost';
+import { membershipIn, membershipsForUser, tenantBySlug, tenantsByIds } from '@/lib/tenantModel';
 
 // The tenant whose users may sign in on a bare (non-tenant) host such as the legacy
 // ai4contactcenter.aproposgroupllc.com. Everyone else signs in on their own {slug}.<root> host.
@@ -32,60 +33,31 @@ export async function resolveMembership(
 
   // Operator console: only owners/admins of the home tenant, acting in the home tenant.
   if (isOperatorHost(requestHost(req))) {
-    const { data: home, error: homeErr } = await admin.from('ai4cc_tenants').select('id, status').eq('slug', HOME_TENANT_SLUG).maybeSingle();
-    if (homeErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${homeErr.message}`);
-    if (!home || home.status !== 'active') throw new Error('AI4CC_NOT_TENANT_MEMBER');
-    const { data: op, error: opErr } = await admin
-      .from('ai4cc_tenant_members')
-      .select('tenant_id, role')
-      .eq('tenant_id', home.id)
-      .eq('user_id', userId)
-      .in('role', ['owner', 'admin'])
-      .maybeSingle();
-    if (opErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${opErr.message}`);
+    const home = await tenantBySlug(admin, HOME_TENANT_SLUG);
+    if (!home || !home.active) throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    const op = await membershipIn(admin, home.id, userId, ['owner', 'admin']);
     if (!op) throw new Error('AI4CC_NOT_TENANT_MEMBER');
-    return { tenantId: op.tenant_id as string, role: op.role as string };
+    return op;
   }
 
   if (slug) {
-    const { data: tenant, error } = await admin
-      .from('ai4cc_tenants')
-      .select('id, status')
-      .eq('slug', slug)
-      .maybeSingle();
-    if (error) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${error.message}`);
-    if (!tenant || tenant.status !== 'active') throw new Error('AI4CC_NOT_TENANT_MEMBER');
-    const { data: m, error: mErr } = await admin
-      .from('ai4cc_tenant_members')
-      .select('tenant_id, role')
-      .eq('tenant_id', tenant.id)
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (mErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${mErr.message}`);
+    const tenant = await tenantBySlug(admin, slug);
+    if (!tenant || !tenant.active) throw new Error('AI4CC_NOT_TENANT_MEMBER');
+    const m = await membershipIn(admin, tenant.id, userId);
     if (!m) throw new Error('AI4CC_NOT_TENANT_MEMBER');
-    return { tenantId: m.tenant_id as string, role: m.role as string };
+    return m;
   }
 
-  const { data: rows, error: rowsErr } = await admin
-    .from('ai4cc_tenant_members')
-    .select('tenant_id, role, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
-  if (rowsErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${rowsErr.message}`);
-  if (!rows || rows.length === 0) throw new Error('AI4CC_NO_TENANT');
+  const rows = await membershipsForUser(admin, userId);
+  if (rows.length === 0) throw new Error('AI4CC_NO_TENANT');
 
-  const { data: tenants, error: tenantsErr } = await admin
-    .from('ai4cc_tenants')
-    .select('id, slug, status')
-    .in('id', rows.map((r) => r.tenant_id));
-  if (tenantsErr) throw new Error(`AI4CC_MEMBERSHIP_ERROR:${tenantsErr.message}`);
-  const activeById = new Map((tenants ?? []).filter((t) => t.status === 'active').map((t) => [t.id as string, t.slug as string]));
+  const tenants = await tenantsByIds(admin, rows.map((r) => r.tenantId));
+  const activeById = new Map(tenants.filter((t) => t.active).map((t) => [t.id, t.slug]));
 
-  const active = rows.filter((r) => activeById.has(r.tenant_id as string));
+  const active = rows.filter((r) => activeById.has(r.tenantId));
   if (active.length === 0) throw new Error('AI4CC_NO_TENANT');
-  const home = active.find((r) => activeById.get(r.tenant_id as string) === HOME_TENANT_SLUG);
-  const chosen = home ?? active[0];
-  return { tenantId: chosen.tenant_id as string, role: chosen.role as string };
+  const home = active.find((r) => activeById.get(r.tenantId) === HOME_TENANT_SLUG);
+  return home ?? active[0];
 }
 
 export type Ai4ccServerContext = {

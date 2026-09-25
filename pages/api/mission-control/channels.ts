@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAi4ccContext, apiErrorMessage, apiErrorStatus } from '@/lib/ai4ccServer';
+import { tenantById } from '@/lib/tenantModel';
 import { deriveChannelStatus } from '@/lib/missionControl';
 
 type BackendHealth = {
@@ -38,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const [voice, sms, tenantResult, queuesResult, agentsResult, versionResult] = await Promise.all([
       fetchHealth(`${backendBase}/webhooks/twilio/voice/health`),
       fetchHealth(`${backendBase}/webhooks/twilio/messaging/health`),
-      ctx.admin.from('ai4cc_tenants').select('id,name').eq('id', ctx.tenantId).single(),
+      tenantById(ctx.admin, ctx.tenantId).then((data) => ({ data, error: null })),
       ctx.admin.from('ai4cc_queues').select('id', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId).eq('status', 'active'),
       ctx.admin.from('ai4cc_agents').select('id', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId).eq('status', 'available'),
       ctx.admin.from('ai4cc_flow_versions').select('id,ai4cc_flows!inner(tenant_id)').eq('ai4cc_flows.tenant_id', ctx.tenantId).order('created_at', { ascending: false }).limit(1).maybeSingle(),

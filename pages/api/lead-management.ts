@@ -108,7 +108,7 @@ function rpcFailure(error: any, res: NextApiResponse) {
     message.includes('AI4CC_TERMINAL_TRANSITION_FORBIDDEN') ||
     message.includes('AI4CC_PIPELINE_TRANSITION_FORBIDDEN') ||
     message.includes('AI4CC_LOST_REASON_FORBIDDEN') ||
-    message.includes('AI4CC_TENANT_MEMBERSHIP_REQUIRED')
+    /TENANT_MEMBERSHIP_REQUIRED/.test(message)
   ) {
     return res.status(403).json({ error: 'This role is not authorized for the requested Lead operation' });
   }
@@ -240,7 +240,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (lifecycleError.message.includes('AI4CC_INTERACTION_NOT_FOUND')) {
           return res.status(404).json({ error: 'Interaction was not found for this tenant' });
         }
-        if (lifecycleError.message.includes('AI4CC_TENANT_MEMBERSHIP_REQUIRED')) {
+        if (/TENANT_MEMBERSHIP_REQUIRED/.test(lifecycleError.message)) {
           return res.status(403).json({ error: 'No AI4 Contact Center tenant membership found' });
         }
         throw lifecycleError;

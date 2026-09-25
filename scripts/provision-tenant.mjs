@@ -67,10 +67,17 @@ if (!url || !serviceKey) {
 }
 const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
+// AI4CC_SCHEMA_MODEL=stellar targets the Stellar database (public.tenants / tenant_users / tenant_phone_numbers,
+// tenant created through public.provision_stellar_tenant). Default is the legacy ai4cc_* tenant tables.
+const STELLAR = process.env.AI4CC_SCHEMA_MODEL === 'stellar';
+const T = STELLAR
+  ? { tenants: 'tenants', members: 'tenant_users', slugCol: 'tenant_slug' }
+  : { tenants: 'ai4cc_tenants', members: 'ai4cc_tenant_members', slugCol: 'slug' };
+
 const host = `${slug}.${rootDomain}`;
 const queues = templates[vertical].queues;
 
-const { data: existing, error: existingErr } = await db.from('ai4cc_tenants').select('id').eq('slug', slug).maybeSingle();
+const { data: existing, error: existingErr } = await db.from(T.tenants).select('id').eq(T.slugCol, slug).maybeSingle();
 if (existingErr) {
   console.error('Could not check slug:', existingErr.message);
   process.exit(1);
@@ -99,21 +106,6 @@ try {
     if (error) throw new Error(`${table}: ${error.message}`);
     return data;
   };
-  const tenant = await ins('ai4cc_tenants', { name, slug, timezone, status: 'active' });
-  tenantId = tenant.id;
-  await ins('ai4cc_branding', {
-    tenant_id: tenantId,
-    company_name: str(intake.company_name) || name,
-    product_name: str(intake.product_name) || 'Contact Center',
-    support_email: str(intake.support_email) || null,
-    settings: { modules, vertical },
-  });
-  const site = await ins('ai4cc_sites', { tenant_id: tenantId, name: 'Main', code: 'main', timezone });
-  const { error: qErr } = await db
-    .from('ai4cc_queues')
-    .insert(queues.map((q) => ({ ...q, tenant_id: tenantId, site_id: site.id, status: 'active' })));
-  if (qErr) throw new Error(`ai4cc_queues: ${qErr.message}`);
-
   // Owner: reuse an existing auth user, otherwise create one (confirmed, no password) and mint a
   // one-time invite link. Nothing is emailed by this script.
   let ownerId = null;
@@ -135,14 +127,46 @@ try {
     createdUserId = ownerId;
     inviteLink = data.properties?.action_link ?? null;
   }
-  const { error: mErr } = await db.from('ai4cc_tenant_members').insert({ tenant_id: tenantId, user_id: ownerId, role: 'owner' });
-  if (mErr) throw new Error(`ai4cc_tenant_members: ${mErr.message}`);
+  if (STELLAR) {
+    const { data: prov, error: provErr } = await db.rpc('provision_stellar_tenant', { _business_name: name, _owner_email: ownerEmail, _owner_user_id: ownerId, _timezone: timezone });
+    if (provErr) throw new Error(`provision_stellar_tenant: ${provErr.message}`);
+    const row = Array.isArray(prov) ? prov[0] : prov;
+    if (!row?.tenant_id) throw new Error('provision_stellar_tenant returned no tenant');
+    tenantId = row.tenant_id;
+    // The engine derives a slug from the business name; the plan slug wins.
+    const { error: slugErr } = await db.from('tenants').update({ tenant_slug: slug, primary_domain: host, status: 'ACTIVE', activated_at: new Date().toISOString() }).eq('id', tenantId);
+    if (slugErr) throw new Error(`tenants slug/domain/status: ${slugErr.message}`);
+  } else {
+    const tenant = await ins('ai4cc_tenants', { name, slug, timezone, status: 'active' });
+    tenantId = tenant.id;
+  }
+  await ins('ai4cc_branding', {
+    tenant_id: tenantId,
+    company_name: str(intake.company_name) || name,
+    product_name: str(intake.product_name) || 'Contact Center',
+    support_email: str(intake.support_email) || null,
+    settings: { modules, vertical },
+  });
+  const site = await ins('ai4cc_sites', { tenant_id: tenantId, name: 'Main', code: 'main', timezone });
+  const { error: qErr } = await db
+    .from('ai4cc_queues')
+    .insert(queues.map((q) => ({ ...q, tenant_id: tenantId, site_id: site.id, status: 'active' })));
+  if (qErr) throw new Error(`ai4cc_queues: ${qErr.message}`);
+
+  if (STELLAR) {
+    // The provisioning engine creates the OWNER membership; make sure it is ACTIVE for this user.
+    const { error: mErr } = await db.from('tenant_users').update({ status: 'ACTIVE', user_id: ownerId }).eq('tenant_id', tenantId).eq('role', 'OWNER');
+    if (mErr) throw new Error(`tenant_users: ${mErr.message}`);
+  } else {
+    const { error: mErr } = await db.from('ai4cc_tenant_members').insert({ tenant_id: tenantId, user_id: ownerId, role: 'owner' });
+    if (mErr) throw new Error(`ai4cc_tenant_members: ${mErr.message}`);
+  }
 
   if (phoneNumbers.length) {
     const { error: pErr } = await db
-      .from('ai4cc_phone_numbers')
-      .insert(phoneNumbers.map((e164) => ({ tenant_id: tenantId, e164, provider: 'twilio', purpose: 'inbound', status: 'active' })));
-    if (pErr) throw new Error(`ai4cc_phone_numbers: ${pErr.message}`);
+      .from(STELLAR ? 'tenant_phone_numbers' : 'ai4cc_phone_numbers')
+      .insert(phoneNumbers.map((e164) => (STELLAR ? { tenant_id: tenantId, e164_number: e164, provider: 'twilio', status: 'ACTIVE' } : { tenant_id: tenantId, e164, provider: 'twilio', purpose: 'inbound', status: 'active' })));
+    if (pErr) throw new Error(`phone numbers: ${pErr.message}`);
   }
 
   const intakeKey = randomBytes(32).toString('hex');
@@ -164,7 +188,7 @@ try {
     counts[t] = count;
   }
   const { count: memberCount } = await db
-    .from('ai4cc_tenant_members')
+    .from(T.members)
     .select('user_id', { count: 'exact', head: true })
     .eq('tenant_id', tenantId);
   if (Object.values(counts).some((c) => c !== 0) || memberCount !== 1) {
@@ -186,7 +210,7 @@ try {
 } catch (err) {
   console.error('\nFAILED:', err.message);
   if (tenantId) {
-    const { error } = await db.from('ai4cc_tenants').delete().eq('id', tenantId);
+    const { error } = await db.from(T.tenants).delete().eq('id', tenantId);
     console.error(error ? `rollback of tenant failed: ${error.message}` : 'rolled back tenant (cascade)');
   }
   if (createdUserId) {
