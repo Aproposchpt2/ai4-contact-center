@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { HOME_TENANT_SLUG, apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4ccServer';
+import { tenantById } from '@/lib/tenantModel';
 import { resolveModules } from '@/lib/modules';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -7,12 +8,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const ctx = await requireAi4ccContext(req);
     const [tenantResult, brandingResult] = await Promise.all([
-      ctx.admin.from('ai4cc_tenants').select('id,name,slug,timezone').eq('id', ctx.tenantId).single(),
+      tenantById(ctx.admin, ctx.tenantId).then((data) => ({ data, error: data ? null : new Error('Tenant not found') })),
       ctx.admin.from('ai4cc_branding').select('product_name,company_name,logo_url,support_email,settings').eq('tenant_id', ctx.tenantId).maybeSingle(),
     ]);
     if (tenantResult.error) throw tenantResult.error;
     if (brandingResult.error) throw brandingResult.error;
     const tenant = tenantResult.data;
+    if (!tenant) throw new Error('Tenant not found');
     const branding = brandingResult.data;
     res.setHeader('Cache-Control', 'private, no-store');
     return res.status(200).json({

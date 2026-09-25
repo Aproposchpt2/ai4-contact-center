@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { resolveMembership, apiErrorStatus, apiErrorMessage } from '@/lib/ai4ccServer';
+import { tenantById } from '@/lib/tenantModel';
 import { createClient } from '@supabase/supabase-js';
 
 type Flow = {
@@ -52,15 +53,13 @@ export default async function handler(
   }
 
   const tenantId = membership.tenant_id as string;
-  const { data: tenant, error: tenantError } = await admin
-    .from('ai4cc_tenants')
-    .select('id, name')
-    .eq('id', tenantId)
-    .single();
-
-  if (tenantError || !tenant) {
-    return res.status(500).json({ error: tenantError?.message ?? 'Tenant not found' });
+  let tenant: Awaited<ReturnType<typeof tenantById>> = null;
+  try {
+    tenant = await tenantById(admin, tenantId);
+  } catch (tenantError) {
+    return res.status(500).json({ error: tenantError instanceof Error ? tenantError.message : 'Tenant not found' });
   }
+  if (!tenant) return res.status(500).json({ error: 'Tenant not found' });
 
   const { data: flowRows, error: flowError } = await admin
     .from('ai4cc_flows')

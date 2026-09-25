@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { isValidTenantSlug, primaryRootDomain } from '@/lib/tenantHost';
+import { tenantBySlug } from '@/lib/tenantModel';
 
 // Public, minimal: turns a workspace name into its sign-in URL. Returns the same generic 404 for
 // unknown, suspended and malformed names, and never returns tenant data.
@@ -17,9 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data, error } = await db.from('ai4cc_tenants').select('slug').eq('slug', slug).eq('status', 'active').maybeSingle();
-    if (error) throw error;
-    if (!data) return res.status(404).json({ error: 'Not found' });
+    const data = await tenantBySlug(db, slug);
+    if (!data || !data.active) return res.status(404).json({ error: 'Not found' });
     return res.status(200).json({ url: `https://${slug}.${primaryRootDomain()}/login` });
   } catch (err) {
     console.error('[workspaces/resolve] failed', err);

@@ -5,6 +5,7 @@ import { generateQAReport } from '@/lib/qualityAssuranceEngine';
 import { selectRuntimeRoute } from '@/lib/runtimeRouting';
 import { resolveRuntimeFlowAuthority, runtimeEnvironment } from '@/lib/runtimeFlowDeployment';
 import { HOME_TENANT_SLUG, requestHost, requestTenantSlug } from '@/lib/ai4ccServer';
+import { tenantBySlug } from '@/lib/tenantModel';
 
 type ChatBody = { action?: 'message' | 'end'; sessionId?: string; visitorId?: string; message?: string };
 
@@ -29,9 +30,8 @@ async function runtimeContext(req: NextApiRequest) {
   const admin = storage();
   // The chat widget belongs to the tenant whose host it is served from (bare host = home tenant).
   const slug = requestTenantSlug(req) ?? HOME_TENANT_SLUG;
-  const { data: tenant, error: tenantError } = await admin.from('ai4cc_tenants').select('id,name').eq('slug', slug).eq('status', 'active').maybeSingle();
-  if (tenantError) throw tenantError;
-  if (!tenant) throw new Error('Web chat is not available');
+  const tenant = await tenantBySlug(admin, slug);
+  if (!tenant || !tenant.active) throw new Error('Web chat is not available');
 
   const environment = runtimeEnvironment();
   const [queueResult, agentResult, activeResult, flowAuthority] = await Promise.all([

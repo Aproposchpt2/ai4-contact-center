@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAi4ccContext, apiErrorMessage, apiErrorStatus } from '@/lib/ai4ccServer';
+import { tenantById } from '@/lib/tenantModel';
 import { derivePlatformStatus, missionControlModules } from '@/lib/missionControl';
 
 const WINDOW_HOURS = 24;
@@ -33,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       complianceResult,
       auditResult,
     ] = await Promise.all([
-      ctx.admin.from('ai4cc_tenants').select('id,name').eq('id', ctx.tenantId).single(),
+      tenantById(ctx.admin, ctx.tenantId).then((data) => ({ data, error: null })),
       ctx.admin.from('ai4cc_flows').select('id', { count: 'exact', head: true }).eq('tenant_id', ctx.tenantId),
       ctx.admin.from('ai4cc_flow_versions').select('id,ai4cc_flows!inner(tenant_id)', { count: 'exact', head: true }).eq('ai4cc_flows.tenant_id', ctx.tenantId),
       ctx.admin.from('ai4cc_flow_versions').select('id,flow_id,version,validation_status,created_at,ai4cc_flows!inner(tenant_id,name)').eq('ai4cc_flows.tenant_id', ctx.tenantId).order('created_at', { ascending: false }).limit(1).maybeSingle(),
