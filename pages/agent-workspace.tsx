@@ -47,6 +47,14 @@ export default function AgentWorkspacePage() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState('');
   const [showVoiceTest, setShowVoiceTest] = useState(false);
+  // The disposable ElevenLabs test widget is for Apropos staff only; customers never see it.
+  const [isHome, setIsHome] = useState(false);
+  useEffect(() => {
+    fetch('/api/tenant/context', { credentials: 'same-origin' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((ctx) => setIsHome(Boolean(ctx?.isHome)))
+      .catch(() => setIsHome(false));
+  }, []);
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -125,9 +133,9 @@ export default function AgentWorkspacePage() {
   return <>
     <Header />
     <main className="page"><div className="shell">
-      <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · DEVELOPMENT OPERATIONS</p><h1>Agent Workspace</h1><p className="subhead">Unified Voice, SMS and Web Chat interactions with canonical routing, transcripts, AI Assist, QA and compliance. Heartbeat monitoring is off. Refresh only when you need a current development snapshot{lastUpdated ? ` · Last checked ${lastUpdated}` : ''}.</p></div><div className="headingActions"><button onClick={() => refresh().catch((e: Error) => setError(e.message))} disabled={loading}>{loading ? 'Checking…' : 'Refresh Interactions'}</button><button onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button><button className="secondary" onClick={() => setShowVoiceTest((v) => !v)}>{showVoiceTest ? 'Hide Voice Agent Test' : 'Test Live Voice Agent'}</button></div></div>
+      <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · DEVELOPMENT OPERATIONS</p><h1>Agent Workspace</h1><p className="subhead">Unified Voice, SMS and Web Chat interactions with canonical routing, transcripts, AI Assist, QA and compliance. Heartbeat monitoring is off. Refresh only when you need a current development snapshot{lastUpdated ? ` · Last checked ${lastUpdated}` : ''}.</p></div><div className="headingActions"><button onClick={() => refresh().catch((e: Error) => setError(e.message))} disabled={loading}>{loading ? 'Checking…' : 'Refresh Interactions'}</button><button onClick={runAcceptance} disabled={running}>{running ? 'Running interaction…' : 'Run Development Interaction'}</button>{isHome && <button className="secondary" onClick={() => setShowVoiceTest((v) => !v)}>{showVoiceTest ? 'Hide Voice Agent Test' : 'Test Live Voice Agent'}</button>}</div></div>
 
-      {showVoiceTest && <div className="panel voiceTest">
+      {isHome && showVoiceTest && <div className="panel voiceTest">
         <h3>Live Voice Agent Test</h3>
         <p className="muted">Disposable ElevenLabs test agent (<code>agent_5201m1d72hh8et8vh4w35enpvt9x</code>) wired in for connectivity testing only — not connected to the NGCC or NAT-CORP live pipelines. Use the widget below, allow microphone access when prompted, and talk.</p>
         <VoiceAgentTestWidget />

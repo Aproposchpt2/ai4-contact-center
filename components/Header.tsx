@@ -22,6 +22,7 @@ const NAV = [
   { href: '/lead-management', label: 'Lead Management' },
   { href: '/customer-360', label: 'Customer 360' },
   { href: '/voicemails', label: 'Voicemails' },
+  { href: '/voice-operations', label: 'Voice Operations' },
   { href: '/analytics-engine', label: 'Analytics Engine' },
   { href: '/flow-simulator', label: 'Flow Simulator' },
   { href: '/flow-auto-repair', label: 'Flow Auto-Repair' },
