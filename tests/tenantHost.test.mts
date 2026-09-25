@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost, isAppHost, isAllowedOnAppHost, primaryRootDomain } from '../lib/tenantHost.ts';
+import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost, isAppHost, isAllowedOnAppHost, primaryRootDomain, isSharedStateRoute } from '../lib/tenantHost.ts';
 
 test('resolves a single-label tenant host under the default root', () => {
   assert.equal(tenantSlugFromHost('acme-plumbing.stellaruc.com'), 'acme-plumbing');
@@ -97,4 +97,16 @@ test('app host serves only the workspace finder', () => {
   assert.equal(isAllowedOnAppHost('/find-workspace'), true);
   assert.equal(isAllowedOnAppHost('/api/workspaces/resolve'), true);
   for (const p of ['/', '/dashboard', '/lead-management', '/api/lead-management', '/api/public/leads', '/login']) assert.equal(isAllowedOnAppHost(p), false, p);
+});
+
+test('shared-state routes are blocked on tenant hosts but tenant-safe ones are not', () => {
+  for (const p of ['/prompt-manager', '/knowledge-vault', '/intent-taxonomy', '/flow-runtime-monitor', '/api/knowledge', '/api/prompts', '/api/intents/list', '/api/intents/save', '/api/versioning/branch', '/api/versioning/merge', '/api/runtime/events', '/api/runtime/incidents', '/api/runtime/mute', '/api/runtime/report', '/api/runtime/acknowledge']) {
+    assert.equal(isSharedStateRoute(p), true, p);
+    assert.equal(isBlockedOnTenantHost(p), true, p);
+  }
+  for (const p of ['/api/runtime/interactions', '/api/runtime/voicemails', '/api/runtime/voice-analytics', '/api/versioning/list', '/api/versioning/save', '/api/versioning/diff', '/api/versioning/rollback', '/lead-management', '/flow-versioning', '/api/knowledge-base-x-not-real']) {
+    assert.equal(isBlockedOnTenantHost(p), false, p);
+  }
+  // staff console keeps them
+  assert.equal(isBlockedOnOperatorHost('/prompt-manager'), false);
 });
