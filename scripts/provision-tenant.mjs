@@ -87,6 +87,16 @@ if (existing) {
   process.exit(1);
 }
 
+// Preflight: in Stellar mode a tenant cannot be rolled back by the service role, so prove every table this run
+// writes is reachable BEFORE the tenant is created.
+for (const t of ['ai4cc_branding', 'ai4cc_queues', 'ai4cc_integrations', 'ai4cc_contacts', 'ai4cc_leads', 'ai4cc_interactions', ...(STELLAR ? [] : ['ai4cc_sites'])]) {
+  const { error } = await db.from(t).select('*', { count: 'exact', head: true }).limit(1);
+  if (error) {
+    console.error(`Preflight failed on ${t}: ${error.message}`);
+    process.exit(1);
+  }
+}
+
 console.log(`Plan for "${name}"`);
 console.log(`  project     ${new URL(url).host}`);
 console.log(`  workspace   https://${host}`);
@@ -133,9 +143,11 @@ try {
     const row = Array.isArray(prov) ? prov[0] : prov;
     if (!row?.tenant_id) throw new Error('provision_stellar_tenant returned no tenant');
     tenantId = row.tenant_id;
-    // The engine derives a slug from the business name; the plan slug wins.
-    const { error: slugErr } = await db.from('tenants').update({ tenant_slug: slug, primary_domain: host, status: 'ACTIVE', activated_at: new Date().toISOString() }).eq('id', tenantId);
-    if (slugErr) throw new Error(`tenants slug/domain/status: ${slugErr.message}`);
+    // The engine derives the slug from the business name and leaves the tenant in SETUP. The service role
+    // cannot write tenants, so the plan slug must match what the engine produced.
+    if (row.tenant_slug !== slug) {
+      throw new Error(`provision_stellar_tenant produced slug "${row.tenant_slug}", not "${slug}" (tenant ${tenantId} was created and must be removed by the database owner)`);
+    }
   } else {
     const tenant = await ins('ai4cc_tenants', { name, slug, timezone, status: 'active' });
     tenantId = tenant.id;
@@ -147,22 +159,23 @@ try {
     support_email: str(intake.support_email) || null,
     settings: { modules, vertical },
   });
-  const site = await ins('ai4cc_sites', { tenant_id: tenantId, name: 'Main', code: 'main', timezone });
+  // The Stellar database does not carry ai4cc_sites; queues there have a nullable site_id.
+  const site = STELLAR ? { id: null } : await ins('ai4cc_sites', { tenant_id: tenantId, name: 'Main', code: 'main', timezone });
   const { error: qErr } = await db
     .from('ai4cc_queues')
     .insert(queues.map((q) => ({ ...q, tenant_id: tenantId, site_id: site.id, status: 'active' })));
   if (qErr) throw new Error(`ai4cc_queues: ${qErr.message}`);
 
   if (STELLAR) {
-    // The provisioning engine creates the OWNER membership; make sure it is ACTIVE for this user.
-    const { error: mErr } = await db.from('tenant_users').update({ status: 'ACTIVE', user_id: ownerId }).eq('tenant_id', tenantId).eq('role', 'OWNER');
-    if (mErr) throw new Error(`tenant_users: ${mErr.message}`);
+    // The provisioning engine created the OWNER membership for _owner_user_id (verified below).
   } else {
     const { error: mErr } = await db.from('ai4cc_tenant_members').insert({ tenant_id: tenantId, user_id: ownerId, role: 'owner' });
     if (mErr) throw new Error(`ai4cc_tenant_members: ${mErr.message}`);
   }
 
-  if (phoneNumbers.length) {
+  if (phoneNumbers.length && STELLAR) {
+    console.log('  note: phone numbers are not written in Stellar mode (service role cannot write tenant_phone_numbers); add them as the database owner');
+  } else if (phoneNumbers.length) {
     const { error: pErr } = await db
       .from(STELLAR ? 'tenant_phone_numbers' : 'ai4cc_phone_numbers')
       .insert(phoneNumbers.map((e164) => (STELLAR ? { tenant_id: tenantId, e164_number: e164, provider: 'twilio', status: 'ACTIVE' } : { tenant_id: tenantId, e164, provider: 'twilio', purpose: 'inbound', status: 'active' })));
@@ -210,8 +223,12 @@ try {
 } catch (err) {
   console.error('\nFAILED:', err.message);
   if (tenantId) {
-    const { error } = await db.from(T.tenants).delete().eq('id', tenantId);
-    console.error(error ? `rollback of tenant failed: ${error.message}` : 'rolled back tenant (cascade)');
+    if (STELLAR) {
+      console.error(`tenant ${tenantId} remains in the database (the service role cannot delete tenants); ask the database owner to remove it`);
+    } else {
+      const { error } = await db.from(T.tenants).delete().eq('id', tenantId);
+      console.error(error ? `rollback of tenant failed: ${error.message}` : 'rolled back tenant (cascade)');
+    }
   }
   if (createdUserId) {
     const { error } = await db.auth.admin.deleteUser(createdUserId);
