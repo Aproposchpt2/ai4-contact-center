@@ -24,3 +24,6 @@ yarn-error.log*
 .ai4-flow-deployment-store.json
 .ai4-runtime-monitor-store.json
 .ai4-intent-taxonomy-store.json
+
+# local agent worktrees
+.claude/worktrees/
