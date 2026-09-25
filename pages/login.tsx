@@ -7,6 +7,13 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 type Step = 'email' | 'otp' | 'done';
 
+// Where to go after sign-in: the page the user was sent here from (?next=), only if it is a
+// same-site path, otherwise the Agent Workspace.
+function safeNext(value: string | string[] | undefined): string {
+  const next = Array.isArray(value) ? value[0] : value;
+  return typeof next === 'string' && next.startsWith('/') && !next.startsWith('//') && !next.includes(String.fromCharCode(92)) ? next : '/agent-workspace';
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>('email');
@@ -24,7 +31,7 @@ export default function LoginPage() {
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/agent-workspace`,
+        emailRedirectTo: `${window.location.origin}${safeNext(router.query.next)}`,
         shouldCreateUser: false,
       },
     });
@@ -52,7 +59,9 @@ export default function LoginPage() {
       return;
     }
     setStep('done');
-    setTimeout(() => router.push('/agent-workspace'), 700);
+    // Full page load, so the freshly stored session cookie is sent with the very next request;
+    // a client-side transition can reach the server before it and bounce back to /login.
+    setTimeout(() => window.location.assign(safeNext(router.query.next)), 700);
   }
 
   return (
