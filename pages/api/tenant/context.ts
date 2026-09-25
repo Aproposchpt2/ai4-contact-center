@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4ccServer';
+import { HOME_TENANT_SLUG, apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4ccServer';
 import { resolveModules } from '@/lib/modules';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -18,6 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       tenant: { name: tenant.name, slug: tenant.slug, timezone: tenant.timezone },
       role: ctx.role,
+      isHome: tenant.slug === HOME_TENANT_SLUG,
       branding: branding
         ? { productName: branding.product_name, companyName: branding.company_name, logoUrl: branding.logo_url, supportEmail: branding.support_email }
         : null,

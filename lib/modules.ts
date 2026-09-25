@@ -10,7 +10,6 @@ export const CORE_MODULES = [
   '/voicemails',
   '/agent-workspace',
   '/voice-operations',
-  '/analytics-engine',
 ];
 
 // branding.settings.modules: "all" | "core" | ["/href", ...]. Missing = core for customers and
