@@ -31,6 +31,10 @@ export function dbRole(role: string): string {
   return STELLAR ? ROLE_TO_STELLAR[role] ?? role.toUpperCase() : role;
 }
 
+// Legacy: only 'active'. Stellar: a tenant in SETUP is being onboarded and may already use its workspace;
+// SUSPENDED and CANCELLED tenants are locked out.
+const WORKSPACE_STATUSES = new Set(STELLAR ? ['active', 'setup'] : ['active']);
+
 export type TenantRow = { id: string; name: string; slug: string; timezone: string; active: boolean };
 
 function toTenant(r: Record<string, unknown>): TenantRow {
@@ -39,7 +43,7 @@ function toTenant(r: Record<string, unknown>): TenantRow {
     name: r[NAME_COL] as string,
     slug: r[SLUG_COL] as string,
     timezone: (r.timezone as string) ?? 'America/Los_Angeles',
-    active: String(r.status).toLowerCase() === 'active',
+    active: WORKSPACE_STATUSES.has(String(r.status).toLowerCase()),
   };
 }
 
