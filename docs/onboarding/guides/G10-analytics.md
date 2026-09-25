@@ -18,8 +18,8 @@ For: the owner at {{business_name}}. Page: **Voice Operations & Analytics** at {
 2. Open a few Recent calls and read the transcripts (G09).
 3. Note any call that went to the wrong queue and send it to {{support_email}}.
 
-## About "Analytics Engine"
-The **Analytics Engine** page in the top bar is a separate tool where you upload or paste your own JSON data and select **Analyze Data**. It is not needed for everyday call reporting; use Voice Operations & Analytics.
+## Where to find it
+**Voice Operations** is in the top bar. (The separate "Analytics Engine" page, a tool for uploading your own JSON data, is not part of a standard customer workspace.)
 
 ## Note
 These figures are operational signals from your calls, not guarantees or forecasts of results.

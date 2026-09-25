@@ -3,7 +3,7 @@
 For: everyone at {{business_name}}
 
 ## The top bar
-The bar across the top shows your workspace name and the pages turned on for you (for example **Lead Management**, **Customer 360**, **Voicemails**, **Agent Workspace**, **Analytics Engine**, **Dashboard**). It also has a **Light / Black** color switch and a **Sign out** button. Your team sees only the pages included in your plan.
+The bar across the top shows your workspace name and the pages turned on for you (for example **Lead Management**, **Customer 360**, **Voicemails**, **Voice Operations**, **Agent Workspace**, **Dashboard**). It also has a **Light / Black** color switch and a **Sign out** button. Your team sees only the pages included in your plan.
 
 ## Refresh model
 Pages load when you open them and update **only when you press their Refresh button**, for example **Refresh Leads**, **Refresh Customers**, **Check Voicemail**, **Refresh Interactions**. Nothing updates in the background. Each page shows "Last refreshed" so you know how fresh it is.
