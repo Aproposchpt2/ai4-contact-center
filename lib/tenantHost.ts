@@ -110,9 +110,32 @@ export function isBlockedOnOperatorHost(pathname: string): boolean {
   );
 }
 
+// Features whose data lives in server memory or JSON files shared by every tenant (audit
+// 2026-09-24): prompts, knowledge, intents, runtime event/incident monitor, version branch/merge.
+// Until they are rebuilt on tenant-keyed tables they must not exist on a customer's host, even
+// though the navigation already hides them. (Staff on the operator host may still use them.)
+const SHARED_STATE_PAGES = new Set(['/prompt-manager', '/knowledge-vault', '/intent-taxonomy', '/flow-runtime-monitor']);
+const SHARED_STATE_API_PREFIXES = [
+  '/api/knowledge',
+  '/api/prompts',
+  '/api/intents/',
+  '/api/versioning/branch',
+  '/api/versioning/merge',
+  '/api/runtime/events',
+  '/api/runtime/incidents',
+  '/api/runtime/acknowledge',
+  '/api/runtime/mute',
+  '/api/runtime/report',
+];
+
+export function isSharedStateRoute(pathname: string): boolean {
+  return SHARED_STATE_PAGES.has(pathname) || SHARED_STATE_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/') || (p.endsWith('/') && pathname.startsWith(p)));
+}
+
 // Paths that belong to the marketing / Apropos-internal surface and must never be served on a
 // customer's tenant host (they show Apropos data or sales content).
 export function isBlockedOnTenantHost(pathname: string): boolean {
+  if (isSharedStateRoute(pathname)) return true;
   return (
     pathname === '/acquisition' ||
     pathname === '/partners' ||
