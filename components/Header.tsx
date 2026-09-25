@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 type Theme = 'light' | 'black';
 
@@ -53,6 +54,17 @@ export default function Header() {
   const { pathname } = useRouter();
   const [theme, setTheme] = useState<Theme>('black');
   const [workspace, setWorkspace] = useState<WorkspaceContext | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function signOut() {
+    setSigningOut(true);
+    try {
+      await supabase?.auth.signOut({ scope: 'local' });
+    } catch {
+      // still leave: the sign-in page will show if the session is gone
+    }
+    window.location.assign('/login');
+  }
 
   // Signed-in tenant members get their workspace branding and module set. Public visitors get a
   // 401 here and simply keep the default header.
@@ -130,6 +142,12 @@ export default function Header() {
             ◑ BLACK
           </button>
         </div>
+
+        {workspace && (
+          <button type="button" className="signOutBtn" onClick={signOut} disabled={signingOut}>
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </button>
+        )}
 
         {showBuilderCta && (
           <Link href="/builder" className="builderCta">
@@ -261,6 +279,25 @@ export default function Header() {
           font-size: .62rem;
           user-select: none;
         }
+        .signOutBtn {
+          flex: 0 0 auto;
+          padding: .55rem .9rem;
+          border-radius: 6px;
+          background: transparent;
+          color: rgba(226,206,162,.85);
+          border: 1px solid rgba(200,169,107,.3);
+          font-size: .7rem;
+          font-weight: 800;
+          letter-spacing: .1em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          cursor: pointer;
+        }
+        .signOutBtn:hover:not(:disabled) {
+          background: rgba(200,169,107,.08);
+          color: #F5F7FA;
+        }
+        .signOutBtn:disabled { opacity: .6; cursor: default; }
         :global(.builderCta),
         :global(.builderCta:visited) {
           flex: 0 0 auto;
