@@ -75,11 +75,31 @@ body input,body select,body textarea{background:var(--theme-input)!important;col
 body .card,body .panel,body .tile,body .surface,body .mc-card,body .step,
 body .proofCard,body .capCard,body .compareScroll,body .dashboard-mock,
 body .naturalCallout,body .demoDrawer,body .drawerHead,body .drawerBody,
-body .industryCard,body .painItem,body .installPromise,body .installHighlights>div{
+body .industryCard,body .painItem,body .installPromise,body .installHighlights>div,
+body .flowItem{
   background:var(--theme-surface)!important;
   color:var(--theme-text)!important;
   border-color:var(--theme-border-soft)!important;
   box-shadow:var(--theme-shadow)!important;
+}
+
+/* Homepage conversation flow cards: remove the final legacy blue fill while
+ * preserving the premium gold top rule and sequence treatment. */
+body .flowItem{
+  border-top:3px solid var(--theme-accent)!important;
+}
+body .flowItem span{
+  color:var(--theme-accent-light)!important;
+}
+
+/* Proof/example field labels must remain clearly legible against the dark card. */
+body .proofRow span{
+  color:var(--theme-accent-light)!important;
+  opacity:1!important;
+  font-weight:500!important;
+}
+body .proofRow b{
+  color:var(--theme-text)!important;
 }
 
 body .builderCta,body .builderCta:visited,body .buyerCta,body .buyerCta:visited{
