@@ -6,18 +6,9 @@ import Footer from '@/components/Footer';
 const PHONE_DISPLAY = '(725) 330-5102';
 const PHONE_TEL = 'tel:+17253305102';
 
-const VALUE_CARDS = [
-  { title: 'Answer 24/7', body: 'Give customers an intelligent front door that can respond when your staff is unavailable, busy, or after hours.' },
-  { title: 'Capture every lead', body: 'Turn conversations into structured lead records instead of leaving valuable customer information trapped inside calls and notes.' },
-  { title: 'Automate intake', body: 'Collect the customer name, business, need, urgency, and service interest through a natural conversational experience.' },
-  { title: 'Organize follow-up', body: 'Carry the conversation into Lead Management, Activities and Tasks so the next action is visible to your team.' },
-  { title: 'Know your customer', body: 'Bring customer identity, interactions, leads and follow-up activity together through Customer 360.' },
-  { title: 'Connect AI + people', body: 'Use conversational AI as the front door while keeping your team and the contact center in control of the customer relationship.' },
-];
-
 const FLOW = [
   'Customer calls',
-  'AI answers',
+  'Stellar answers',
   'Need is understood',
   'Customer information is captured',
   'Lead is created',
@@ -37,6 +28,21 @@ const PAIN_POINTS = [
   'Voicemail backlog',
 ];
 
+const FINANCIAL_POINTS = [
+  { title: 'Avoided infrastructure replacement', body: 'Keep your phones, your provider and your existing workflows. Nothing has to be ripped out to add capacity.' },
+  { title: 'Less overtime pressure', body: 'Overflow and after-hours volume is absorbed without stretching the people you already pay.' },
+  { title: 'Better use of existing staff', body: 'Your people spend their time on the customers and decisions that need them, not on repetitive intake.' },
+  { title: 'Fewer missed opportunities', body: 'Every inquiry is answered, captured and organized, so revenue is not lost to a busy signal or a voicemail box.' },
+  { title: 'Continuous coverage', body: 'Business hours, overflow, after-hours, weekends and holidays, handled the same way every time.' },
+  { title: 'Scale without scaling operations', body: 'Grow customer engagement without growing a traditional staffing and contact-center operation at the same rate.' },
+];
+
+const VALUE_LAYERS = [
+  { title: 'Platform', body: 'The recurring Stellar technology and operational capability: answering, intake, qualification, routing, escalation, lead capture, Customer 360 and follow-up in one operating environment.' },
+  { title: 'Implementation', body: 'The work of configuring that capability around your organization: your call flows, hours, teams, escalation rules, knowledge and workspace, tested before it takes a single live call.' },
+  { title: 'Managed operations and support', body: 'The ongoing human expertise that modifies, optimizes and maintains your environment as your business changes, so the system keeps performing.' },
+];
+
 const INDUSTRIES = [
   { title: 'Home / Field Services', body: 'HVAC · Plumbing · Electrical · Roofing · Restoration and other field-service operations' },
   { title: 'Property Management', body: 'Resident inquiries · Leasing calls · Maintenance requests · After-hours call handling' },
@@ -44,86 +50,98 @@ const INDUSTRIES = [
 ];
 
 const PLATFORM_PAGES = [
-  { href: '/platform/flow-authoring', eyebrow: 'FLOW AUTHORING', title: 'Build call logic without writing code', body: 'AI Script Builder, Visual Flow Designer, simulation, auto-repair and version history.' },
+  { href: '/platform/flow-authoring', eyebrow: 'FLOW AUTHORING', title: 'Build call logic without writing code', body: 'Script Builder, Visual Flow Designer, simulation, auto-repair and version history.' },
   { href: '/platform/live-operations', eyebrow: 'LIVE OPERATIONS', title: 'Where conversations become customers', body: 'Agent Workspace, Lead Management, Activities, Tasks and Customer 360 in one operating environment.' },
   { href: '/platform/intelligence-qa', eyebrow: 'INTELLIGENCE & QA', title: 'Know what happened on every call', body: 'Analytics, transcript intelligence, quality scoring, coaching, intent taxonomy and routing optimization.' },
   { href: '/platform/governance-platform', eyebrow: 'GOVERNANCE & PLATFORM', title: 'A platform built to grow', body: 'Governance, access controls, flow management and shared platform services support broader commercialization.' },
 ];
 
 const BUSINESS_FIT = [
-  'High inbound call volume is overwhelming staff',
+  'Communication volume has become an operational problem',
+  'You have more customer demand than your current people and processes can consistently handle',
   'After-hours and missed calls can mean lost revenue',
-  'Customer questions consume valuable staff time',
+  'You want to add coverage without replacing your phones, your provider or your people',
   'Calls need to become organized leads, tasks and follow-up',
-  'The business wants AI without replacing its existing phone number',
-  'The team needs a customized operating dashboard, not another disconnected tool',
+  'You need one operating view of every customer, not another disconnected tool',
 ];
 
 export default function HomePage() {
   return <>
     <Head>
-      <title>AI4 Contact Center — Stellar Voice Management</title>
-      <meta name="description" content="Keep your number. Add the intelligence. AI4CC Stellar Voice Management answers, understands, routes, captures and organizes customer calls 24 hours a day." />
+      <title>Stellar Unified Communications — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="Keep your number. Add the intelligence. Stellar is an intelligent customer engagement operation center that adds answering, intake, routing, escalation, lead capture and follow-up capacity without replacing your phones, your provider or your people." />
     </Head>
     <Header />
     <main className="page">
       <section className="hero">
-        <div className="eyebrow">AI4 CONTACT CENTER · STELLAR VOICE MANAGEMENT · APROPOS GROUP LLC</div>
+        <div className="eyebrow">STELLAR UNIFIED COMMUNICATIONS · INTELLIGENT CUSTOMER ENGAGEMENT OPERATION CENTER</div>
         <h1>Keep your number. <span>Add the intelligence.</span></h1>
-        <p className="heroKicker">HIGH CALL VOLUME SHOULD NOT REQUIRE AN ENTERPRISE CONTACT CENTER.</p>
-        <p className="heroLead">AI4CC answers, understands, routes, captures and organizes customer calls 24 hours a day — while your business keeps the number your customers already know.</p>
-        <div className="heroStatement">AI4CC handles the conversation. <strong>And what happens next.</strong></div>
-        <div className="heroInstall">KEEP YOUR NUMBER · FORWARD YOUR CALLS · ACCESS YOUR CUSTOMIZED DASHBOARD</div>
+        <p className="heroKicker">STELLAR IS NOT AN ANSWERING SERVICE. IT IS AN INTELLIGENT CUSTOMER-OPERATIONS LAYER.</p>
+        <p className="heroLead">For organizations where communication volume has become an operational problem. Stellar adds capacity for answering, intake, qualification, routing, escalation, lead capture and after-hours coverage, without replacing your phones, your provider or your people.</p>
+        <div className="heroStatement">Stellar doesn’t replace your people. <strong>It expands what your people can cover.</strong></div>
+        <div className="heroInstall">KEEP YOUR NUMBER · KEEP YOUR PHONES · KEEP YOUR PROVIDER · ADD THE INTELLIGENCE</div>
         <div className="ctaRow">
           <a href={PHONE_TEL} className="callCta">
-            <span className="callLabel">Call the live AI</span>
+            <span className="callLabel">Call the live demo line</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
           </a>
-          <a href="#stellar-review" className="buyerCta">Request a Stellar Voice Review →</a>
+          <a href="#stellar-review" className="buyerCta">Request a Stellar Review →</a>
         </div>
-        <p className="livePrompt">Call the same AI your customers could be talking to tomorrow.</p>
+        <p className="livePrompt">Hear the operation center on a real phone line.</p>
       </section>
 
       <section className="painSection">
         <div className="sectionHead">
-          <small>THE HIGH-CALL-VOLUME PROBLEM</small>
-          <h2>Too many calls. <span>Not enough people.</span></h2>
-          <p>Customer demand does not stop when your staff is busy, helping someone else, or off the clock.</p>
+          <small>THE OPERATIONAL PROBLEM</small>
+          <h2>More customer demand than your people and processes <span>can consistently handle.</span></h2>
+          <p>Customer demand does not stop when your staff is busy, helping someone else, or off the clock. Stellar adds capacity for answering, intake, qualification, routing, escalation, lead capture, after-hours coverage, Customer 360 and follow-up.</p>
         </div>
         <div className="painGrid">
           {PAIN_POINTS.map(item => <div className="painItem" key={item}>{item}</div>)}
         </div>
-        <div className="painClose">AI4CC HANDLES THE CONVERSATION <strong>AND WHAT HAPPENS NEXT.</strong></div>
+        <div className="painClose">STELLAR HANDLES THE CONVERSATION <strong>AND WHAT HAPPENS NEXT.</strong></div>
+      </section>
+
+      <section className="industries">
+        <div className="sectionHead">
+          <small>THE FINANCIAL PROBLEM</small>
+          <h2>How do you add customer-service capacity without building an expensive 24/7 staffing and contact-center operation?</h2>
+          <p>The financial case isn’t simply labor reduction. It is the full cost of covering your customers, with and without Stellar.</p>
+        </div>
+        <div className="industryGrid">
+          {FINANCIAL_POINTS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
+        </div>
+        <div className="painClose">THE QUESTION ISN’T WHAT STELLAR COSTS. <strong>IT’S WHAT EQUIVALENT COVERAGE COSTS WITHOUT IT.</strong></div>
       </section>
 
       <section className="easyInstall">
         <div className="easyInstallTop">
           <div>
-            <small>EASY INSTALLATION · FAST ADOPTION</small>
+            <small>NO MANDATORY INFRASTRUCTURE REPLACEMENT</small>
             <h2>Keep your number. <span>Add the intelligence.</span></h2>
-            <p>You do not have to replace the business number your customers already know or rebuild your communications system. Forward your calls to AI4CC, and we configure the conversational experience and backend workflow around your organization.</p>
+            <p>You do not have to replace the business number your customers already know or rebuild your communications system. Forward your calls to Stellar, and we configure the customer-operations workflow around your organization, then manage it with you.</p>
           </div>
           <div className="installPromise">
-            <strong>YOUR CUSTOMIZED AI4CC DASHBOARD</strong>
-            <p>Your team receives access to its own customized dashboard for customer interactions, leads, activities, tasks, follow-up and Customer 360.</p>
+            <strong>YOUR STELLAR WORKSPACE</strong>
+            <p>Your team gets its own workspace for customer interactions, leads, activities, tasks, follow-up and Customer 360.</p>
           </div>
         </div>
         <div className="installFlow">
-          <b>YOUR EXISTING NUMBER</b><span>→</span><b>CALL FORWARDING</b><span>→</span><b>AI4CC</b><span>→</span><b>YOUR CUSTOMIZED DASHBOARD</b><span>→</span><b>YOUR TEAM</b>
+          <b>YOUR EXISTING NUMBER</b><span>→</span><b>CALL FORWARDING</b><span>→</span><b>STELLAR</b><span>→</span><b>YOUR WORKSPACE</b><span>→</span><b>YOUR TEAM</b>
         </div>
         <div className="installHighlights">
-          <div><strong>KEEP YOUR NUMBER</strong><p>No new number for customers to remember.</p></div>
-          <div><strong>WE CUSTOMIZE AI4CC</strong><p>AI intake, routing and workflows configured around your business.</p></div>
-          <div><strong>ACCESS YOUR DASHBOARD</strong><p>Your operation stays visible, organized and ready for follow-up.</p></div>
+          <div><strong>DEPLOY WHERE THE PRESSURE EXISTS</strong><p>One business. One location. One department. One high-volume operation.</p></div>
+          <div><strong>WE CONFIGURE AND MANAGE IT</strong><p>Intake, routing, escalation and workflows built around your business and kept current.</p></div>
+          <div><strong>PROVE THE VALUE. EXPAND WHEN IT MAKES SENSE.</strong><p>Start where calls hurt most, then extend coverage as the results show.</p></div>
         </div>
-        <div className="installClose">Forward your calls. We configure the system. <strong>You’re up and running.</strong></div>
+        <div className="installClose">Forward your calls. We configure the system. <strong>Your people cover more.</strong></div>
       </section>
 
       <section className="journey">
         <div className="sectionHead">
-          <small>FROM CONVERSATION TO BUSINESS OPPORTUNITY</small>
+          <small>ANSWER · UNDERSTAND · QUALIFY · CAPTURE · ROUTE · ESCALATE · ORGANIZE · FOLLOW UP</small>
           <h2>A phone call should not end when the customer hangs up.</h2>
-          <p>AI4CC transforms customer conversations into structured business activity — without disconnected notes, information trapped inside calls, or leads left without an operational next step.</p>
+          <p>Stellar turns customer conversations into structured business activity, with no disconnected notes, no information trapped inside calls, and no lead left without an operational next step.</p>
         </div>
         <div className="flowGrid">
           {FLOW.map((item, i) => <div className="flowItem" key={item}><span>{String(i + 1).padStart(2, '0')}</span><b>{item}</b></div>)}
@@ -131,34 +149,11 @@ export default function HomePage() {
         <div className="journeyClose">FROM CONVERSATION → TO CUSTOMER → TO ACTION</div>
       </section>
 
-      <section className="experience">
-        <div>
-          <small>LIVE STELLAR VOICE EXPERIENCE</small>
-          <h2>Call the same AI your customers could be talking to tomorrow.</h2>
-          <p>Experience AI4CC on a real phone line. Hear the conversational experience first, then see how the platform carries the call into structured customer intake, lead management and follow-up.</p>
-        </div>
-        <div className="experienceActions">
-          <a href={PHONE_TEL} className="callCta"><span className="callLabel">Call the live AI</span><span className="callNumber">{PHONE_DISPLAY}</span></a>
-          <Link href="/demo" className="buyerCta">See what happens next →</Link>
-        </div>
-      </section>
-
-      <section className="industries">
-        <div className="sectionHead">
-          <small>INITIAL CAMPAIGN FOCUS</small>
-          <h2>Built for small businesses where high call volume can overwhelm the operation.</h2>
-          <p>Stellar Voice Management is broadly useful wherever calls matter. Our initial campaign focuses on three high-call-volume operating environments.</p>
-        </div>
-        <div className="industryGrid">
-          {INDUSTRIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
-        </div>
-      </section>
-
       <section className="platformStory">
         <div className="sectionHead">
-          <small>MORE THAN AN AI RECEPTIONIST</small>
+          <small>ONE OPERATING ENVIRONMENT</small>
           <h2>The intelligence continues after the conversation.</h2>
-          <p>Conversational AI + CRM + Lead Management + Activities + Tasks + Customer 360 + Agent Workspace + Voice/SMS/Web Chat + operational intelligence.</p>
+          <p>Voice, SMS and web chat intake · Lead Management · Activities and Tasks · Customer 360 · Agent Workspace · Quality and compliance monitoring · Operational analytics.</p>
         </div>
         <div className="capGrid">
           {PLATFORM_PAGES.map(p => (
@@ -169,11 +164,45 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="industries">
+        <div className="sectionHead">
+          <small>WHAT YOU ARE SUBSCRIBING TO</small>
+          <h2>Three kinds of value. Delivered as one operation.</h2>
+          <p>A customer-operations capability is more than software. Stellar brings the technology, the configuration around your organization, and the ongoing expertise to keep it working.</p>
+        </div>
+        <div className="industryGrid">
+          {VALUE_LAYERS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
+        </div>
+      </section>
+
+      <section className="experience">
+        <div>
+          <small>LIVE DEMONSTRATION LINE</small>
+          <h2>Hear it on a real phone line.</h2>
+          <p>Call the demonstration line, then see how the platform carries that call into structured customer intake, lead management and follow-up.</p>
+        </div>
+        <div className="experienceActions">
+          <a href={PHONE_TEL} className="callCta"><span className="callLabel">Call the live demo line</span><span className="callNumber">{PHONE_DISPLAY}</span></a>
+          <Link href="/demo" className="buyerCta">See what happens next →</Link>
+        </div>
+      </section>
+
+      <section className="industries">
+        <div className="sectionHead">
+          <small>INITIAL FOCUS</small>
+          <h2>Built for operations where call volume has become the pressure point.</h2>
+          <p>Stellar applies wherever customer communication matters. We are starting with three high-volume operating environments.</p>
+        </div>
+        <div className="industryGrid">
+          {INDUSTRIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
+        </div>
+      </section>
+
       <section id="proof" className="proof">
         <div className="sectionHead">
           <small>REAL CALL · OWNER-TESTED END TO END</small>
           <h2>See what the platform does with the conversation.</h2>
-          <p>The public homepage uses a sanitized example. The dedicated demo lets a prospective customer or buyer experience the product flow directly.</p>
+          <p>The public homepage uses a sanitized example. The dedicated demo lets a prospective customer experience the product flow directly.</p>
         </div>
         <div className="proofCard">
           <div className="proofRow"><span>Caller</span><b>Jordan Reyes</b></div>
@@ -184,19 +213,19 @@ export default function HomePage() {
       </section>
 
       <section className="fit">
-        <div className="sectionHead"><small>WHO STELLAR VOICE MANAGEMENT IS FOR</small><h2>Built for businesses that cannot afford to lose the call.</h2></div>
+        <div className="sectionHead"><small>WHO STELLAR IS FOR</small><h2>Built for organizations that cannot afford to lose the customer.</h2></div>
         <ul>{BUSINESS_FIT.map(item => <li key={item}>{item}</li>)}</ul>
       </section>
 
       <section id="stellar-review" className="closing">
-        <small>STELLAR VOICE MANAGEMENT</small>
-        <h2>Ready to give every customer call somewhere intelligent to go?</h2>
-        <p>Keep your existing number. Forward your calls to AI4CC. We configure the conversational experience and operating workflow around your business and provide access to your customized dashboard.</p>
+        <small>STELLAR · INTELLIGENT CUSTOMER ENGAGEMENT OPERATION CENTER</small>
+        <h2>Premium system. Cost-effective solution.</h2>
+        <p>Stellar is not positioned as a cheap answering service. It is a managed customer-operations system designed to deliver substantial operational and financial value. Keep your number, your phones and your provider, and add the intelligence.</p>
         <div className="closingActions">
-          <a href={PHONE_TEL} className="callCta"><span className="callLabel">Call the live AI</span><span className="callNumber">{PHONE_DISPLAY}</span></a>
-          <Link href="/demo" className="buyerCta">Request a Stellar Voice Review →</Link>
+          <a href={PHONE_TEL} className="callCta"><span className="callLabel">Call the live demo line</span><span className="callNumber">{PHONE_DISPLAY}</span></a>
+          <Link href="/demo" className="buyerCta">Request a Stellar Review →</Link>
         </div>
-        <p className="livePrompt closingPrompt">Call the same AI your customers could be talking to tomorrow.</p>
+        <p className="livePrompt closingPrompt">Hear the operation center on a real phone line.</p>
         <div className="partnerFoot">Technology provider, MSP, telecom or reseller? <Link href="/partners">Explore Partner &amp; White-Label Opportunities →</Link></div>
       </section>
     </main>
