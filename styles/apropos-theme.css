@@ -95,4 +95,20 @@ body .callCta,body .callCta:visited{
 body .themeSwitch{display:none!important}
 body footer{background:#050505!important;border-color:var(--theme-border-soft)!important;color:var(--theme-muted)!important}
 
+/* Final legacy-color cleanup: page-level section styles must not reintroduce
+ * the retired blue/sapphire acquisition palette. Preserve cards and controls. */
+body main > section,
+body .page > section,
+body .mc-shell > section,
+body section.pain,
+body section.problem,
+body section.proof,
+body section.capabilities,
+body section.experience,
+body section.easyInstall,
+body section.closing{
+  background-color:var(--theme-canvas)!important;
+  background-image:none!important;
+}
+
 @media (prefers-reduced-motion:reduce){html,body{transition:none}}
