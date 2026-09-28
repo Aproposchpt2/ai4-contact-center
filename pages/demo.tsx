@@ -42,8 +42,8 @@ export default function DemoPage() {
 
   return <>
     <Head>
-      <title>Live Demo — AI4 Contact Center</title>
-      <meta name="description" content="Call (725) 330-5102, talk to the AI4 Contact Center Conversational AI Agent, then watch the call become a real lead in the live CRM." />
+      <title>Live Demo — Stellar Unified Communications</title>
+      <meta name="description" content="Call (725) 330-5102, talk to Stellar's Intelligent Customer Engagement Operation Center, then watch the call become a real lead in the live CRM." />
     </Head>
     <Header />
     <main className="page">
@@ -121,7 +121,7 @@ export default function DemoPage() {
       </div>
 
       <div className="drawerBody">
-        <p className="role"><strong>The AI Conversational Agent is currently programmed to serve as a representative of the AI4 Contact Center Sales Division.</strong></p>
+        <p className="role"><strong>The Conversational Agent is currently programmed to serve as a representative of Stellar's Sales Division.</strong></p>
 
         <p>For this demonstration, play the role of a business owner or decision-maker who is shopping for a <strong>Contact Center, CRM or Lead Management solution.</strong></p>
 
@@ -139,7 +139,7 @@ export default function DemoPage() {
 
         <div className="afterCall">
           <small>AFTER YOUR CALL</small>
-          <p>Close this guide and watch AI4 Contact Center convert the conversation into a structured Lead in the live CRM.</p>
+          <p>Close this guide and watch Stellar convert the conversation into a structured Lead in the live CRM.</p>
         </div>
       </div>
     </aside>

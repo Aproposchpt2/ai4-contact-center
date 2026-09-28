@@ -24,8 +24,8 @@ export default function LiveLeadsPage() {
 
   return <>
     <Head>
-      <title>Live Lead Management — AI4 Contact Center</title>
-      <meta name="description" content="A real, live view of AI4 Contact Center's Lead Management pipeline — see exactly what the platform captures from a real call." />
+      <title>Live Lead Management — Stellar Unified Communications</title>
+      <meta name="description" content="A real, live view of Stellar's Lead Management pipeline — see exactly what the platform captures from a real call." />
       <meta name="robots" content="noindex" />
     </Head>
     <Header />
@@ -34,7 +34,7 @@ export default function LiveLeadsPage() {
         <Link href="/demo" className="back">← Back to the demo</Link>
         <div className="eyebrow">LIVE · LEAD MANAGEMENT</div>
         <h1>The real pipeline, right now.</h1>
-        <p>This is a live, read-only mirror of AI4CC&apos;s actual Lead Management data. Call the demo line and
+        <p>This is a live, read-only mirror of Stellar&apos;s actual Lead Management data. Call the demo line and
           your lead will appear here within moments.</p>
       </section>
       <section className="list">
