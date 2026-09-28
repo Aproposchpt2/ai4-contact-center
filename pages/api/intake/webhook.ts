@@ -26,7 +26,10 @@ const KEY_HEADER = 'x-ai4cc-intake-key';
 // header, unkeyed calls are attributed to Apropos's own tenant only. Set
 // AI4CC_INTAKE_ALLOW_UNKEYED=false in Netlify to close this door (then unkeyed calls get 401).
 const LEGACY_TENANT_ID = '5885a020-d363-4c27-910a-c035eda132f5';
-const LEGACY_ACTOR_USER_ID = '54aade67-58be-4136-826c-b6c4f98adf6f';
+// Must be an active member (tenant_users) of LEGACY_TENANT_ID in whichever Supabase project
+// this deploy points at — override per environment via AI4CC_INTAKE_FALLBACK_ACTOR_ID rather
+// than editing this default when the project changes (e.g. legacy -> production cutover).
+const LEGACY_ACTOR_USER_ID = process.env.AI4CC_INTAKE_FALLBACK_ACTOR_ID || '735fc481-1b75-4cf3-9f68-128e9e169fdc';
 const ALLOW_UNKEYED = process.env.AI4CC_INTAKE_ALLOW_UNKEYED !== 'false';
 
 const MAX_TEXT = 2000;
