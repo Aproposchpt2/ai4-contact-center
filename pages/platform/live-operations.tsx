@@ -32,8 +32,8 @@ const ITEMS = [
 export default function LiveOperationsPage() {
   return <>
     <Head>
-      <title>Live Operations — AI4 Contact Center</title>
-      <meta name="description" content="How AI4 Contact Center turns real conversations into a working commercial pipeline — Agent Workspace, Lead Management, and Customer 360." />
+      <title>Live Operations — Stellar Unified Communications</title>
+      <meta name="description" content="How Stellar's Intelligent Customer Engagement Operation Center turns real conversations into a working commercial pipeline — Agent Workspace, Lead Management, and Customer 360." />
     </Head>
     <Header />
     <main className="page">

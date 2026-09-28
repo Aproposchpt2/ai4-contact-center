@@ -15,7 +15,7 @@ const WHY = [
 export default function PartnersPage() {
   return <>
     <Head>
-      <title>AI4 Contact Center — For BPOs, MSPs &amp; Agencies</title>
+      <title>Stellar Unified Communications — For BPOs, MSPs &amp; Agencies</title>
       <meta name="description" content="Before you sign with another contact-center vendor, call this number. A live AI agent answers, runs a real intake, and creates a lead automatically — see it work in two minutes." />
     </Head>
     <Header />
@@ -51,7 +51,7 @@ export default function PartnersPage() {
         <div className="offerGrid">
           <div className="offerCard">
             <h3>License it</h3>
-            <p>Run AI4CC as your own AI intake/contact-center layer, deployed for your operation.</p>
+            <p>Run Stellar as your own intake/contact-center layer, deployed for your operation.</p>
           </div>
           <div className="offerCard">
             <h3>White-label it</h3>
