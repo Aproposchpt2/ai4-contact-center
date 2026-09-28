@@ -14,7 +14,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !serviceKey) return res.status(503).json({ error: 'Unavailable' });
+  if (!url || !serviceKey) {
+    console.error('[workspaces/resolve] DIAG missing env', { hasUrl: !!url, hasServiceKey: !!serviceKey, host: req.headers.host });
+    return res.status(503).json({ error: 'Unavailable' });
+  }
 
   try {
     const db = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
