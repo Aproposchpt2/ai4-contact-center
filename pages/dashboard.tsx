@@ -23,7 +23,7 @@ export default function DashboardPage() {
 
     async function loadFlows() {
       if (!isSupabaseConfigured() || !supabase) {
-        setError('Canonical Supabase configuration is required for the AI4 Contact Center dashboard.');
+        setError('Canonical Supabase configuration is required for the Stellar Unified Communications dashboard.');
         return;
       }
 
@@ -116,7 +116,7 @@ export default function DashboardPage() {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2.4rem' }}>
             <div>
               <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-                AI4 Contact Center · Canonical Dashboard
+                Stellar Unified Communications · Canonical Dashboard
               </p>
               <h1 style={{ fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 700, lineHeight: 1.1, margin: 0, color: '#fff' }}>
                 Saved Flows

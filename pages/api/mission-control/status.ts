@@ -108,7 +108,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       tenant: {
         id: ctx.tenantId,
-        name: tenantResult.data?.name ?? 'AI4 Contact Center',
+        name: tenantResult.data?.name ?? 'Stellar Unified Communications',
         role: ctx.role,
       },
       platform: {

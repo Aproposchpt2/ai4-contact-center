@@ -88,13 +88,13 @@ export default function VoiceOperationsPage() {
   const maxDaily = Math.max(1, ...(data?.dailyVolume.map(x => x.count) ?? [1]));
 
   return <>
-    <Head><title>Voice Operations & Analytics | AI4 Contact Center</title></Head>
+    <Head><title>Voice Operations & Analytics | Stellar Unified Communications</title></Head>
     <Header />
     <main className="page"><div className="shell">
       <div className="crumbs"><Link href="/channels/voice">Voice Channel</Link><span>/</span><b>Operations & Analytics</b></div>
       <section className="hero">
-        <div><p className="eyebrow">APROPOS GROUP LLC · AI4 CONTACT CENTER</p><h1>Voice Operations & Analytics</h1><p>Canonical production visibility for live Twilio Voice interactions, routing, queues, agents, voicemail, QA and compliance. Data is queried on demand; no heartbeat or background polling is used.</p></div>
-        <div className="authority"><small>ANALYTICS AUTHORITY</small><b>Canonical AI4CC Runtime</b><span>{data ? `Snapshot · ${new Date(data.generatedAt).toLocaleString()}` : 'No snapshot loaded'}</span></div>
+        <div><p className="eyebrow">APROPOS GROUP LLC · STELLAR UNIFIED COMMUNICATIONS</p><h1>Voice Operations & Analytics</h1><p>Canonical production visibility for live Twilio Voice interactions, routing, queues, agents, voicemail, QA and compliance. Data is queried on demand; no heartbeat or background polling is used.</p></div>
+        <div className="authority"><small>ANALYTICS AUTHORITY</small><b>Canonical Stellar Runtime</b><span>{data ? `Snapshot · ${new Date(data.generatedAt).toLocaleString()}` : 'No snapshot loaded'}</span></div>
       </section>
 
       <section className="controls">

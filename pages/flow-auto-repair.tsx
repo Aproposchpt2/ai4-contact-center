@@ -114,7 +114,7 @@ export default function FlowAutoRepairPage() {
       >
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-            AI4 Contact Center · Flow Auto-Repair & Optimization
+            Stellar Unified Communications · Flow Auto-Repair & Optimization
           </p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>
             Flow Auto-Repair

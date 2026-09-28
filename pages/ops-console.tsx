@@ -68,12 +68,12 @@ export default function MissionControlPage() {
   ];
 
   return <>
-    <Head><title>Mission Control | AI4 Contact Center</title><meta name="description" content="AI4 Contact Center Mission Control" /><meta name="robots" content="noindex" /></Head>
+    <Head><title>Mission Control | Stellar Unified Communications</title><meta name="description" content="Stellar Unified Communications Mission Control" /><meta name="robots" content="noindex" /></Head>
     <Header />
     <main className="page"><div className="shell">
       <div className="topbar"><div className="badge">● DEVELOPMENT MISSION CONTROL</div><div className="manual"><button onClick={() => load().catch((e: Error) => setError(e.message))} disabled={loading}>{loading ? 'Checking…' : 'Check System Status'}</button><span>{lastChecked ? `Last checked ${lastChecked}` : 'Monitoring off · on-demand only'}</span></div></div>
       <section className="hero">
-        <div><div className="brand">AI4 CONTACT CENTER</div><h1>Development operations.<br/><span>Canonical control.</span></h1><p>The contact-center platform is in development. Continuous monitoring is disabled; current status is queried only when you request it.</p></div>
+        <div><div className="brand">STELLAR UNIFIED COMMUNICATIONS</div><h1>Development operations.<br/><span>Canonical control.</span></h1><p>The contact-center platform is in development. Continuous monitoring is disabled; current status is queried only when you request it.</p></div>
         <div className="card"><small>PLATFORM STATUS</small><strong style={{color:tone(status?.platform.status ?? 'unknown')}}>{status ? label(status.platform.status) : 'NOT CHECKED'}</strong><b>{status?.tenant.name ?? 'No snapshot loaded'}</b><em>{status?.tenant.role ? `ROLE · ${status.tenant.role.toUpperCase()}` : 'ON-DEMAND DEVELOPMENT MODE'}</em></div>
       </section>
       {error && <div className="error">{error}</div>}

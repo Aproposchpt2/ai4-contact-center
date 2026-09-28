@@ -155,7 +155,7 @@ export default function FlowSimulatorPage() {
       <main style={{ minHeight: '100vh', background: '#06111f', color: '#e8f0fe', fontFamily: "'Inter', 'Jost', sans-serif", padding: '2rem clamp(1rem, 4vw, 3rem)' }}>
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-            AI4 Contact Center · Flow Simulator & Stress Tester
+            Stellar Unified Communications · Flow Simulator & Stress Tester
           </p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>Flow Simulator</h1>
 

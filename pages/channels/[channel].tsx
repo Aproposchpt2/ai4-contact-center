@@ -70,12 +70,12 @@ export default function ChannelOperationsPage() {
   if (!meta) return null;
 
   return <>
-    <Head><title>{meta.title} | AI4 Contact Center</title></Head>
+    <Head><title>{meta.title} | Stellar Unified Communications</title></Head>
     <Header />
     <main className="page"><div className="shell">
       <div className="crumbs"><Link href="/channels">Channel Operations</Link><span>/</span><b>{meta.title}</b></div>
       <section className="hero">
-        <div><p className="eyebrow">AI4 CONTACT CENTER · DEVELOPMENT · {meta.runtime.toUpperCase()}</p><h1>{meta.title}</h1><p>{meta.subtitle}</p></div>
+        <div><p className="eyebrow">STELLAR UNIFIED COMMUNICATIONS · DEVELOPMENT · {meta.runtime.toUpperCase()}</p><h1>{meta.title}</h1><p>{meta.subtitle}</p></div>
         <div className="health"><small>CHANNEL STATUS</small><strong style={{color:tone(health?.status ?? 'unknown')}}>{health ? health.status.replace(/_/g,' ').toUpperCase() : 'NOT CHECKED'}</strong><span>{health?.details.service ?? meta.runtime}</span></div>
       </section>
       {error && <div className="error">{error}</div>}
