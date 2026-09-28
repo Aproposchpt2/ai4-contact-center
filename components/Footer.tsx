@@ -17,10 +17,10 @@ export default function Footer() {
       }}>
         <div>
           <div style={{ fontSize: '.72rem', fontWeight: 900, color: '#E2CEA2', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: '.5rem' }}>
-            AI4 Contact Center
+            Stellar Unified Communications
           </div>
           <p style={{ fontSize: '.78rem', color: '#8F9CAF', lineHeight: 1.7 }}>
-            AI-powered call flow engineering for modern contact centers.
+            Intelligent customer engagement operations for modern business communications.
           </p>
           <p style={{ fontSize: '.72rem', color: '#7D899C', marginTop: '.5rem' }}>
             Apropos Group LLC
@@ -55,10 +55,7 @@ export default function Footer() {
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', paddingTop: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
         <span style={{ fontSize: '.72rem', color: '#7D899C' }}>
-          © 2026 Apropos Group LLC · AI4 Contact Center Engineering Suite
-        </span>
-        <span style={{ fontSize: '.68rem', color: '#657187', fontStyle: 'italic' }}>
-          MVP v1.0 · July 2026
+          © 2026 Apropos Group LLC · Stellar Unified Communications
         </span>
       </div>
     </footer>

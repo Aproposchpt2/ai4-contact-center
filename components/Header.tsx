@@ -78,13 +78,18 @@ export default function Header() {
     return () => { cancelled = true; };
   }, []);
 
-  const visibleNav = workspace && workspace.modules !== 'all'
-    ? NAV.filter(({ href }) => (workspace.modules as string[]).includes(href))
-    : NAV;
-  const showBuilderCta = !workspace || workspace.modules === 'all' || workspace.modules.includes('/builder');
+  // Safe default is minimal, not maximal: a visitor with no resolved workspace (signed out, or
+  // context still loading) must never see the full internal tool list. Only an explicit
+  // workspace.modules === 'all' (staff on the operator host) unlocks everything.
+  const visibleNav = workspace?.modules === 'all'
+    ? NAV
+    : workspace
+      ? NAV.filter(({ href }) => (workspace.modules as string[]).includes(href))
+      : [];
+  const showBuilderCta = workspace?.modules === 'all' || (Array.isArray(workspace?.modules) && workspace.modules.includes('/builder'));
   const brandName = workspace?.branding?.companyName || workspace?.tenant.name || null;
-  const brandProduct = workspace?.branding?.productName || 'Contact Center';
-  const brandInitials = brandName ? brandName.replace(/[^A-Za-z0-9 ]/g, '').split(/[ ]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'CC' : 'AI4';
+  const brandProduct = workspace?.branding?.productName || 'Unified Communications';
+  const brandInitials = brandName ? brandName.replace(/[^A-Za-z0-9 ]/g, '').split(/[ ]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'CC' : 'ST';
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme === 'light' ? 'light' : 'black';
@@ -109,7 +114,7 @@ export default function Header() {
           ) : (
             <span className="brandMark">{brandInitials}</span>
           )}
-          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Contact Center'}</span>
+          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Stellar Unified Communications'}</span>
         </Link>
 
         <nav className="navRail" aria-label="Primary navigation">
