@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost, isAppHost, isAllowedOnAppHost, primaryRootDomain, isSharedStateRoute } from '../lib/tenantHost.ts';
+import { tenantSlugFromHost, isBlockedOnTenantHost, isValidTenantSlug, effectiveHost, isOperatorHost, isBlockedOnOperatorHost, isAppHost, isAllowedOnAppHost, primaryRootDomain, isSharedStateRoute, isUnentitledApiRoute } from '../lib/tenantHost.ts';
 
 test('resolves a single-label tenant host under the default root', () => {
   assert.equal(tenantSlugFromHost('acme-plumbing.stellaruc.com'), 'acme-plumbing');
@@ -109,4 +109,16 @@ test('shared-state routes are blocked on tenant hosts but tenant-safe ones are n
   }
   // staff console keeps them
   assert.equal(isBlockedOnOperatorHost('/prompt-manager'), false);
+});
+
+test('unentitled (hidden-at-launch) enterprise API routes are blocked on tenant hosts, staff console keeps them', () => {
+  for (const p of ['/api/datalake/query', '/api/experiments/run', '/api/flow-rewrite/generate', '/api/governance/scan', '/api/cost/roi', '/api/wfm/schedule', '/api/localization/translate', '/api/journey/create', '/api/integration/execute', '/api/qa/score', '/api/coaching/report', '/api/skills/save', '/api/transcripts/analyze', '/api/compliance/scan', '/api/assist/kb', '/api/repair-flow', '/api/analyze-script', '/api/analyze-data', '/api/optimize-routing', '/api/parse-flow']) {
+    assert.equal(isUnentitledApiRoute(p), true, p);
+    assert.equal(isBlockedOnTenantHost(p), true, p);
+    assert.equal(isBlockedOnOperatorHost(p), false, p);
+  }
+  // tenant-scoped or otherwise safe routes must not be swept up by the new prefixes
+  for (const p of ['/api/lead-management', '/api/get-flows', '/api/save-flow', '/api/delete-flow', '/api/chat/message', '/api/intake/webhook', '/api/workspaces/resolve', '/api/mission-control/channels']) {
+    assert.equal(isUnentitledApiRoute(p), false, p);
+  }
 });

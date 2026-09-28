@@ -132,10 +132,46 @@ export function isSharedStateRoute(pathname: string): boolean {
   return SHARED_STATE_PAGES.has(pathname) || SHARED_STATE_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/') || (p.endsWith('/') && pathname.startsWith(p)));
 }
 
+// Advanced/enterprise-tier API routes (Designer/Builder/Simulator, Auto-Repair, Rewrite,
+// Governance, Data Lake, Experimentation, Compliance Automation, Cost Optimizer, WFM,
+// Localization, Journey Designer, Integration Hub, QA/Coaching, Skills, Transcript analysis)
+// that the blueprint's launch entitlement set (docs/AI4CC-ONBOARDING-BLUEPRINT-001.md §2.4)
+// marks "Hidden at launch" — none of these use requireAi4ccContext yet (confirmed 2026-09-28),
+// so unlike the routes PR #30 fixed via host-based resolution (get/save/delete-flow,
+// chat/message), these are still unaudited for tenant isolation. Block them on tenant hosts by
+// default until each is either tenant-scoped and deliberately entitled, or removed from this
+// list. Do not add a route here without adding the tenant-scoping fix in the same change.
+const UNENTITLED_API_PREFIXES = [
+  '/api/analyze-data',
+  '/api/analyze-script',
+  '/api/optimize-routing',
+  '/api/parse-flow',
+  '/api/repair-flow',
+  '/api/assist/',
+  '/api/coaching/',
+  '/api/compliance/',
+  '/api/cost/',
+  '/api/datalake/',
+  '/api/experiments/',
+  '/api/flow-rewrite/',
+  '/api/governance/',
+  '/api/integration/',
+  '/api/journey/',
+  '/api/localization/',
+  '/api/qa/',
+  '/api/skills/',
+  '/api/transcripts/',
+  '/api/wfm/',
+];
+
+export function isUnentitledApiRoute(pathname: string): boolean {
+  return UNENTITLED_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
+}
+
 // Paths that belong to the marketing / Apropos-internal surface and must never be served on a
 // customer's tenant host (they show Apropos data or sales content).
 export function isBlockedOnTenantHost(pathname: string): boolean {
-  if (isSharedStateRoute(pathname)) return true;
+  if (isSharedStateRoute(pathname) || isUnentitledApiRoute(pathname)) return true;
   return (
     pathname === '/acquisition' ||
     pathname === '/partners' ||
