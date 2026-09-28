@@ -119,7 +119,7 @@ export default function LeadOperationsPage(){
   }
 
   return <><Header/><main className="page"><div className="shell">
-    <div className="heading"><div><p className="eyebrow">AI4 CONTACT CENTER · CR-01B PACKAGE 02</p><h1>Lead Activity + Task Operations</h1><p>Manual-refresh operational workspace for canonical Lead history and follow-up work. No polling, duplicate CRM, or alternate task authority.{lastUpdated?` · Last refreshed ${lastUpdated}`:''}</p></div><div className="headingActions"><span className="roleBadge">{role?role.toUpperCase():'ROLE PENDING'}</span><button onClick={refresh} disabled={loading}>{loading?'Refreshing…':'Refresh'}</button></div></div>
+    <div className="heading"><div><p className="eyebrow">STELLAR UNIFIED COMMUNICATIONS · CR-01B PACKAGE 02</p><h1>Lead Activity + Task Operations</h1><p>Manual-refresh operational workspace for canonical Lead history and follow-up work. No polling, duplicate CRM, or alternate task authority.{lastUpdated?` · Last refreshed ${lastUpdated}`:''}</p></div><div className="headingActions"><span className="roleBadge">{role?role.toUpperCase():'ROLE PENDING'}</span><button onClick={refresh} disabled={loading}>{loading?'Refreshing…':'Refresh'}</button></div></div>
 
     <div className="metrics"><div className="metric"><small>Lead Activities</small><b>{activities.length}</b></div><div className="metric"><small>Open Tasks</small><b>{openTasks}</b></div><div className="metric"><small>Overdue</small><b>{overdue}</b></div><div className="metric"><small>Total Tasks</small><b>{tasks.length}</b></div></div>
     {error&&<div className="error">{error}</div>}{notice&&<div className="notice">{notice}</div>}

@@ -127,7 +127,7 @@ export default function BuilderPage() {
       <main style={{ minHeight: '100vh', background: '#06111f', color: '#e8f0fe', fontFamily: "'Inter', 'Jost', sans-serif", padding: '2rem clamp(1rem, 4vw, 3rem)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-            AI4 Contact Center · Canonical Script Builder
+            Stellar Unified Communications · Canonical Script Builder
           </p>
           <h1 style={{ fontSize: 'clamp(1.5rem,3vw,2.2rem)', fontWeight: 700, margin: '0 0 1.2rem 0', color: '#fff' }}>
             Builder
