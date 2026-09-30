@@ -122,6 +122,10 @@ export function classifyIdentifier(rawEmail: unknown, rawPhone: unknown) {
   return { type: 'opaque' as const, value: email || text(rawPhone) || 'Unknown contact', email: null, phone: null };
 }
 
+export function callbackPhone(submitted: unknown, callerId: unknown): string | null {
+  return normalizePhone(text(submitted)) || normalizePhone(text(callerId));
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -157,6 +161,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .select('id')
         .single();
 
+      if (error?.code === '23505' && conversationId) {
+        // The unique constraint also handles simultaneous start requests.
+        const { data: existing, error: lookupError } = await db
+          .from('ai4cc_interactions')
+          .select('id, metadata')
+          .eq('tenant_id', tenantId)
+          .eq('channel', 'voice')
+          .eq('external_id', conversationId)
+          .maybeSingle();
+        if (lookupError) throw lookupError;
+        if (existing?.metadata?.source === 'elevenlabs_agent') {
+          return res.status(200).json({ interactionId: existing.id });
+        }
+        return res.status(409).json({ error: 'conversation ID is already in use' });
+      }
       if (error) throw error;
       return res.status(201).json({ interactionId: data.id });
     }
@@ -179,35 +198,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .maybeSingle();
       if (fetchError) throw fetchError;
       if (!interaction) return res.status(404).json({ error: 'interaction not found' });
-      if (interaction.status === 'completed') return res.status(409).json({ error: 'interaction already submitted' });
-
-      // 2026-09-30 fix: fall back to the verified telephony caller ID captured at
-      // 'start' when the agent's submit payload has no usable phone -- this is a
-      // real, network-verified number, more reliable than relying on the caller
-      // to speak their own number back correctly.
-      const phoneCandidate = text(body.phone) || interaction.customer_identifier || '';
-
-      const { error: updateError } = await db
-        .from('ai4cc_interactions')
-        .update({
-          status: 'completed',
-          ended_at: new Date().toISOString(),
-          metadata: {
-            ...(interaction.metadata as Record<string, unknown>),
-            businessName,
-            callerName,
-            email,
-            phone: phoneCandidate,
-            description,
-            serviceInterest,
-          },
-        })
-        .eq('id', interactionId);
-      if (updateError) throw updateError;
-
+      const phoneCandidate = callbackPhone(body.phone, interaction.customer_identifier);
       const identifier = classifyIdentifier(email, phoneCandidate);
 
-      const { data: lifecycle, error: rpcError } = await db.rpc('ai4cc_create_lead_from_interaction', {
+      // The RPC locks the interaction and commits completion, contact, lead and
+      // audit together. Failure leaves it retryable; replay returns the first lead.
+      const { data: lifecycle, error: rpcError } = await db.rpc('ai4cc_submit_voice_intake', {
         p_tenant_id: tenantId,
         p_actor_user_id: actorUserId,
         p_interaction_id: interactionId,
@@ -217,20 +213,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         p_phone: identifier.phone,
         p_contact_name: callerName || businessName || identifier.value,
         p_company_name: businessName || null,
-        p_title: businessName ? `${businessName} — voice intake` : 'Voice intake lead',
         p_service_interest: serviceInterest || null,
         p_description: description || 'Lead captured by the AI4CC Business Intake Agent.',
-        p_pipeline_stage: 'new',
-        p_priority: 'normal',
-        p_score: 50,
-        p_estimated_value: 0,
-        p_probability: 0,
-        p_next_action: 'Review intake call and follow up.',
-        p_next_follow_up: null,
+        p_metadata: { businessName, callerName, email, phone: phoneCandidate, description, serviceInterest },
       });
 
-      if (rpcError) throw rpcError;
-      return res.status(201).json(lifecycle);
+      if (rpcError) {
+        if (rpcError.message?.includes('AI4CC_INTERACTION_NOT_FOUND')) return res.status(404).json({ error: 'interaction not found' });
+        if (rpcError.message?.includes('AI4CC_INTAKE_INTERACTION_STATE_INVALID')) return res.status(409).json({ error: 'interaction cannot be submitted in this state' });
+        if (rpcError.message?.includes('AI4CC_INTAKE_SOURCE_INVALID')) return res.status(409).json({ error: 'interaction is not a voice intake' });
+        throw rpcError;
+      }
+      return res.status(lifecycle?.replayed ? 200 : 201).json(lifecycle);
     }
 
     return res.status(400).json({ error: 'action must be "start" or "submit"' });
