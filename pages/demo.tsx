@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -21,16 +21,26 @@ const DOC_PAGES = [
 export default function DemoPage() {
   const [call, setCall] = useState<LiveCall | null>(null);
   const [checked, setChecked] = useState(false);
+  const [looking, setLooking] = useState(false);
+  const [last4, setLast4] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/public/latest-call')
-      .then(r => r.ok ? r.json() : { call: null })
-      .then(d => { if (!cancelled) setCall(d?.call ?? null); })
-      .finally(() => { if (!cancelled) setChecked(true); });
-    return () => { cancelled = true; };
-  }, []);
+  // Only the caller's own call is shown: the lookup needs the last 4 digits of the number they called from.
+  const findMyCall = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!/^\d{4}$/.test(last4)) return;
+    setLooking(true);
+    try {
+      const r = await fetch(`/api/public/latest-call?last4=${last4}`);
+      const d = r.ok ? await r.json() : { call: null };
+      setCall(d?.call ?? null);
+    } catch {
+      setCall(null);
+    } finally {
+      setChecked(true);
+      setLooking(false);
+    }
+  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -71,15 +81,26 @@ export default function DemoPage() {
         <div className="step">
           <span>03</span>
           <h2>Watch it become a lead</h2>
-          <p>The moment you hang up, a structured lead exists in the CRM below — no data entry, nobody typing notes after the call.</p>
+          <p>The moment you hang up, a structured lead exists in the CRM. Enter the last 4 digits of your phone below to see it — no data entry, nobody typing notes after the call.</p>
         </div>
       </section>
 
       <section className="result">
         <div className="resultHead">
-          <small>{checked && call ? 'LIVE · MOST RECENT CALL' : 'WAITING FOR A CALL'}</small>
-          <h2>{checked && call ? 'Here\'s what your call (or the last one) produced' : 'No call captured yet — be the first'}</h2>
+          <small>{checked && call ? 'LIVE · YOUR CALL' : 'FIND YOUR CALL'}</small>
+          <h2>{checked && call ? 'Here\'s what your call produced' : checked ? 'No matching call yet' : 'See the lead your call created'}</h2>
+          <p>{checked && !call
+            ? 'We couldn\'t find a completed call from the last hour ending in those digits. If you just hung up, give it a few seconds and check again.'
+            : 'For privacy, only your own call is shown. Enter the last 4 digits of the phone you called from.'}</p>
         </div>
+        <form className="lookup" onSubmit={findMyCall}>
+          <label htmlFor="last4">Last 4 digits of your phone</label>
+          <div className="lookupRow">
+            <input id="last4" inputMode="numeric" autoComplete="off" pattern="\d{4}" maxLength={4} placeholder="1234"
+              value={last4} onChange={e => setLast4(e.target.value.replace(/\D/g, '').slice(0, 4))} />
+            <button type="submit" disabled={looking || last4.length !== 4}>{looking ? 'Checking…' : checked ? 'Check again' : 'Show my call'}</button>
+          </div>
+        </form>
         {checked && call && (
           <div className="proofCard">
             <div className="proofRow"><span>Caller</span><b>{call.callerName ?? '—'}</b></div>
@@ -169,6 +190,14 @@ export default function DemoPage() {
       .resultHead{margin-bottom:20px}
       .resultHead small{color:#69d8ff;font-size:.65rem;font-weight:900;letter-spacing:.16em}
       .resultHead h2{margin:10px 0 0;font-size:1.5rem;letter-spacing:-.02em}
+      .resultHead p{margin:10px 0 0;color:#9eb3c4;font-size:.9rem;line-height:1.6}
+      .lookup{display:grid;gap:8px;margin:0 0 20px}
+      .lookup label{color:#718ba0;font-size:.66rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+      .lookupRow{display:flex;gap:10px;flex-wrap:wrap}
+      .lookup input{width:120px;border:1px solid #29495d;border-radius:9px;background:rgba(7,24,38,.72);color:#eef8ff;padding:11px 14px;font-size:1.05rem;letter-spacing:.2em}
+      .lookup input:focus{outline:none;border-color:#69d8ff}
+      .lookup button{border:none;border-radius:9px;background:#69d8ff;color:#06111f;padding:11px 18px;font-size:.78rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+      .lookup button:disabled{opacity:.5;cursor:default}
       .proofCard{border:1px solid #19384d;border-radius:16px;background:rgba(7,24,38,.72);padding:8px}
       .proofRow{display:grid;grid-template-columns:160px 1fr;gap:16px;padding:15px 20px;border-bottom:1px solid #123047}
       .proofRow:last-child{border-bottom:none}
