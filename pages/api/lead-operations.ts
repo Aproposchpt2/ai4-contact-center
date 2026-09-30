@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { requireAi4ccContext } from '@/lib/ai4ccServer';
+import { apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4ccServer';
 
 const ACTIVITY_DIRECTIONS = new Set(['internal','inbound','outbound']);
 const TASK_PRIORITIES = new Set(['low','normal','high','urgent']);
@@ -15,7 +15,7 @@ function validUuid(value: string) {
 
 function rpcError(message: string, res: NextApiResponse) {
   if (message.includes('NOT_FOUND')) return res.status(404).json({ error: 'Lead, task, or assigned agent was not found in this tenant' });
-  if (message.includes('FORBIDDEN')) return res.status(403).json({ error: 'Your role or assignment is not authorized for this operation' });
+  if (message.includes('FORBIDDEN') || message.includes('TENANT_MEMBERSHIP_REQUIRED')) return res.status(403).json({ error: 'Your role or assignment is not authorized for this operation' });
   if (message.includes('NO_MATERIAL_CHANGE')) return res.status(409).json({ error: 'The requested task update does not materially change the current record' });
   if (message.includes('INVALID') || message.includes('REQUIRED') || message.includes('NOT_SUPPORTED')) {
     return res.status(400).json({ error: 'The Lead operation contains invalid input' });
@@ -157,6 +157,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (error: any) {
     console.error('lead-operations error', error);
-    return res.status(500).json({ error: 'Unable to complete Lead operation' });
+    const status = apiErrorStatus(error);
+    return res.status(status).json({ error: status === 500 ? 'Unable to complete Lead operation' : apiErrorMessage(error) });
   }
 }

@@ -1,9 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { apiErrorMessage, apiErrorStatus, requireAi4ccContext } from '@/lib/ai4ccServer';
 
+const MANAGE_ROLES = new Set(['owner', 'admin', 'supervisor', 'operator', 'agent']);
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { admin, tenantId } = await requireAi4ccContext(req);
+    const { admin, tenantId, role } = await requireAi4ccContext(req);
+    const canManage = MANAGE_ROLES.has(role);
 
     if (req.method === 'GET') {
       const { data, error } = await admin
@@ -13,10 +16,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .order('received_at', { ascending: false })
         .limit(100);
       if (error) throw error;
-      return res.status(200).json({ voicemails: data ?? [] });
+      return res.status(200).json({ voicemails: data ?? [], canManage });
     }
 
     if (req.method === 'PUT') {
+      if (!canManage) return res.status(403).json({ error: 'Your role cannot change voicemail status' });
       const id = typeof req.body?.id === 'string' ? req.body.id : '';
       const status = typeof req.body?.callback_status === 'string' ? req.body.callback_status : '';
       if (!id || !['new','reviewed','callback_pending','resolved'].includes(status)) {
