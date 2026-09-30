@@ -3,6 +3,8 @@ import { requireAi4ccContext, apiErrorMessage, apiErrorStatus } from '@/lib/ai4c
 import { generateGuidance, type AssistSession } from '@/lib/agentAssistEngine';
 import { generateQAReport } from '@/lib/qualityAssuranceEngine';
 
+const WRITE_ROLES = new Set(['owner', 'admin', 'supervisor', 'operator', 'agent']);
+
 type RuntimeBody = {
   versionId?: string;
   customerText?: string;
@@ -24,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const ctx = await requireAi4ccContext(req);
+    if (!WRITE_ROLES.has(ctx.role)) return res.status(403).json({ error: 'Your role cannot run acceptance simulations' });
     const body = (req.body ?? {}) as RuntimeBody;
 
     let versionId = body.versionId;
