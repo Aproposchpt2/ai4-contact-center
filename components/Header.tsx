@@ -88,7 +88,7 @@ export default function Header() {
       : [];
   const showBuilderCta = workspace?.modules === 'all' || (Array.isArray(workspace?.modules) && workspace.modules.includes('/builder'));
   const brandName = workspace?.branding?.companyName || workspace?.tenant.name || null;
-  const brandProduct = workspace?.branding?.productName || 'Unified Communications';
+  const brandProduct = workspace?.branding?.productName || 'Intelligent Customer Engagement Operation Center';
   const brandInitials = brandName ? brandName.replace(/[^A-Za-z0-9 ]/g, '').split(/[ ]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || 'CC' : 'ST';
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function Header() {
           ) : (
             <span className="brandMark">{brandInitials}</span>
           )}
-          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Stellar Unified Communications'}</span>
+          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Intelligent Customer Engagement Operation Center'}</span>
         </Link>
 
         <nav className="navRail" aria-label="Primary navigation">

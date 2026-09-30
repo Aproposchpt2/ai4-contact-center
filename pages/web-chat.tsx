@@ -78,7 +78,7 @@ export default function WebChatPage() {
       <main style={{ minHeight: '100vh', background: '#06111f', color: '#e8f0fe', fontFamily: "'Inter','Jost',sans-serif", padding: '2rem clamp(1rem,4vw,3rem)' }}>
         <div style={{ maxWidth: 920, margin: '0 auto' }}>
           <div style={{ marginBottom: '1.25rem' }}>
-            <p style={{ fontSize: '.65rem', fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', margin: '0 0 .4rem' }}>Stellar Unified Communications · Channel Acceptance</p>
+            <p style={{ fontSize: '.65rem', fontWeight: 900, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', margin: '0 0 .4rem' }}>Intelligent Customer Engagement Operation Center · Channel Acceptance</p>
             <h1 style={{ margin: 0, color: '#fff', fontSize: 'clamp(1.8rem,4vw,2.8rem)' }}>Live Web Chat</h1>
             <p style={{ color: 'rgba(255,255,255,.5)', lineHeight: 1.6, maxWidth: 720 }}>Development chat surface for validating canonical chat sessions, routing, Agent Assist, QA, compliance and Agent Workspace visibility.</p>
           </div>
@@ -87,7 +87,7 @@ export default function WebChatPage() {
             <section style={{ border: '1px solid rgba(255,255,255,.1)', borderRadius: 14, background: 'rgba(255,255,255,.025)', overflow: 'hidden' }}>
               <div style={{ padding: '1rem 1.1rem', borderBottom: '1px solid rgba(255,255,255,.08)', display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div>
-                  <div style={{ fontWeight: 900, color: '#fff' }}>Stellar Development Chat</div>
+                  <div style={{ fontWeight: 900, color: '#fff' }}>Development Chat</div>
                   <div style={{ marginTop: '.25rem', fontSize: '.72rem', color: 'rgba(255,255,255,.42)' }}>Session {sessionId.slice(0, 8)} · {status}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '.55rem' }}>
@@ -99,12 +99,12 @@ export default function WebChatPage() {
               <div style={{ padding: '1rem', minHeight: 360, maxHeight: 520, overflowY: 'auto' }}>
                 {turns.length === 0 ? (
                   <div style={{ display: 'grid', placeItems: 'center', minHeight: 300, textAlign: 'center', color: 'rgba(255,255,255,.4)' }}>
-                    <div><div style={{ fontSize: '1rem', color: '#fff', fontWeight: 800, marginBottom: '.4rem' }}>Start a controlled web-chat interaction</div><div style={{ fontSize: '.85rem' }}>Your first message creates a canonical <strong>chat</strong> interaction in Stellar.</div></div>
+                    <div><div style={{ fontSize: '1rem', color: '#fff', fontWeight: 800, marginBottom: '.4rem' }}>Start a controlled web-chat interaction</div><div style={{ fontSize: '.85rem' }}>Your first message creates a canonical <strong>chat</strong> interaction in the Operation Center.</div></div>
                   </div>
                 ) : turns.map((turn, index) => (
                   <div key={`${turn.speaker}-${index}`} style={{ display: 'flex', justifyContent: turn.speaker === 'customer' ? 'flex-end' : 'flex-start', marginBottom: '.75rem' }}>
                     <div style={{ maxWidth: '78%', borderRadius: 12, padding: '.75rem .9rem', background: turn.speaker === 'customer' ? '#5bd3ff' : 'rgba(255,255,255,.07)', color: turn.speaker === 'customer' ? '#06111f' : '#e8f0fe' }}>
-                      <div style={{ fontSize: '.58rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', opacity: .65, marginBottom: '.3rem' }}>{turn.speaker === 'customer' ? 'Visitor' : 'Stellar Agent'}</div>
+                      <div style={{ fontSize: '.58rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '.1em', opacity: .65, marginBottom: '.3rem' }}>{turn.speaker === 'customer' ? 'Visitor' : 'The Operation Center Agent'}</div>
                       <div style={{ fontSize: '.9rem', lineHeight: 1.5 }}>{turn.text}</div>
                     </div>
                   </div>

@@ -94,7 +94,7 @@ export default function AnalyticsEnginePage() {
         }}
       >
         <div style={{ maxWidth: '980px', margin: '0 auto' }}>
-          <p style={eyebrowStyle}>Stellar Unified Communications · Analytics Engine</p>
+          <p style={eyebrowStyle}>Intelligent Customer Engagement Operation Center · Analytics Engine</p>
           <h1 style={{ margin: '0 0 1.1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>
             Analytics Engine
           </h1>

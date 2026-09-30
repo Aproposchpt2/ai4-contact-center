@@ -475,7 +475,7 @@ The purpose is to create the realization: "This could answer my customers."
 | "Will this replace my staff?" | "The intended model combines intelligent customer engagement with human operations. It can reduce repetitive workload and extend coverage while your staff continues handling the work and decisions that require people." |
 | "Can it handle more than one call at a time?" | "Yes. It can answer multiple callers at the same time, so callers aren't stuck waiting for a free line. Expected call volume is part of onboarding." |
 | "Is this difficult to install?" | "No. Setup is a managed service: our team configures and tests everything. Your part is sharing how your business runs and turning on call forwarding with your phone provider once testing is approved." |
-| "How quickly can we get started?" | Describe the steps (discovery, configuration, testing, forwarding, soft launch). Do not give a duration; a specialist confirms the timeline. |
+| "How quickly can we get started?" | "Typically one to two weeks after we receive your information." Then describe the steps: discovery, configuration, testing, forwarding, soft launch. |
 | "Can it integrate with our existing systems?" | "Captured leads, tasks and customer history live in your own operating dashboard. Connections to other specific systems are confirmed case by case, so I'll have a specialist follow up on the systems you use." Never confirm a named integration. |
 | "Can I change the greeting or answers myself?" | "Changes are handled through our managed change process: you tell us what to update, and we make and test the change so your live calls don't break." |
 | "What happens if I cancel?" | "It's month to month and you can cancel anytime." For the cancellation steps, data export or switching your forwarding back, a specialist follows up. |
@@ -577,14 +577,16 @@ DO NOT GUESS. DO NOT FABRICATE. DO NOT MAKE A COMMITMENT. ESCALATE.
 | Offer structure | **Approved 2026-09-30** | Monthly subscription |
 | Monthly subscription price | **Approved 2026-09-30** | $1,200 per month |
 | Contract term | **Approved 2026-09-30** | No long-term contract; cancel anytime |
-| Setup / implementation fee | OWNER DECISION REQUIRED | Escalate. Do not say there is no setup fee. |
-| Trial or pilot policy | OWNER DECISION REQUIRED | Escalate |
-| Approved implementation timeline | OWNER DECISION REQUIRED | Escalate |
+| Setup / implementation fee | **Approved 2026-09-30** (amount pending) | "There's a one-time setup fee, and a specialist will give you the exact amount." The amount is escalated until the owner sets it. |
+| Trial or pilot policy | **Approved 2026-09-30** | No free-trial period. "This call is your demo, and before you commit we build and test a version for your business that you sign off on." |
+| Approved implementation timeline | **Approved 2026-09-30** | "Typically one to two weeks after we receive your information." No specific go-live date is promised. |
 | Primary conversion action (schedule consultation, begin onboarding, send onboarding link, transfer to representative, or other) | OWNER DECISION REQUIRED | Until decided: capture the lead and say a specialist will follow up |
 | Qualified lead notification — recipient and channel | **Approved 2026-09-30** | SMS to the owner's mobile. The number is held in deployment configuration, not in this public repository. |
 | Qualified lead notification — email and required response time | OWNER DECISION REQUIRED | Do not promise the prospect a callback time |
 | Human sales transfer — destination | **Approved 2026-09-30** | The owner's sales line. The number is configured in the agent's transfer tool, not in this public repository. The lead is saved before every transfer. |
-| Human sales transfer — operating hours and after-hours fallback | OWNER DECISION REQUIRED | Until decided: transfer is attempted at any hour; if nobody answers, the agent takes a callback request |
+| Human sales transfer — operating hours and after-hours fallback | **Approved 2026-09-30** | Monday to Friday, 8 AM to 6 PM Pacific. Outside those hours the agent takes a callback request instead of transferring. |
+| Questions the agent isn't approved to answer | **Approved 2026-09-30** | Inside transfer hours: "Good question. Let me connect you with a specialist right now." and transfer after saving the lead. Outside hours: callback request. |
+| Usage: included minutes, overage, whether usage is unlimited | OWNER DECISION REQUIRED | Owner is checking the documentation. Handled as a question the agent isn't approved to answer. |
 
 **Approved price statement:** "The service is twelve hundred dollars per month, and you can cancel anytime."
 
@@ -663,7 +665,7 @@ Never quantify savings or revenue.
 The onboarding guide lists these as pending final policy. Until each is approved and added to section 35, the agent escalates:
 
 - Plan names, included usage and overage policy
-- Setup fee and trial policy (also in section 35)
+- Setup fee amount (section 35)
 - Supported phone providers and forwarding instructions
 - Appointment-scheduling scope for launch
 - User-seat and role limits

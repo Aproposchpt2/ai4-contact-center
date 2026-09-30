@@ -121,7 +121,7 @@ export function apiErrorStatus(error: unknown): number {
 export function apiErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (message === 'AI4CC_NOT_AUTHENTICATED') return 'Not authenticated';
-  if (message === 'AI4CC_NO_TENANT') return 'No AI4 Contact Center tenant membership found';
+  if (message === 'AI4CC_NO_TENANT') return 'No workspace membership found for this account';
   if (message === 'AI4CC_NOT_TENANT_MEMBER') return 'You do not have access to this workspace';
   if (message === 'AI4CC_STORAGE_NOT_CONFIGURED') return 'Canonical Supabase storage is not configured';
   if (message.startsWith('AI4CC_MEMBERSHIP_ERROR:')) return 'Could not verify workspace membership';

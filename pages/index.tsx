@@ -8,7 +8,7 @@ const PHONE_TEL = 'tel:+17253305102';
 
 const FLOW = [
   'Customer calls',
-  'Stellar answers',
+  'The Operation Center answers',
   'Need is understood',
   'Customer information is captured',
   'Lead is created',
@@ -38,7 +38,7 @@ const FINANCIAL_POINTS = [
 ];
 
 const VALUE_LAYERS = [
-  { title: 'Platform', body: 'The recurring Stellar technology and operational capability: answering, intake, qualification, routing, escalation, lead capture, Customer 360 and follow-up in one operating environment.' },
+  { title: 'Platform', body: 'The recurring Operation Center technology and operational capability: answering, intake, qualification, routing, escalation, lead capture, Customer 360 and follow-up in one operating environment.' },
   { title: 'Implementation', body: 'The work of configuring that capability around your organization: your call flows, hours, teams, escalation rules, knowledge and workspace, tested before it takes a single live call.' },
   { title: 'Managed operations and support', body: 'The ongoing human expertise that modifies, optimizes and maintains your environment as your business changes, so the system keeps performing.' },
 ];
@@ -68,8 +68,8 @@ const BUSINESS_FIT = [
 export default function HomePage() {
   return <>
     <Head>
-      <title>Stellar Unified Communications — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="Keep your number. Add the intelligence. Stellar is an intelligent customer engagement operation center that adds answering, intake, routing, escalation, lead capture and follow-up capacity without replacing your phones, your provider or your people." />
+      <title>Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="Keep your number. Add the intelligence. The Intelligent Customer Engagement Operation Center adds answering, intake, routing, escalation, lead capture and follow-up capacity without replacing your phones, your provider or your people." />
     </Head>
     <Header />
     <main className="page">
@@ -77,15 +77,15 @@ export default function HomePage() {
         <div className="eyebrow">STELLAR UNIFIED COMMUNICATIONS · INTELLIGENT CUSTOMER ENGAGEMENT OPERATION CENTER</div>
         <h1>INTELLIGENT CUSTOMER ENGAGEMENT <span>OPERATION CENTER.</span></h1>
         <p className="heroKicker">STELLAR IS NOT AN ANSWERING SERVICE. IT IS AN INTELLIGENT CUSTOMER-OPERATIONS LAYER.</p>
-        <p className="heroLead">For organizations where communication volume has become an operational problem. Stellar adds capacity for answering, intake, qualification, routing, escalation, lead capture and after-hours coverage, without replacing your phones, your provider or your people.</p>
-        <div className="heroStatement">Stellar doesn’t replace your people. <strong>It expands what your people can cover.</strong></div>
+        <p className="heroLead">For organizations where communication volume has become an operational problem. The Operation Center adds capacity for answering, intake, qualification, routing, escalation, lead capture and after-hours coverage, without replacing your phones, your provider or your people.</p>
+        <div className="heroStatement">The Operation Center doesn’t replace your people. <strong>It expands what your people can cover.</strong></div>
         <div className="heroInstall">KEEP YOUR NUMBER · KEEP YOUR PHONES · KEEP YOUR PROVIDER · ADD THE INTELLIGENCE</div>
         <div className="ctaRow">
           <a href={PHONE_TEL} className="callCta">
             <span className="callLabel">Call the live demo line</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
           </a>
-          <a href="#stellar-review" className="buyerCta">Request a Stellar Review →</a>
+          <a href="#stellar-review" className="buyerCta">Request an Operation Center Review →</a>
         </div>
         <p className="livePrompt">Hear the operation center on a real phone line.</p>
       </section>
@@ -94,7 +94,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>THE OPERATIONAL PROBLEM</small>
           <h2>More customer demand than your people and processes <span>can consistently handle.</span></h2>
-          <p>Customer demand does not stop when your staff is busy, helping someone else, or off the clock. Stellar adds capacity for answering, intake, qualification, routing, escalation, lead capture, after-hours coverage, Customer 360 and follow-up.</p>
+          <p>Customer demand does not stop when your staff is busy, helping someone else, or off the clock. The Operation Center adds capacity for answering, intake, qualification, routing, escalation, lead capture, after-hours coverage, Customer 360 and follow-up.</p>
         </div>
         <div className="painGrid">
           {PAIN_POINTS.map(item => <div className="painItem" key={item}>{item}</div>)}
@@ -106,7 +106,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>THE FINANCIAL PROBLEM</small>
           <h2>How do you add customer-service capacity without building an expensive 24/7 staffing and contact-center operation?</h2>
-          <p>The financial case isn’t simply labor reduction. It is the full cost of covering your customers, with and without Stellar.</p>
+          <p>The financial case isn’t simply labor reduction. It is the full cost of covering your customers, with and without the Operation Center.</p>
         </div>
         <div className="industryGrid">
           {FINANCIAL_POINTS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
@@ -119,7 +119,7 @@ export default function HomePage() {
           <div>
             <small>NO INFRASTRUCTURE CONFIGURATION CHANGES NEEDED</small>
             <h2>Keep your number. <span>Add the intelligence.</span></h2>
-            <p>You do not have to replace the business number your customers already know or rebuild your communications system. Forward your calls to Stellar, and we configure the customer-operations workflow around your organization, then manage it with you.</p>
+            <p>You do not have to replace the business number your customers already know or rebuild your communications system. Forward your calls to the Operation Center, and we configure the customer-operations workflow around your organization, then manage it with you.</p>
           </div>
           <div className="installPromise">
             <strong>YOUR STELLAR WORKSPACE</strong>
@@ -141,7 +141,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>ANSWER · UNDERSTAND · QUALIFY · CAPTURE · ROUTE · ESCALATE · ORGANIZE · FOLLOW UP</small>
           <h2>A phone call should not end when the customer hangs up.</h2>
-          <p>Stellar turns customer conversations into structured business activity, with no disconnected notes, no information trapped inside calls, and no lead left without an operational next step.</p>
+          <p>The Operation Center turns customer conversations into structured business activity, with no disconnected notes, no information trapped inside calls, and no lead left without an operational next step.</p>
         </div>
         <div className="flowGrid">
           {FLOW.map((item, i) => <div className="flowItem" key={item}><span>{String(i + 1).padStart(2, '0')}</span><b>{item}</b></div>)}
@@ -168,7 +168,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>WHAT YOU ARE SUBSCRIBING TO</small>
           <h2>Three kinds of value. Delivered as one operation.</h2>
-          <p>A customer-operations capability is more than software. Stellar brings the technology, the configuration around your organization, and the ongoing expertise to keep it working.</p>
+          <p>A customer-operations capability is more than software. The Operation Center brings the technology, the configuration around your organization, and the ongoing expertise to keep it working.</p>
         </div>
         <div className="industryGrid">
           {VALUE_LAYERS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
@@ -191,7 +191,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>INITIAL FOCUS</small>
           <h2>Built for operations where call volume has become the pressure point.</h2>
-          <p>Stellar applies wherever customer communication matters. We are starting with three high-volume operating environments.</p>
+          <p>The Operation Center applies wherever customer communication matters. We are starting with three high-volume operating environments.</p>
         </div>
         <div className="industryGrid">
           {INDUSTRIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}
@@ -220,10 +220,10 @@ export default function HomePage() {
       <section id="stellar-review" className="closing">
         <small>STELLAR · INTELLIGENT CUSTOMER ENGAGEMENT OPERATION CENTER</small>
         <h2>Premium system. Cost-effective solution.</h2>
-        <p>Stellar is not positioned as a cheap answering service. It is a managed customer-operations system designed to deliver substantial operational and financial value. Keep your number, your phones and your provider, and add the intelligence.</p>
+        <p>The Operation Center is not positioned as a cheap answering service. It is a managed customer-operations system designed to deliver substantial operational and financial value. Keep your number, your phones and your provider, and add the intelligence.</p>
         <div className="closingActions">
           <a href={PHONE_TEL} className="callCta"><span className="callLabel">Call the live demo line</span><span className="callNumber">{PHONE_DISPLAY}</span></a>
-          <Link href="/demo" className="buyerCta">Request a Stellar Review →</Link>
+          <Link href="/demo" className="buyerCta">Request an Operation Center Review →</Link>
         </div>
         <p className="livePrompt closingPrompt">Hear the operation center on a real phone line.</p>
         <div className="partnerFoot">Technology provider, MSP, telecom or reseller? <Link href="/partners">Explore Partner &amp; White-Label Opportunities →</Link></div>

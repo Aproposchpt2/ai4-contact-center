@@ -30,8 +30,8 @@ const ITEMS = [
 export default function IntelligenceQaPage() {
   return <>
     <Head>
-      <title>Intelligence & QA — Stellar Unified Communications</title>
-      <meta name="description" content="How Stellar's Intelligent Customer Engagement Operation Center turns every call into data — analytics, transcript intelligence, QA scoring, agent coaching, and intent-based routing." />
+      <title>Intelligence & QA — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="How the Intelligent Customer Engagement Operation Center turns every call into data — analytics, transcript intelligence, QA scoring, agent coaching, and intent-based routing." />
     </Head>
     <Header />
     <main className="page">

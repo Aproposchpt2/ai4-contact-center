@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const chatDetails = {
       ok: true,
       service: 'ai4cc-web-chat',
-      tenant: tenantResult.data?.name ?? 'Stellar Unified Communications',
+      tenant: tenantResult.data?.name ?? 'Intelligent Customer Engagement Operation Center',
       queueReady: (queuesResult.count ?? 0) > 0,
       agentReady: (agentsResult.count ?? 0) > 0,
       flowVersionReady: Boolean(versionResult.data),

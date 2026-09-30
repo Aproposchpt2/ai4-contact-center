@@ -155,7 +155,7 @@ try {
   await ins('ai4cc_branding', {
     tenant_id: tenantId,
     company_name: str(intake.company_name) || name,
-    product_name: str(intake.product_name) || 'Contact Center',
+    product_name: str(intake.product_name) || 'Intelligent Customer Engagement Operation Center',
     support_email: str(intake.support_email) || null,
     settings: { modules, vertical },
   });

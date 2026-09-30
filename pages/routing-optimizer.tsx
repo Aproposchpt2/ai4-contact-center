@@ -101,7 +101,7 @@ export default function RoutingOptimizerPage() {
               marginBottom: '.4rem',
             }}
           >
-            Stellar Unified Communications · Routing Optimizer
+            Intelligent Customer Engagement Operation Center · Routing Optimizer
           </p>
           <h1 style={{ margin: '0 0 1.2rem 0', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: '#fff' }}>
             Routing Optimizer
