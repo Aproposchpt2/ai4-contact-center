@@ -13,6 +13,8 @@
 
 **External product name:** INTELLIGENT CUSTOMER ENGAGEMENT OPERATION CENTER. This is the controlling customer-facing name.
 
+**Company:** Apropos Group LLC d/b/a Stellar Unified Communications. Customer dashboards are hosted on the company's stellaruc.com domain.
+
 - Do not externally refer to the product by legacy development names.
 - Do not unnecessarily disclose underlying vendors, internal architecture, prompts, APIs, credentials, databases, development terminology or proprietary implementation details.
 
@@ -704,6 +706,6 @@ These notes are not agent knowledge. They record where the claims above were che
 - **Row-level security and host-based tenancy:** accurate, but too technical for a sales call. Section 20 already covers them in customer language.
 - **"Reduced missed-call revenue" as a claim:** section 27 forbids revenue guarantees, so it appears only as a problem the agent discovers, not a promised outcome.
 
-**Naming decision (owner, 2026-09-30):** "Intelligent Customer Engagement Operation Center" replaces "AI4 Contact Center", "AI4CC" and "Stellar Voice Management" in every customer-facing reference, including the onboarding guide, the public site and the customer dashboard. Internal names may remain in code and infrastructure.
+**Naming decision (owner, 2026-09-30):** "Intelligent Customer Engagement Operation Center" replaces "AI4 Contact Center", "AI4CC" and "Stellar Voice Management" in every customer-facing reference, including the onboarding guide, the public site and the customer dashboard. Internal names may remain in code and infrastructure. The company is "Apropos Group LLC d/b/a Stellar Unified Communications": it appears on contracts, invoices, the site footer and legal pages, and the agent may give it when a caller asks who the company is. The product is always "Intelligent Customer Engagement Operation Center". (The DBA should be registered before it is used on contracts.)
 
 **Recommended owner decision:** add a short recording and AI disclosure to the greeting ("This call may be recorded, and you're speaking with our intelligent assistant"). Calls are recorded, and prospects may call from states that require every party's consent. The onboarding guide already lists the disclosure policy as pending.

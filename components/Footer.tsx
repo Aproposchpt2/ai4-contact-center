@@ -23,7 +23,7 @@ export default function Footer() {
             Intelligent customer engagement operations for modern business communications.
           </p>
           <p style={{ fontSize: '.72rem', color: '#7D899C', marginTop: '.5rem' }}>
-            Apropos Group LLC
+            Apropos Group LLC d/b/a Stellar Unified Communications
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function Footer() {
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', paddingTop: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '.5rem' }}>
         <span style={{ fontSize: '.72rem', color: '#7D899C' }}>
-          © 2026 Apropos Group LLC · Intelligent Customer Engagement Operation Center
+          © 2026 Apropos Group LLC d/b/a Stellar Unified Communications
         </span>
       </div>
     </footer>
