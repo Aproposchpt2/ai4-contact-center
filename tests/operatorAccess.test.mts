@@ -17,6 +17,7 @@ const requireAi4ccContext = async () => {
 ${errorHelpers}`);
   source = source.replace(/import \{[^\n]+\} from '@\/lib\/agentAssistEngine';/, 'const generateGuidance = () => { throw new Error("Unexpected simulation execution"); };');
   source = source.replace(/import \{[^\n]+\} from '@\/lib\/qualityAssuranceEngine';/, 'const generateQAReport = () => { throw new Error("Unexpected simulation execution"); };');
+  source = source.replace(/import \{[^\n]+\} from '@\/lib\/deploymentEngine';/, 'const validateFlow = () => ({ isValid: true, warnings: [] });');
   return (await import('data:text/javascript;base64,' + Buffer.from(stripTypeScriptTypes(source)).toString('base64'))).default;
 }
 const voicemail = await load('../pages/api/runtime/voicemails.ts');
@@ -88,4 +89,33 @@ test('lead operation authentication and membership errors use correct HTTP statu
 test('membership lost during a lead mutation returns forbidden', async () => {
   const s = fixture(); s.rpcError = { message: 'STELLAR_TENANT_MEMBERSHIP_REQUIRED' };
   assert.equal((await request(operations, 'POST', { leadId, operation: 'create_task', title: 'Follow up' })).status, 403);
+});
+
+const controlHandlers = [
+  ['deploy', await load('../pages/api/deployment/deploy.ts'), { environment: 'production', versionId: leadId }],
+  ['rollback', await load('../pages/api/deployment/rollback.ts'), { environment: 'production', versionId: leadId }],
+  ['promote', await load('../pages/api/deployment/promote.ts'), { fromEnvironment: 'staging', toEnvironment: 'production', versionId: leadId }],
+  ['validate stored version', await load('../pages/api/deployment/validate.ts'), { versionId: leadId }],
+  ['voice destination', await load('../pages/api/voice-destinations.ts'), { action: 'create_destination', name: 'VAR only', destinationType: 'say' }],
+] as const;
+for (const [name, handler, body] of controlHandlers) {
+  test(`${name} rejects agent, viewer and unknown roles before storage`, async () => {
+    for (const role of ['agent', 'viewer', 'unknown']) {
+      const s = fixture(role);
+      assert.equal((await request(handler, 'POST', body)).status, 403);
+      assert.equal(s.reads, 0); assert.equal(s.writes, 0);
+    }
+  });
+  test(`${name} retains existing flow editor access`, async () => {
+    for (const role of ['owner', 'admin', 'supervisor', 'operator']) {
+      const s = fixture(role);
+      assert.notEqual((await request(handler, 'POST', body)).status, 403);
+      assert.ok(s.reads > 0);
+    }
+  });
+}
+test('viewer can validate an unsaved draft without changing canonical storage', async () => {
+  const s = fixture('viewer');
+  const result = await request(controlHandlers[3][1], 'POST', { flow: { nodes: [] } });
+  assert.equal(result.status, 200); assert.equal(s.reads, 0); assert.equal(s.writes, 0);
 });
