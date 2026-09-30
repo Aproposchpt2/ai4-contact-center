@@ -4,7 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 // Public, read-only, no-auth mirror of the real Lead Management list — proves the demo
 // flow (call -> lead) without exposing the authenticated admin tool or write access.
 // Deliberately excludes email/phone/notes fields even though this is single-tenant data;
-// only what's needed to show the pipeline is real and working.
+// only what's needed to show the pipeline is real and working. Stored titles name the
+// caller's company ("Acme — voice intake"), so the public title is generic.
 
 const TENANT_ID = '5885a020-d363-4c27-910a-c035eda132f5';
 
@@ -13,6 +14,10 @@ function admin() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) throw new Error('AI4CC_STORAGE_NOT_CONFIGURED');
   return createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+
+function publicTitle(title: unknown) {
+  return typeof title === 'string' && /voice intake/i.test(title) ? 'Voice intake lead' : 'Lead';
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -29,7 +34,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .limit(25);
 
     if (error) throw error;
-    return res.status(200).json({ leads: data ?? [] });
+    const leads = (data ?? []).map(lead => ({ ...lead, title: publicTitle(lead.title) }));
+    return res.status(200).json({ leads });
   } catch (error) {
     return res.status(500).json({ error: error instanceof Error ? error.message : 'public leads failed' });
   }
