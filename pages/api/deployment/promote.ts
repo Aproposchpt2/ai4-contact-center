@@ -21,6 +21,8 @@ type PromotionResponse = {
   validation: ValidationReport;
 };
 
+const FLOW_EDITOR_ROLES = new Set(['owner', 'admin', 'supervisor', 'operator']);
+
 type ErrorResponse = { error: string };
 const ENVIRONMENTS: EnvironmentName[] = ['dev', 'qa', 'staging', 'production'];
 
@@ -44,7 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
   }
 
   try {
-    const { admin, userId, tenantId } = await requireAi4ccContext(req);
+    const { admin, userId, tenantId, role } = await requireAi4ccContext(req);
+    if (!FLOW_EDITOR_ROLES.has(role)) return res.status(403).json({ error: 'Your role cannot change flow deployments' });
 
     const { data: version, error: versionError } = await admin
       .from('ai4cc_flow_versions')
