@@ -588,6 +588,7 @@ DO NOT GUESS. DO NOT FABRICATE. DO NOT MAKE A COMMITMENT. ESCALATE.
 | Human sales transfer — destination | **Approved 2026-09-30** | The owner's sales line. The number is configured in the agent's transfer tool, not in this public repository. The lead is saved before every transfer. |
 | Human sales transfer — operating hours and after-hours fallback | **Approved 2026-09-30** | Monday to Friday, 8 AM to 6 PM Pacific. Outside those hours the agent takes a callback request instead of transferring. |
 | Questions the agent isn't approved to answer | **Approved 2026-09-30** | Inside transfer hours: "Good question. Let me connect you with a specialist right now." and transfer after saving the lead. Outside hours: callback request. |
+| Support | **Approved 2026-09-30** | Included: anything not working correctly, monitoring, and up to 2 hours a month of routine changes (hours and holidays, greeting, FAQs and answers, transfer numbers, users, small routing tweaks). Additional work (new departments, call flows or locations, large knowledge rewrites, integrations, or changes beyond 2 hours) is $125 per hour, 1-hour minimum then 15-minute increments, quoted before work starts. Unused hours do not roll over. |
 | Usage: included minutes and overage | **Approved 2026-09-30** | The $1,200 per month includes up to 2,000 call minutes; additional minutes are $0.40 each. "The twelve hundred a month includes up to two thousand minutes of calls, which covers most businesses. Beyond that it's forty cents a minute." |
 
 **Approved price statement:** "The service is twelve hundred dollars per month, and you can cancel anytime."
@@ -605,6 +606,7 @@ THE DEMO PERFORMS THE SALE.
 The Intelligent Customer Engagement Operation Center is delivered as a managed service. The team configures the customer's environment, business rules, call flows, conversational agent, knowledge, queues, users and go-live settings. This keeps setup simple for the customer and protects live calls from accidental changes.
 
 - Prompt, knowledge, call-flow and routing changes after go-live are requested through the support process and made and tested by the team. Customers do not edit the live conversational agent themselves.
+- Support is included: fixes, monitoring and up to 2 hours a month of routine changes. Larger projects are $125 per hour and quoted up front (section 35).
 - Customers receive the operational modules they need day to day: interactions, leads, contacts, activities, tasks, Customer 360, voicemail, agent workspace, queues and agents, channel status, team users, voice operations and analytics. The exact modules depend on the subscribed service.
 - Each customer gets its own dedicated operating environment, presented with the customer's name and logo.
 
