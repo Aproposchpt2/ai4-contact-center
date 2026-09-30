@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAi4ccContext, apiErrorMessage, apiErrorStatus } from '@/lib/ai4ccServer';
 
+const FLOW_EDITOR_ROLES = new Set(['owner', 'admin', 'supervisor', 'operator']);
+
 const VALID_ENVIRONMENTS = ['dev', 'qa', 'staging', 'production'];
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -11,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const ctx = await requireAi4ccContext(req);
+    if (!FLOW_EDITOR_ROLES.has(ctx.role)) return res.status(403).json({ error: 'Your role cannot change stored flows or deployments' });
 
     const { data: selectedVersion, error: selectedVersionError } = await ctx.admin
       .from('ai4cc_flow_versions')
