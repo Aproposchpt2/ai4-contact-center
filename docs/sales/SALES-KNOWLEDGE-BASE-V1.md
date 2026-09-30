@@ -500,7 +500,7 @@ Until explicitly approved in section 35, the agent must not invent or independen
 - Unsupported integrations
 - Future product availability
 - Custom contractual commitments
-- Plan names or tiers, included call minutes or usage, overage charges, and whether usage is unlimited
+- Plan names or tiers, volume discounts, or any usage terms beyond section 35
 - User-seat limits
 - Supported phone providers or phone systems, and provider-specific forwarding steps
 - Calendar booking directly into the customer's scheduling system (see section 41)
@@ -579,7 +579,7 @@ DO NOT GUESS. DO NOT FABRICATE. DO NOT MAKE A COMMITMENT. ESCALATE.
 | Offer structure | **Approved 2026-09-30** | Monthly subscription |
 | Monthly subscription price | **Approved 2026-09-30** | $1,200 per month |
 | Contract term | **Approved 2026-09-30** | No long-term contract; cancel anytime |
-| Setup / implementation fee | **Approved 2026-09-30** (amount pending) | "There's a one-time setup fee, and a specialist will give you the exact amount." The amount is escalated until the owner sets it. |
+| Setup / implementation fee | **Approved 2026-09-30** | $1,500 one-time. "There's a one-time setup fee of fifteen hundred dollars, which covers building and testing everything around your business." |
 | Trial or pilot policy | **Approved 2026-09-30** | No free-trial period. "This call is your demo, and before you commit we build and test a version for your business that you sign off on." |
 | Approved implementation timeline | **Approved 2026-09-30** | "Typically one to two weeks after we receive your information." No specific go-live date is promised. |
 | Primary conversion action (schedule consultation, begin onboarding, send onboarding link, transfer to representative, or other) | OWNER DECISION REQUIRED | Until decided: capture the lead and say a specialist will follow up |
@@ -588,7 +588,7 @@ DO NOT GUESS. DO NOT FABRICATE. DO NOT MAKE A COMMITMENT. ESCALATE.
 | Human sales transfer — destination | **Approved 2026-09-30** | The owner's sales line. The number is configured in the agent's transfer tool, not in this public repository. The lead is saved before every transfer. |
 | Human sales transfer — operating hours and after-hours fallback | **Approved 2026-09-30** | Monday to Friday, 8 AM to 6 PM Pacific. Outside those hours the agent takes a callback request instead of transferring. |
 | Questions the agent isn't approved to answer | **Approved 2026-09-30** | Inside transfer hours: "Good question. Let me connect you with a specialist right now." and transfer after saving the lead. Outside hours: callback request. |
-| Usage: included minutes, overage, whether usage is unlimited | OWNER DECISION REQUIRED | Owner is checking the documentation. Handled as a question the agent isn't approved to answer. |
+| Usage: included minutes and overage | **Approved 2026-09-30** | The $1,200 per month includes up to 2,000 call minutes; additional minutes are $0.40 each. "The twelve hundred a month includes up to two thousand minutes of calls, which covers most businesses. Beyond that it's forty cents a minute." |
 
 **Approved price statement:** "The service is twelve hundred dollars per month, and you can cancel anytime."
 
@@ -646,7 +646,7 @@ These are common prospect questions where the honest answer is narrower than the
 | SMS and web chat | The service centers on phone calls. | That text messaging or web chat is included. A specialist follows up. |
 | Notifications | Captured leads, voicemails and tasks appear in the customer's dashboard; who gets notified, and whether by email or text, is set up during onboarding. | Instant alerts, specific response times, or that notifications already work for them. |
 | Mobile | The operating dashboard runs in a web browser. | That there is a mobile app. A mobile experience is on the roadmap. |
-| Usage | The approved price. | Whether usage is unlimited, included minutes or overage charges. A specialist follows up. |
+| Usage | 2,000 minutes a month included; $0.40 per additional minute (section 35). | That usage is unlimited. Volume discounts or larger plans go to a specialist. |
 | Phone providers | Most businesses keep their number and forward calls from their current provider. | That a specific carrier or phone system is supported. Confirmed during onboarding. |
 | Multiple locations | Routing can be configured by department, location or purpose. | A number of locations or numbers included in the price. A specialist follows up. |
 
@@ -666,8 +666,7 @@ Never quantify savings or revenue.
 
 The onboarding guide lists these as pending final policy. Until each is approved and added to section 35, the agent escalates:
 
-- Plan names, included usage and overage policy
-- Setup fee amount (section 35)
+- Plan names and larger or volume plans
 - Supported phone providers and forwarding instructions
 - Appointment-scheduling scope for launch
 - User-seat and role limits
