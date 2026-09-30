@@ -100,14 +100,16 @@ test('no match returns an empty result', async () => {
   assert.equal(res.body.call, null);
 });
 
-test('only looks back one hour, or to the start of the demo session', async () => {
+test('only looks back one hour', async () => {
   const old = { ...visitor, started_at: minutesAgo(90), ended_at: minutesAgo(88) };
   fixture([old]);
   assert.equal((await call({ last4: '4321' })).body.call, null);
+});
 
+test('a call made before the visitor opened /demo is still found', async () => {
+  // The demo-session cookie resets on each homepage -> /demo visit; it must not hide the caller's own call.
   fixture([visitor]);
-  assert.equal((await call({ last4: '4321' }, { ai4cc_demo_started_at: minutesAgo(5) })).body.call, null);
-  assert.equal((await call({ last4: '4321' }, { ai4cc_demo_started_at: minutesAgo(30) })).body.call.businessName, 'Carter HVAC');
+  assert.equal((await call({ last4: '4321' }, { ai4cc_demo_started_at: minutesAgo(1) })).body.call.businessName, 'Carter HVAC');
 });
 
 test('is scoped to completed voice calls of the demo tenant', async () => {
