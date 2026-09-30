@@ -78,7 +78,7 @@ async function resolveScope(db: SupabaseClient, req: NextApiRequest): Promise<In
   return { tenantId: data.tenant_id as string, actorUserId: actor };
 }
 
-function normalizePhone(value: string): string | null {
+export function normalizePhone(value: string): string | null {
   const raw = value.trim();
   if (!raw || !/^[+\d().\-\s]+$/.test(raw)) return null;
   const digits = raw.replace(/\D/g, '');
@@ -89,13 +89,37 @@ function normalizePhone(value: string): string | null {
   return digits;
 }
 
-function classifyIdentifier(rawEmail: unknown, rawPhone: unknown) {
-  const email = text(rawEmail);
+// 2026-09-30 fix: the ElevenLabs voice agent sometimes spells an email back to
+// the caller letter-by-letter with a literal hyphen between every character
+// ("j-m-i-t-c-h-e-l-l@domain.com" instead of "jmitchell@domain.com"), and that
+// transcription artifact gets sent to this webhook verbatim -- confirmed
+// corrupting real production leads (Stellar Validation and Acceptance Report
+// v2, 2026-09-29). This recovers the real local-part without touching
+// genuinely hyphenated addresses: a real hyphenated word ("mary-jane@...")
+// has multi-character segments, never a long run of single letters.
+export function collapseSpelledOutLocalPart(email: string): string {
+  const at = email.indexOf('@');
+  if (at < 1) return email;
+  const local = email.slice(0, at);
+  const domain = email.slice(at);
+  const segments = local.split('-');
+  const looksSpelledOut = segments.length >= 4 && segments.every((s) => s.length === 1);
+  return looksSpelledOut ? segments.join('') + domain : email;
+}
+
+// 2026-09-30 fix: previously this nulled out phone entirely whenever email was
+// present, even when a real caller-supplied phone was also available -- the
+// same report flagged this as dropping the callback number on every voice
+// lead. Preserve both when both exist; email still wins as the primary
+// identifier/type, matching prior behavior for everything else.
+export function classifyIdentifier(rawEmail: unknown, rawPhone: unknown) {
+  const emailRaw = text(rawEmail);
+  const email = emailRaw ? collapseSpelledOutLocalPart(emailRaw) : emailRaw;
   const emailLike = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (email && emailLike.test(email)) {
-    return { type: 'email' as const, value: email, email: email.toLowerCase(), phone: null as string | null };
-  }
   const phone = normalizePhone(text(rawPhone));
+  if (email && emailLike.test(email)) {
+    return { type: 'email' as const, value: email, email: email.toLowerCase(), phone };
+  }
   if (phone) return { type: 'phone' as const, value: phone, email: null as string | null, phone };
   return { type: 'opaque' as const, value: email || text(rawPhone) || 'Unknown contact', email: null, phone: null };
 }
@@ -146,19 +170,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const businessName = text(body.businessName);
       const callerName = text(body.callerName);
       const email = text(body.email);
-      const phone = text(body.phone);
       const description = text(body.description);
       const serviceInterest = text(body.serviceInterest);
 
       const { data: interaction, error: fetchError } = await db
         .from('ai4cc_interactions')
-        .select('id, status, metadata')
+        .select('id, status, metadata, customer_identifier')
         .eq('tenant_id', tenantId)
         .eq('id', interactionId)
         .maybeSingle();
       if (fetchError) throw fetchError;
       if (!interaction) return res.status(404).json({ error: 'interaction not found' });
       if (interaction.status === 'completed') return res.status(409).json({ error: 'interaction already submitted' });
+
+      // 2026-09-30 fix: fall back to the verified telephony caller ID captured at
+      // 'start' when the agent's submit payload has no usable phone -- this is a
+      // real, network-verified number, more reliable than relying on the caller
+      // to speak their own number back correctly.
+      const phoneCandidate = text(body.phone) || interaction.customer_identifier || '';
 
       const { error: updateError } = await db
         .from('ai4cc_interactions')
@@ -170,7 +199,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             businessName,
             callerName,
             email,
-            phone,
+            phone: phoneCandidate,
             description,
             serviceInterest,
           },
@@ -178,7 +207,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('id', interactionId);
       if (updateError) throw updateError;
 
-      const identifier = classifyIdentifier(email, phone);
+      const identifier = classifyIdentifier(email, phoneCandidate);
 
       const { data: lifecycle, error: rpcError } = await db.rpc('ai4cc_create_lead_from_interaction', {
         p_tenant_id: tenantId,
