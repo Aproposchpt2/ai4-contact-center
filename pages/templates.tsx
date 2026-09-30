@@ -20,7 +20,7 @@ export default function TemplatesPage() {
           {/* Header */}
           <div style={{ marginBottom: '2.8rem' }}>
             <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-              Stellar Unified Communications · Template Library
+              Intelligent Customer Engagement Operation Center · Template Library
             </p>
             <h1 style={{ fontSize: 'clamp(1.8rem,3.5vw,2.6rem)', fontWeight: 700, lineHeight: 1.1, margin: '0 0 .6rem', color: '#fff' }}>
               Industry Templates

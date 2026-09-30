@@ -99,7 +99,7 @@ export default function TroubleshooterPage() {
               marginBottom: '.4rem',
             }}
           >
-            Stellar Unified Communications · Script Troubleshooter
+            Intelligent Customer Engagement Operation Center · Script Troubleshooter
           </p>
           <h1 style={{ margin: '0 0 1.2rem 0', fontSize: 'clamp(1.5rem,3vw,2.2rem)', color: '#fff' }}>
             Troubleshooter

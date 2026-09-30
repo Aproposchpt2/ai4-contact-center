@@ -241,7 +241,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           return res.status(404).json({ error: 'Interaction was not found for this tenant' });
         }
         if (/TENANT_MEMBERSHIP_REQUIRED/.test(lifecycleError.message)) {
-          return res.status(403).json({ error: 'No AI4 Contact Center tenant membership found' });
+          return res.status(403).json({ error: 'No workspace membership found for this account' });
         }
         throw lifecycleError;
       }

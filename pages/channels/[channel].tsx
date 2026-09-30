@@ -13,7 +13,7 @@ type Interaction = { id: string; channel: string; customer_identifier: string | 
 const META: Record<ChannelKey, { title: string; subtitle: string; runtime: string; primary: string; secondary?: string }> = {
   voice: { title: 'Voice Operations', subtitle: 'Incoming calling, IVR/auto-attendant readiness, queue routing and development interaction visibility.', runtime: 'Twilio Voice', primary: '/builder', secondary: '/voice-attendant' },
   sms: { title: 'SMS Operations', subtitle: 'Twilio messaging intake, routing, reply handling and canonical development interaction visibility.', runtime: 'Twilio Messaging', primary: '/agent-workspace?channel=sms' },
-  chat: { title: 'Web Chat Operations', subtitle: 'Site chat runtime, queue/agent routing and canonical development conversation visibility.', runtime: 'AI4 Web Chat', primary: '/web-chat' },
+  chat: { title: 'Web Chat Operations', subtitle: 'Site chat runtime, queue/agent routing and canonical development conversation visibility.', runtime: 'Web Chat', primary: '/web-chat' },
 };
 
 function tone(status: string) {
@@ -70,7 +70,7 @@ export default function ChannelOperationsPage() {
   if (!meta) return null;
 
   return <>
-    <Head><title>{meta.title} | Stellar Unified Communications</title></Head>
+    <Head><title>{meta.title} | Intelligent Customer Engagement Operation Center</title></Head>
     <Header />
     <main className="page"><div className="shell">
       <div className="crumbs"><Link href="/channels">Channel Operations</Link><span>/</span><b>{meta.title}</b></div>

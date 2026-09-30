@@ -94,7 +94,7 @@ export default function VoiceAttendantPage() {
         }}
       >
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <p style={eyebrowStyle}>Stellar Unified Communications · Voice Attendant</p>
+          <p style={eyebrowStyle}>Intelligent Customer Engagement Operation Center · Voice Attendant</p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>
             Voice Attendant
           </h1>

@@ -48,7 +48,7 @@ export default function ChannelsPage() {
   }
 
   return <>
-    <Head><title>Channel Operations | Stellar Unified Communications</title></Head>
+    <Head><title>Channel Operations | Intelligent Customer Engagement Operation Center</title></Head>
     <Header />
     <main className="page"><div className="shell">
       <p className="eyebrow">STELLAR UNIFIED COMMUNICATIONS · DEVELOPMENT OPERATIONS</p>

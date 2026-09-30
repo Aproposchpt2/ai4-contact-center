@@ -68,7 +68,7 @@ export default function MissionControlPage() {
   ];
 
   return <>
-    <Head><title>Mission Control | Stellar Unified Communications</title><meta name="description" content="Stellar Unified Communications Mission Control" /><meta name="robots" content="noindex" /></Head>
+    <Head><title>Mission Control | Intelligent Customer Engagement Operation Center</title><meta name="description" content="Intelligent Customer Engagement Operation Center Mission Control" /><meta name="robots" content="noindex" /></Head>
     <Header />
     <main className="page"><div className="shell">
       <div className="topbar"><div className="badge">● DEVELOPMENT MISSION CONTROL</div><div className="manual"><button onClick={() => load().catch((e: Error) => setError(e.message))} disabled={loading}>{loading ? 'Checking…' : 'Check System Status'}</button><span>{lastChecked ? `Last checked ${lastChecked}` : 'Monitoring off · on-demand only'}</span></div></div>

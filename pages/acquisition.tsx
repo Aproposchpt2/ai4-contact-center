@@ -20,7 +20,7 @@ const SECTIONS: Section[] = [
     n: '01',
     eyebrow: 'POSITIONING',
     title: 'A system authority, not a chatbot',
-    body: 'Stellar is a developed, production-deployed contact-center platform. The core system stays authoritative for customer identity, interactions, routing, CRM workflow, tasks and audit evidence — conversational AI sits at the voice layer as an enhancement, not the source of truth.',
+    body: 'The Operation Center is a developed, production-deployed contact-center platform. The core system stays authoritative for customer identity, interactions, routing, CRM workflow, tasks and audit evidence — conversational AI sits at the voice layer as an enhancement, not the source of truth.',
   },
   {
     n: '02',
@@ -68,22 +68,22 @@ const SECTIONS: Section[] = [
     n: '08',
     eyebrow: 'ACQUISITION',
     title: 'A technology asset, priced on what was built',
-    body: 'Stellar is pre-revenue and has never been publicly launched — offered as a full technology-asset sale on documented development cost, production deployment history, and a clear commercialization path, not a revenue multiple. Full technical diligence (repository, schema, deployment model, security controls, known-issues register) is available under NDA.',
+    body: 'The Operation Center is pre-revenue and has never been publicly launched — offered as a full technology-asset sale on documented development cost, production deployment history, and a clear commercialization path, not a revenue multiple. Full technical diligence (repository, schema, deployment model, security controls, known-issues register) is available under NDA.',
   },
 ];
 
 export default function AcquisitionPage() {
   return <>
     <Head>
-      <title>Stellar — Buyer Walkthrough</title>
-      <meta name="description" content="A self-guided walkthrough of Stellar's Intelligent Customer Engagement Operation Center for prospective buyers and white-label partners — architecture, live product surfaces, and the proven Conversational Agent." />
+      <title>Buyer Walkthrough — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="A self-guided walkthrough of the Intelligent Customer Engagement Operation Center for prospective buyers and white-label partners — architecture, live product surfaces, and the proven Conversational Agent." />
       <meta name="robots" content="noindex" />
     </Head>
     <Header />
     <main className="page">
       <section className="intro">
         <div className="eyebrow">FOR BUYERS &amp; WHITE-LABEL PARTNERS</div>
-        <h1>Walk through Stellar the way a diligence call would.</h1>
+        <h1>Walk through the Operation Center the way a diligence call would.</h1>
         <p>Eight sections, same order as the acquisition demo script — each one links straight to the live
           surface so you can click through yourself instead of taking a screenshot&apos;s word for it.</p>
         <a href={PHONE_TEL} className="callCta">

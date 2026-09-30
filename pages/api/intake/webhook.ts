@@ -214,7 +214,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         p_contact_name: callerName || businessName || identifier.value,
         p_company_name: businessName || null,
         p_service_interest: serviceInterest || null,
-        p_description: description || 'Lead captured by the AI4CC Business Intake Agent.',
+        p_description: description || 'Lead captured by the conversational agent.',
         p_metadata: { businessName, callerName, email, phone: phoneCandidate, description, serviceInterest },
       });
 

@@ -6,7 +6,7 @@ export default function IntentTaxonomyPage() {
   return (
     <>
       <Head>
-        <title>Intent Taxonomy Manager – Stellar Unified Communications</title>
+        <title>Intent Taxonomy Manager – Intelligent Customer Engagement Operation Center</title>
       </Head>
       <Header />
       <main className="min-h-screen bg-gray-50 py-8">

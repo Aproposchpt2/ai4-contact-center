@@ -72,7 +72,7 @@ export default function LoginPage() {
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg,#5bd3ff,rgba(91,211,255,.1))', borderRadius: '12px 12px 0 0' }} />
 
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.5rem' }}>
-            Stellar Unified Communications
+            Intelligent Customer Engagement Operation Center
           </p>
 
           {step === 'done' ? (
@@ -84,7 +84,7 @@ export default function LoginPage() {
           ) : (
             <>
               <h1 style={{ fontSize: 'clamp(1.4rem,3vw,1.8rem)', fontWeight: 700, color: '#fff', marginBottom: '.5rem', lineHeight: 1.1 }}>
-                {step === 'email' ? 'Sign in to Stellar' : 'Enter your code'}
+                {step === 'email' ? 'Sign in' : 'Enter your code'}
               </h1>
               <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '.86rem', marginBottom: '1.6rem', lineHeight: 1.6 }}>
                 {step === 'email'

@@ -52,8 +52,8 @@ export default function DemoPage() {
 
   return <>
     <Head>
-      <title>Live Demo — Stellar Unified Communications</title>
-      <meta name="description" content="Call (725) 330-5102, talk to Stellar's Intelligent Customer Engagement Operation Center, then watch the call become a real lead in the live CRM." />
+      <title>Live Demo — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="Call (725) 330-5102, talk to the Intelligent Customer Engagement Operation Center, then watch the call become a real lead in the live CRM." />
     </Head>
     <Header />
     <main className="page">
@@ -142,7 +142,7 @@ export default function DemoPage() {
       </div>
 
       <div className="drawerBody">
-        <p className="role"><strong>The Conversational Agent is currently programmed to serve as a representative of Stellar's Sales Division.</strong></p>
+        <p className="role"><strong>The Conversational Agent is currently programmed to serve as a representative of the Operation Center's sales team.</strong></p>
 
         <p>For this demonstration, play the role of a business owner or decision-maker who is shopping for a <strong>Contact Center, CRM or Lead Management solution.</strong></p>
 
@@ -160,7 +160,7 @@ export default function DemoPage() {
 
         <div className="afterCall">
           <small>AFTER YOUR CALL</small>
-          <p>Close this guide and watch Stellar convert the conversation into a structured Lead in the live CRM.</p>
+          <p>Close this guide and watch the Operation Center convert the conversation into a structured Lead in the live CRM.</p>
         </div>
       </div>
     </aside>

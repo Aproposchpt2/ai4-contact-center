@@ -19,8 +19,8 @@ export default function LiveContactsPage() {
 
   return <>
     <Head>
-      <title>Live Customer 360 — Stellar Unified Communications</title>
-      <meta name="description" content="A real, live view of Stellar's Customer 360 contact intelligence — see exactly what the platform builds from a real call." />
+      <title>Live Customer 360 — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="A real, live view of the Operation Center's Customer 360 contact intelligence — see exactly what the platform builds from a real call." />
       <meta name="robots" content="noindex" />
     </Head>
     <Header />
@@ -29,7 +29,7 @@ export default function LiveContactsPage() {
         <Link href="/demo" className="back">← Back to the demo</Link>
         <div className="eyebrow">LIVE · CUSTOMER 360</div>
         <h1>Every caller, unified.</h1>
-        <p>A live, read-only mirror of Stellar&apos;s Customer 360 contact list. Call the demo line and you&apos;ll
+        <p>A live, read-only mirror of the Operation Center&apos;s Customer 360 contact list. Call the demo line and you&apos;ll
           show up here as a new contact, unified with your lead automatically.</p>
       </section>
       <section className="list">

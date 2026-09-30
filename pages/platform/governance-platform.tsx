@@ -29,8 +29,8 @@ const ITEMS = [
 export default function GovernancePlatformPage() {
   return <>
     <Head>
-      <title>Governance & Platform — Stellar Unified Communications</title>
-      <meta name="description" content="The shared foundation under Stellar's Intelligent Customer Engagement Operation Center — multi-tenant RBAC, compliance automation, flow governance, and platform services." />
+      <title>Governance & Platform — Intelligent Customer Engagement Operation Center</title>
+      <meta name="description" content="The shared foundation under the Intelligent Customer Engagement Operation Center — multi-tenant RBAC, compliance automation, flow governance, and platform services." />
     </Head>
     <Header />
     <main className="page">

@@ -55,7 +55,7 @@ export default function FlowRewritePage() {
       <Header />
       <main style={{ minHeight: '100vh', background: '#06111f', color: '#e8f0fe', fontFamily: "'Inter','Jost',sans-serif", padding: '2rem clamp(1rem,4vw,3rem)' }}>
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
-          <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>Stellar Unified Communications · System #32</p>
+          <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>Intelligent Customer Engagement Operation Center · System #32</p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>Flow Rewrite Engine (LLM-Native Authoring)</h1>
           <FlowRewriteDashboard
             input={input}

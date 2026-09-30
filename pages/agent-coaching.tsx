@@ -126,7 +126,7 @@ export default function AgentCoachingPage() {
       >
         <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
           <p style={{ fontSize: '.66rem', fontWeight: 700, letterSpacing: '.2em', textTransform: 'uppercase', color: '#5bd3ff', marginBottom: '.4rem' }}>
-            Stellar Unified Communications · Agent Coaching
+            Intelligent Customer Engagement Operation Center · Agent Coaching
           </p>
           <h1 style={{ margin: '0 0 1rem 0', color: '#fff', fontSize: 'clamp(1.6rem,3vw,2.3rem)' }}>
             Agent Coaching & Playbook Recommendation Engine
