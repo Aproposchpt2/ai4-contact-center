@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { requireAi4ccContext, apiErrorMessage, apiErrorStatus } from '@/lib/ai4ccServer';
 
+const FLOW_EDITOR_ROLES = new Set(['owner', 'admin', 'supervisor', 'operator']);
+
 const ENVIRONMENTS = ['dev', 'qa', 'staging', 'production'] as const;
 type Environment = (typeof ENVIRONMENTS)[number];
 type DestinationType = 'say' | 'voicemail';
@@ -78,13 +80,14 @@ async function listDestinations(admin: any, tenantId: string) {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const { admin, userId, tenantId } = await requireAi4ccContext(req);
+    const { admin, userId, tenantId, role } = await requireAi4ccContext(req);
 
     if (req.method === 'GET') {
       return res.status(200).json({ destinations: await listDestinations(admin, tenantId) });
     }
 
     if (req.method !== 'POST') return res.status(405).json({ error: 'GET or POST only' });
+    if (!FLOW_EDITOR_ROLES.has(role)) return res.status(403).json({ error: 'Your role cannot change voice destinations' });
 
     const action = req.body?.action as string | undefined;
 
