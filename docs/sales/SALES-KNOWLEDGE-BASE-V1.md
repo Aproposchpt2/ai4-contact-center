@@ -567,7 +567,8 @@ DO NOT GUESS. DO NOT FABRICATE. DO NOT MAKE A COMMITMENT. ESCALATE.
 | Primary conversion action (schedule consultation, begin onboarding, send onboarding link, transfer to representative, or other) | OWNER DECISION REQUIRED | Until decided: capture the lead and say a specialist will follow up |
 | Qualified lead notification — recipient and channel | **Approved 2026-09-30** | SMS to the owner's mobile. The number is held in deployment configuration, not in this public repository. |
 | Qualified lead notification — email and required response time | OWNER DECISION REQUIRED | Do not promise the prospect a callback time |
-| Human sales transfer (destination, operating hours, after-hours fallback) | OWNER DECISION REQUIRED | Until decided: do not attempt a transfer; capture a callback request |
+| Human sales transfer — destination | **Approved 2026-09-30** | The owner's sales line. The number is configured in the agent's transfer tool, not in this public repository. The lead is saved before every transfer. |
+| Human sales transfer — operating hours and after-hours fallback | OWNER DECISION REQUIRED | Until decided: transfer is attempted at any hour; if nobody answers, the agent takes a callback request |
 
 **Approved price statement:** "The service is twelve hundred dollars per month, and you can cancel anytime."
 
@@ -586,7 +587,7 @@ THE DEMO PERFORMS THE SALE.
 These notes are not agent knowledge. They record where the claims above were checked against the platform and what must be settled before go-live.
 
 - **Checked in code:** every module named in sections 1 and 17 has a page in the platform (lead management and operations, Customer 360, agent workspace, voicemails, voice operations, analytics, knowledge vault, web chat, queue and routing tooling). The task states in section 12 match the database constraint exactly (`pending`, `in_progress`, `completed`, `cancelled`). Tenant isolation, roles and per-tenant intake keys (section 20) are enforced in the current code.
-- **Not yet validated live:** human transfer and voicemail were open cases in the last acceptance run. The agent may describe them as configurable (sections 8, 15 and 29 already say so), but it must not perform a live transfer during a demo until the sales transfer destination in section 35 is approved and a transfer test call passes.
+- **Not yet validated live:** human transfer and voicemail were open cases in the last acceptance run. The sales transfer is now configured on the `sales-v1` test branch; a transfer test call must pass before that branch goes live. Demo role-plays still never perform a real transfer.
 - **Conflict to resolve:** the public site still offers the platform as a $25,000 one-time technology-asset sale (`pages/acquisition.tsx`, `pages/partners.tsx`). A prospect who reads those pages and then hears "$1,200 per month" will get two different offers. The owner should decide whether the asset sale stays, is labeled as a separate offer, or is removed.
 - **Setup fee:** not stated. The agent must not say "no setup fee" until it is approved.
 - **Lead SMS:** the owner's number stays out of the repository because it is public. Store it as a deployment secret when the notification is built (Phase 3).
