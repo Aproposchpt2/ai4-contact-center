@@ -89,22 +89,20 @@ export function normalizePhone(value: string): string | null {
   return digits;
 }
 
-// 2026-09-30 fix: the ElevenLabs voice agent sometimes spells an email back to
-// the caller letter-by-letter with a literal hyphen between every character
-// ("j-m-i-t-c-h-e-l-l@domain.com" instead of "jmitchell@domain.com"), and that
-// transcription artifact gets sent to this webhook verbatim -- confirmed
-// corrupting real production leads (Stellar Validation and Acceptance Report
-// v2, 2026-09-29). This recovers the real local-part without touching
-// genuinely hyphenated addresses: a real hyphenated word ("mary-jane@...")
-// has multi-character segments, never a long run of single letters.
+// Voice transcription can put hyphens between each spelled-out character in
+// either the local part or a domain label. Collapse only runs of at least four
+// single alphanumeric characters; preserve dotted boundaries and ordinary
+// hyphenated words. This is a recovery heuristic for the observed voice artifact,
+// not a general rule that every single-character hyphenated address is invalid.
+// Keep the existing export name for callers and tests.
 export function collapseSpelledOutLocalPart(email: string): string {
   const at = email.indexOf('@');
-  if (at < 1) return email;
-  const local = email.slice(0, at);
-  const domain = email.slice(at);
-  const segments = local.split('-');
-  const looksSpelledOut = segments.length >= 4 && segments.every((s) => s.length === 1);
-  return looksSpelledOut ? segments.join('') + domain : email;
+  if (at < 1 || at !== email.lastIndexOf('@')) return email;
+  const collapse = (part: string) =>
+    /^[a-z0-9](?:-[a-z0-9]){3,}$/i.test(part) ? part.replace(/-/g, '') : part;
+  const local = collapse(email.slice(0, at));
+  const domain = email.slice(at + 1).split('.').map(collapse).join('.');
+  return `${local}@${domain}`;
 }
 
 // 2026-09-30 fix: previously this nulled out phone entirely whenever email was
