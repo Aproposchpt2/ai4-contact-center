@@ -92,3 +92,46 @@ test('a missing caller ID skips the lookup and a failed lookup never blocks the 
   assert.equal(failed.body.knownCallerName, '');
   assert.equal(failed.body.transferAllowed === 'yes' || failed.body.transferAllowed === 'no', true);
 });
+
+async function initiate(body: any) {
+  const output: any = {};
+  const response: any = { status(code: number) { output.status = code; return response; }, json(b: any) { output.body = b; return output; } };
+  await mod.default({ method: 'POST', headers: { 'x-ai4cc-intake-key': 'test-key' }, body }, response);
+  return output;
+}
+
+test('the initiation webhook greets a returning caller by first name', async () => {
+  fixture([{ tenant_id: tenant, phone: '+17025550100', display_name: 'Jeffrey Mitchell', updated_at: '2026-10-01T00:00:00Z' }]);
+  const result = await initiate({ caller_id: '+17025550100', agent_id: 'agent_x', called_number: '+17025550199', call_sid: 'CA1' });
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.body, {
+    type: 'conversation_initiation_client_data',
+    dynamic_variables: {
+      known_caller_name: 'Jeffrey Mitchell',
+      greeting_question: 'Am I speaking with Jeffrey?',
+      caller_number: '702-555-0100',
+    },
+  });
+});
+
+test('the initiation webhook gives a new caller the standard question', async () => {
+  fixture([]);
+  const result = await initiate({ caller_id: '+17025550100' });
+  assert.equal(result.body.dynamic_variables.known_caller_name, '');
+  assert.equal(result.body.dynamic_variables.greeting_question, "What's got you looking into us today?");
+  const anonymous = await initiate({ caller_id: '' });
+  assert.equal(anonymous.status, 200);
+  assert.equal(anonymous.body.dynamic_variables.caller_number, '');
+});
+
+test('start_intake returns the caller ID for reading back', async () => {
+  fixture([]);
+  assert.equal((await start('+17025550100')).body.callerNumber, '702-555-0100');
+});
+
+test('a short or made-up callback number falls back to the caller ID', () => {
+  assert.equal(mod.callbackPhone('5550123', '+17025550100'), '+17025550100');
+  assert.equal(mod.callbackPhone('555-0123', '+17025550100'), '+17025550100');
+  assert.equal(mod.callbackPhone('310-599-6999', '+17025550100'), '+13105996999');
+  assert.equal(mod.callbackPhone('+44 20 7946 0958', '+17025550100'), '+442079460958');
+});
