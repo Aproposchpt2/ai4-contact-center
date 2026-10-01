@@ -148,6 +148,30 @@ function transferAllowed(): 'yes' | 'no' {
   return transferWindowOpen() ? 'yes' : 'no';
 }
 
+// A repeat caller is recognized by caller ID: the name saved on the most
+// recently updated contact with that phone number is returned at call start so
+// the agent can greet them by name. A failed lookup never blocks the call.
+export async function knownCallerName(
+  db: SupabaseClient, tenantId: string, callerPhone: string,
+): Promise<string> {
+  const phone = normalizePhone(callerPhone);
+  if (!phone) return '';
+  try {
+    const { data, error } = await db
+      .from('ai4cc_contacts')
+      .select('display_name')
+      .eq('tenant_id', tenantId)
+      .eq('phone', phone)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) return '';
+    return cleanField(data?.display_name);
+  } catch {
+    return '';
+  }
+}
+
 // The voice agent sometimes fills unknown fields with filler ("Unknown",
 // "Not specified", "None stated") despite its instructions. Treat those as empty
 // so they never become a lead title or a line in the lead description.
@@ -239,12 +263,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .maybeSingle();
         if (lookupError) throw lookupError;
         if (existing?.metadata?.source === 'elevenlabs_agent') {
-          return res.status(200).json({ interactionId: existing.id, transferAllowed: transferAllowed() });
+          return res.status(200).json({
+            interactionId: existing.id,
+            transferAllowed: transferAllowed(),
+            knownCallerName: await knownCallerName(db, tenantId, callerPhone),
+          });
         }
         return res.status(409).json({ error: 'conversation ID is already in use' });
       }
       if (error) throw error;
-      return res.status(201).json({ interactionId: data.id, transferAllowed: transferAllowed() });
+      return res.status(201).json({
+        interactionId: data.id,
+        transferAllowed: transferAllowed(),
+        knownCallerName: await knownCallerName(db, tenantId, callerPhone),
+      });
     }
 
     if (action === 'submit') {
