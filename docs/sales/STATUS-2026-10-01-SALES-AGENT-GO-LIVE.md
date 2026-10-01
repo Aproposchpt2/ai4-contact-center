@@ -59,9 +59,9 @@
 1. A call arrives on Twilio, and ElevenLabs connects it to the agent.
 2. **Before the agent speaks**, ElevenLabs POSTs `caller_id`, `agent_id`, `called_number` and `call_sid` to `https://stellaruc.com/api/intake/webhook`. The request is authenticated with the existing intake key (stored in ElevenLabs only).
 3. The website looks up the most recently updated contact with that phone number and returns:
-   - `known_caller_name`: for example "Jeffrey Mitchell", or empty for a new caller
-   - `greeting_question`: "Am I speaking with Jeffrey?", or "What's got you looking into us today?" for a new caller
-   - `caller_number`: the caller ID formatted for reading back
+    - `known_caller_name`: for example "Jeffrey Mitchell", or empty for a new caller
+    - `greeting_question`: "Am I speaking with Jeffrey?", or "What's got you looking into us today?" for a new caller
+    - `caller_number`: the caller ID formatted for reading back
 4. The first message is *"Thanks for calling the Intelligent Customer Engagement Operation Center. {{greeting_question}}"*.
 5. The prompt never reads out anything else from the saved record and never says the number was recognized. It confirms the name as a question, because someone else may be calling from that phone.
 
