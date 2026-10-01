@@ -126,6 +126,51 @@ export function callbackPhone(submitted: unknown, callerId: unknown): string | n
   return normalizePhone(text(submitted)) || normalizePhone(text(callerId));
 }
 
+// The voice agent sometimes fills unknown fields with filler ("Unknown",
+// "Not specified", "None stated") despite its instructions. Treat those as empty
+// so they never become a lead title or a line in the lead description.
+const PLACEHOLDER_RE = /^(?:unknown|n\/?a|none|none (?:specified|stated|given|provided|mentioned)|not (?:specified|stated|given|provided|mentioned|applicable|sure)|tbd)\.?$/i;
+
+export function isPlaceholder(value: string): boolean {
+  return PLACEHOLDER_RE.test(value.trim());
+}
+
+export function cleanField(value: unknown): string {
+  const v = text(value);
+  return isPlaceholder(v) ? '' : v;
+}
+
+// Drops "Label: <placeholder>" lines. "Objections: None" is kept, because the
+// agent is told to write it only when it asked and the caller had none.
+export function stripPlaceholderLines(description: string): string {
+  return description
+    .split('\n')
+    .filter((line) => {
+      const m = line.match(/^\s*([^:]{1,40}):\s*(.*)$/);
+      if (!m) return true;
+      const [, label, value] = m;
+      if (/^objections$/i.test(label.trim()) && /^none\.?$/i.test(value.trim())) return true;
+      return !isPlaceholder(value);
+    })
+    .join('\n')
+    .trim();
+}
+
+// The intake RPC accepts one submission per call; a repeat returns the first
+// lead unchanged. When a later submit carries an email or phone the saved
+// contact is missing, fill only those empty fields so a detail the caller gave
+// after the first save is not lost. Existing values are never overwritten.
+export function missingContactFields(
+  contact: { email?: string | null; phone?: string | null } | null | undefined,
+  identifier: { email: string | null; phone: string | null },
+): { email?: string; phone?: string } {
+  if (!contact) return {};
+  const patch: { email?: string; phone?: string } = {};
+  if (!contact.email && identifier.email) patch.email = identifier.email;
+  if (!contact.phone && identifier.phone) patch.phone = identifier.phone;
+  return patch;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
@@ -184,11 +229,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const interactionId = text(body.interactionId);
       if (!UUID_RE.test(interactionId)) return res.status(400).json({ error: 'interactionId is required' });
 
-      const businessName = text(body.businessName);
-      const callerName = text(body.callerName);
-      const email = text(body.email);
-      const description = text(body.description);
-      const serviceInterest = text(body.serviceInterest);
+      const businessName = cleanField(body.businessName);
+      const callerName = cleanField(body.callerName);
+      const email = cleanField(body.email);
+      const description = stripPlaceholderLines(text(body.description));
+      const serviceInterest = cleanField(body.serviceInterest);
 
       const { data: interaction, error: fetchError } = await db
         .from('ai4cc_interactions')
@@ -224,7 +269,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (rpcError.message?.includes('AI4CC_INTAKE_SOURCE_INVALID')) return res.status(409).json({ error: 'interaction is not a voice intake' });
         throw rpcError;
       }
-      return res.status(lifecycle?.replayed ? 200 : 201).json(lifecycle);
+      if (lifecycle?.replayed) {
+        const contact = lifecycle.contact as { id?: string; email?: string | null; phone?: string | null } | null;
+        const patch = missingContactFields(contact, identifier);
+        const filled: string[] = [];
+        for (const field of Object.keys(patch) as Array<'email' | 'phone'>) {
+          // Guarded on the column still being empty, so a concurrent fill is never overwritten.
+          const { data: updated, error: fillError } = await db
+            .from('ai4cc_contacts')
+            .update({ [field]: patch[field], updated_at: new Date().toISOString() })
+            .eq('tenant_id', tenantId)
+            .eq('id', contact!.id!)
+            .is(field, null)
+            .select('id');
+          if (fillError) throw fillError;
+          if (updated?.length) {
+            filled.push(field);
+            (lifecycle.contact as Record<string, unknown>)[field] = patch[field];
+          }
+        }
+        return res.status(200).json(filled.length ? { ...lifecycle, filled } : lifecycle);
+      }
+      return res.status(201).json(lifecycle);
     }
 
     return res.status(400).json({ error: 'action must be "start" or "submit"' });
