@@ -126,6 +126,28 @@ export function callbackPhone(submitted: unknown, callerId: unknown): string | n
   return normalizePhone(text(submitted)) || normalizePhone(text(callerId));
 }
 
+// Live transfers to a specialist are allowed Monday to Friday, 8 AM to 6 PM
+// Pacific (daylight saving handled by the time zone). The agent is told the
+// answer at call start instead of working it out from the clock, which it did
+// unreliably.
+const TRANSFER_TZ = 'America/Los_Angeles';
+const TRANSFER_START_HOUR = 8;
+const TRANSFER_END_HOUR = 18;
+
+export function transferWindowOpen(now: Date = new Date()): boolean {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: TRANSFER_TZ, weekday: 'short', hour: 'numeric', hourCycle: 'h23',
+  }).formatToParts(now);
+  const weekday = parts.find((p) => p.type === 'weekday')?.value;
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value);
+  if (weekday === 'Sat' || weekday === 'Sun') return false;
+  return hour >= TRANSFER_START_HOUR && hour < TRANSFER_END_HOUR;
+}
+
+function transferAllowed(): 'yes' | 'no' {
+  return transferWindowOpen() ? 'yes' : 'no';
+}
+
 // The voice agent sometimes fills unknown fields with filler ("Unknown",
 // "Not specified", "None stated") despite its instructions. Treat those as empty
 // so they never become a lead title or a line in the lead description.
@@ -217,12 +239,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .maybeSingle();
         if (lookupError) throw lookupError;
         if (existing?.metadata?.source === 'elevenlabs_agent') {
-          return res.status(200).json({ interactionId: existing.id });
+          return res.status(200).json({ interactionId: existing.id, transferAllowed: transferAllowed() });
         }
         return res.status(409).json({ error: 'conversation ID is already in use' });
       }
       if (error) throw error;
-      return res.status(201).json({ interactionId: data.id });
+      return res.status(201).json({ interactionId: data.id, transferAllowed: transferAllowed() });
     }
 
     if (action === 'submit') {
