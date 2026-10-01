@@ -72,7 +72,7 @@ test('operator console host', () => {
 });
 
 test('operator host blocks every public surface', () => {
-  for (const p of ['/acquisition', '/demo', '/partners', '/live/leads', '/platform/x', '/api/public/leads', '/web-chat', '/api/chat/message', '/api/intake/webhook']) {
+  for (const p of ['/acquisition', '/demo', '/partners', '/live/leads', '/platform/x', '/api/public/leads', '/web-chat', '/api/chat/message', '/api/intake/webhook', '/api/sms/webhook']) {
     assert.equal(isBlockedOnOperatorHost(p), true, p);
   }
   for (const p of ['/ops-console', '/dashboard', '/login', '/lead-management', '/api/mission-control/status']) {

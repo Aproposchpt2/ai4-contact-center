@@ -106,7 +106,8 @@ export function isBlockedOnOperatorHost(pathname: string): boolean {
     pathname.startsWith('/live/') ||
     pathname.startsWith('/api/public/') ||
     pathname.startsWith('/api/chat/') ||
-    pathname.startsWith('/api/intake/')
+    pathname.startsWith('/api/intake/') ||
+    pathname.startsWith('/api/sms/')
   );
 }
 

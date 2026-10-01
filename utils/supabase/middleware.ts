@@ -13,11 +13,14 @@ const PUBLIC_PATHS = new Set(['/', '/login', '/web-chat', '/acquisition', '/demo
 // /api/intake/ authenticates itself with a per-tenant `x-ai4cc-intake-key` header that also selects
 // the tenant (see pages/api/intake/webhook.ts) — called machine-to-machine by ElevenLabs, which
 // can't carry a Supabase session cookie.
+// /api/sms/ authenticates itself by validating Twilio's X-Twilio-Signature header (see
+// pages/api/sms/webhook.ts) — called machine-to-machine by Twilio, which also can't carry a
+// Supabase session cookie.
 // /api/public/ is deliberately read-only, minimal-field, no-auth — see pages/api/public/*.
 // /platform/ holds the public capability detail pages linked from the homepage.
 // /live/ holds public read-only mirrors of real CRM data (see pages/live/*), backed only
 // by /api/public/* endpoints — never the authenticated admin API routes.
-const PUBLIC_PREFIXES = ['/api/chat/', '/api/intake/', '/api/public/', '/platform/', '/live/'];
+const PUBLIC_PREFIXES = ['/api/chat/', '/api/intake/', '/api/sms/', '/api/public/', '/platform/', '/live/'];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.has(pathname) || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
