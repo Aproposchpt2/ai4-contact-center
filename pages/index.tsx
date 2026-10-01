@@ -99,7 +99,7 @@ export default function HomePage() {
         <div className="eyebrow">STELLARUC · APROPOS GROUP LLC</div>
         <p className="serviceName">INTELLIGENT SALES SERVICE SYSTEM</p>
         <h1 id="sales-headline">YOUR BUSINESS MAY CLOSE.<br /><span>WHILE YOUR SALES OPERATION REMAINS OPEN 24/7.</span></h1>
-        <p className="heroLead">Give your business an Intelligent Sales Agent configured to engage prospective customers, answer approved sales questions, qualify opportunities, and move prospects toward the appropriate next step around the clock.</p>
+        <p className="heroLead">An Intelligent Sales Agent trained for your business engages prospects, answers approved sales questions, qualifies opportunities, and advances next steps 24/7.</p>
         <p className="heroKicker">24/7 SALES AVAILABILITY · USAGE-BASED PRICING</p>
         <div className="ctaRow">
           <Link href="/demo" className="buyerCta">See How It Works →</Link>
@@ -289,6 +289,7 @@ export default function HomePage() {
       @media(max-width:1000px){h1{font-size:3.2rem}.flowGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.experience{display:block}.experienceActions{flex-direction:row;flex-wrap:wrap}}
       @media(max-width:850px){.painGrid,.industryGrid,.installHighlights{grid-template-columns:1fr}.capGrid,.flowGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pricingPromises{grid-template-columns:1fr;gap:.5rem}.proofRow{grid-template-columns:1fr}.installFlow{display:grid;grid-template-columns:1fr}.installFlow span{transform:rotate(90deg);justify-self:start}}
       @media(max-width:600px){h1{font-size:2.15rem;line-height:1.12}.serviceName{font-size:.95rem}.heroLead{font-size:1rem}.heroKicker{font-size:.85rem}.eyebrow{font-size:.65rem}:global(body .salesHome .hero){padding-top:28px!important;padding-bottom:28px!important}.sectionHead h2,.easyInstall h2,.experience h2,.closing h2{font-size:2.15rem}.ctaRow,.closingActions,.experienceActions{flex-direction:column}.callCta,:global(.salesHome .buyerCta){width:100%;min-width:0;padding:.8rem 1rem}.capGrid,.flowGrid{grid-template-columns:1fr}.painSection,.journey,.industries,.platformStory,.proof,.fit,.easyInstall,.experience,.closing{padding-top:44px;padding-bottom:44px}}
+      @media(max-width:360px){:global(body .salesHome .hero){padding:18px 18px 20px!important}.hero h1{font-size:1.65rem;line-height:1.12;margin:12px 0}.hero .eyebrow{font-size:.55rem}.hero .serviceName{font-size:.85rem;margin:10px 0}.hero .heroLead{font-size:.9rem;line-height:1.55;margin:12px 0}.hero .heroKicker{font-size:.73rem;margin:10px 0}.hero .ctaRow{gap:.6rem;margin-top:14px}.hero .callCta,:global(.salesHome .hero .buyerCta){padding:.5rem .8rem}.hero .callNumber{font-size:1.05rem}.hero .livePrompt{font-size:.83rem;margin:12px 0 0}}
     `}</style>
   </>;
 }
