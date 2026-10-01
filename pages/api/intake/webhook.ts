@@ -122,8 +122,26 @@ export function classifyIdentifier(rawEmail: unknown, rawPhone: unknown) {
   return { type: 'opaque' as const, value: email || text(rawPhone) || 'Unknown contact', email: null, phone: null };
 }
 
+// A callback number must be a full number with its area code. Anything shorter,
+// such as "555-0123" made up when the caller said "same number", falls back to
+// the caller ID.
 export function callbackPhone(submitted: unknown, callerId: unknown): string | null {
-  return normalizePhone(text(submitted)) || normalizePhone(text(callerId));
+  const full = normalizePhone(text(submitted));
+  return (full?.startsWith('+') ? full : null) || normalizePhone(text(callerId));
+}
+
+// The caller ID in the form the agent reads back ("702-555-0100").
+export function formatCallerNumber(callerPhone: string): string {
+  const phone = normalizePhone(callerPhone);
+  const us = phone?.match(/^\+1(\d{3})(\d{3})(\d{4})$/);
+  return us ? `${us[1]}-${us[2]}-${us[3]}` : phone ?? '';
+}
+
+// The question that ends the first message: a returning caller is asked to
+// confirm the saved first name, a new caller is asked why they called.
+export function greetingQuestion(knownName: string): string {
+  const first = knownName.split(/\s+/)[0];
+  return first ? `Am I speaking with ${first}?` : "What's got you looking into us today?";
 }
 
 // Live transfers to a specialist are allowed Monday to Friday, 8 AM to 6 PM
@@ -230,6 +248,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!scope) return res.status(401).json({ error: 'unauthorized' });
     const { tenantId, actorUserId } = scope;
 
+    // ElevenLabs calls this before the agent speaks on an inbound phone call
+    // (conversation initiation webhook) with caller_id, agent_id, called_number
+    // and call_sid. The returned dynamic variables fill the first message.
+    if (action === 'initiate' || (!action && typeof body.caller_id === 'string')) {
+      const callerPhone = text(body.caller_id);
+      const name = await knownCallerName(db, tenantId, callerPhone);
+      return res.status(200).json({
+        type: 'conversation_initiation_client_data',
+        dynamic_variables: {
+          known_caller_name: name,
+          greeting_question: greetingQuestion(name),
+          caller_number: formatCallerNumber(callerPhone),
+        },
+      });
+    }
+
     if (action === 'start') {
       const callerPhone = text(body.callerPhone);
       const conversationId = text(body.conversationId);
@@ -267,6 +301,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             interactionId: existing.id,
             transferAllowed: transferAllowed(),
             knownCallerName: await knownCallerName(db, tenantId, callerPhone),
+            callerNumber: formatCallerNumber(callerPhone),
           });
         }
         return res.status(409).json({ error: 'conversation ID is already in use' });
@@ -276,6 +311,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         interactionId: data.id,
         transferAllowed: transferAllowed(),
         knownCallerName: await knownCallerName(db, tenantId, callerPhone),
+        callerNumber: formatCallerNumber(callerPhone),
       });
     }
 
