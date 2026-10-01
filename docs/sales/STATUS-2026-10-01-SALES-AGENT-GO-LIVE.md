@@ -1,6 +1,7 @@
 # Status Update: Sales Agent Go-Live (October 1, 2026)
 
 **Prepared for:** Jeffrey Mitchell, Apropos Group LLC (d/b/a Stellar Unified Communications)
+
 **Covers:** everything since the September 30 evening status update, through the go-live merge at 1:28 PM Pacific on October 1.
 
 ---
@@ -10,9 +11,9 @@
 - **The sales agent is live.** The tested sales-v1 branch (prompt v1.16) was merged into the agent's **Main** branch at **1:28 PM Pacific**. The live line, **(725) 330-5102**, now runs it. The test line, (702) 710-2622, runs the same version on sales-v1.
 - **Pricing message:** usage-based pricing with **no dollar amounts** spoken (a monthly service fee plus calls handled, estimated from the caller's call history, no overage, no contract). Requests for numbers go to a specialist, or to a callback noted "pricing estimate".
 - **Core message (three points):**
-  1. 24/7 sales: "Your business may close, while your sales operation stays open 24/7."
-  2. A transparent monthly cost.
-  3. Multiple calls answered at once.
+    1. 24/7 sales: "Your business may close, while your sales operation stays open 24/7."
+    2. A transparent monthly cost.
+    3. Multiple calls answered at once.
 - **New: caller-ID greeting.** Before the agent speaks, the website looks up the caller ID. A returning caller hears *"Thanks for calling the Intelligent Customer Engagement Operation Center. Am I speaking with Jeffrey?"*
 - **New: no made-up callback numbers.** "Same number" now reads back the real caller ID. The website rejects a callback number with no area code.
 - **Website changes:** two PRs merged and published (#61, #62). 84 automated tests pass.
@@ -114,6 +115,7 @@
 ## 8. Open items
 
 **Owner**
+
 1. Set `AI4CC_INTAKE_ALLOW_UNKEYED=false` in Netlify. The ElevenLabs tools and webhook already send the key.
 2. Enable ElevenLabs usage-based billing and move to the Pro plan when customer #1 signs.
 3. Twilio auto-recharge and a TwiML fallback for the numbers.
@@ -122,6 +124,7 @@
 6. Finalize the static monthly fee (working figure $500, not locked) once all vendor costs are confirmed.
 
 **Engineering (offered, not started)**
+
 - Clean up today's test leads and the "5550123" contact.
 - Website-side guard against saving before a phone number is confirmed.
 - Update Sales Knowledge Base section 35 to usage-based pricing when the numbers are final.
