@@ -5,15 +5,16 @@ import Footer from '@/components/Footer';
 
 const PHONE_DISPLAY = '(725) 330-5102';
 const PHONE_TEL = 'tel:+17253305102';
-const SERVICE_NAME = 'Intelligent Sales Service System';
-const DESCRIPTION = 'Keep your sales operation open 24/7 with an Intelligent Sales Agent configured for your business. Transparent usage-based pricing from Apropos Group LLC. Keep Your Number. Add The Intelligence.';
+const SERVICE_NAME = 'Sales Service System';
+const PLATFORM_NAME = 'Customer Engagement Operations Center';
+const DESCRIPTION = 'Keep your sales operation open 24/7 with the Sales Service System, supported by the Customer Engagement Operations Center. Transparent usage-based pricing from Apropos Group LLC. Keep Your Number. Add The Intelligence.';
 
 const FLOW = [
   { title: 'Your prospect contacts your business', body: 'A sales inquiry arrives during business hours, after hours, or while your team is helping someone else.' },
   { title: 'The Intelligent Sales Agent engages', body: 'The conversation follows the sales process and engagement rules configured for your business.' },
   { title: 'Approved sales questions are answered', body: 'Prospects receive information about your products, services, service areas, and approved pricing.' },
   { title: 'The opportunity is qualified', body: 'The agent collects relevant details and applies your qualification criteria before human follow-up.' },
-  { title: 'The appropriate next step is taken', body: 'Depending on your configuration: an appointment, consultation, estimate, inspection, demonstration, lead capture, or human escalation.' },
+  { title: 'The appropriate next step is captured', body: 'Depending on your configuration: an appointment request, consultation request, estimate intake, qualified lead, or human escalation.' },
 ];
 
 const PAIN_POINTS = [
@@ -25,19 +26,43 @@ const PAIN_POINTS = [
   'An opportunity waits in voicemail',
 ];
 
-const KNOWLEDGE = [
-  { title: 'Your products and services', body: 'Products, services, service areas, frequently asked questions, approved pricing, promotions, and financing information where applicable.' },
-  { title: 'Your sales approach', body: 'Qualification criteria, common objections, approved objection responses, and the information your agent may communicate.' },
-  { title: 'Your next steps and boundaries', body: 'Scheduling, estimate and consultation procedures, sales-process requirements, escalation rules, and situations requiring a person.' },
+const SALES_CAPABILITIES = [
+  { title: '24/7 sales availability', body: 'Engage incoming prospects during business hours, after closing, and while your team is helping other customers.' },
+  { title: 'Business-specific knowledge', body: 'Represent your products, services, service areas, policies, promotions, and approved sales procedures.' },
+  { title: 'Product and service questions', body: 'Answer questions using the information and pricing your business approves during onboarding.' },
+  { title: 'Needs discovery and qualification', body: 'Understand the prospect\'s needs, collect relevant details, and apply your qualification criteria.' },
+  { title: 'Approved objection responses', body: 'Address common concerns using approved responses and involve your team when the conversation needs a person.' },
+  { title: 'Estimate and quote intake', body: 'Capture the requirements and contact details your team needs to prepare an estimate or quote.' },
+  { title: 'Appointment and consultation requests', body: 'Collect preferred times and request details for your team to confirm the appointment, consultation, inspection, or demonstration.' },
+  { title: 'Configured human handoffs', body: 'Escalate to your people according to the transfer destinations, availability, and fallback rules established during onboarding.' },
+  { title: 'Concurrent inquiry handling', body: 'Support multiple incoming sales conversations according to your configured service capacity and usage.' },
 ];
 
-const BENEFITS = [
-  { title: 'Sales availability beyond business hours', body: 'Give prospects a way to engage with your business at night, on weekends, and when your sales team is unavailable.' },
-  { title: 'Engage prospects when they are ready', body: 'Answer approved sales questions while interest is active and help prospective customers find the appropriate next step.' },
-  { title: 'Consistent sales conversations', body: 'Represent your business using the knowledge, qualification criteria, and sales rules you approve.' },
-  { title: 'Qualify before human follow-up', body: 'Give your sales team relevant prospect details and context for the opportunities that need their attention.' },
-  { title: 'Keep compatible communications', body: 'Add an intelligence layer around the business number and communications environment your customers already know.' },
-  { title: 'Transparent, scalable sales engagement', body: 'Support inbound sales inquiries around the clock, with an estimated cost explained before service begins and monthly billing based on actual usage.' },
+const OPERATIONS_CAPABILITIES = [
+  { title: 'Customer 360 profiles', body: 'Keep customer and prospect information connected with recorded engagement and follow-up context.' },
+  { title: 'Conversation history', body: 'Review captured interactions and available transcripts so the next conversation can build on the last.' },
+  { title: 'Lead and opportunity management', body: 'Organize captured leads, track pipeline stages, and maintain the details your team needs to advance an opportunity.' },
+  { title: 'Activities and follow-up tasks', body: 'Record sales activity, assign tasks, and track the follow-up work that needs staff attention.' },
+  { title: 'Configured communications', body: 'Text follow-up and email or text notifications follow the recipients and rules established during onboarding.' },
+  { title: 'Conversation intelligence and review', body: 'Use available analytics, transcript review, and quality scoring to understand engagement and refine your sales process.' },
+];
+
+const STAFF_CAPABILITIES = [
+  { title: 'Track prospects and customers', body: 'Authorized staff access the leads, customer records, and sales activity available to their role.' },
+  { title: 'Review Sales Agent activity', body: 'See captured interaction details and available transcripts before continuing the conversation.' },
+  { title: 'Manage follow-up', body: 'Create and update assigned tasks, record activity, and keep the next action connected to the opportunity.' },
+  { title: 'Receive engagement notifications', body: 'Email or text notifications can reach the staff designated during onboarding, according to your configured rules.' },
+  { title: 'Maintain conversation continuity', body: 'Use the customer record and prior engagement context to support informed human follow-up.' },
+  { title: 'Continue the human conversation', body: 'Handle configured transfers or follow up with prospects whose needs require a member of your team.' },
+];
+
+const LIFECYCLE = [
+  { title: 'Inquiry and engagement', body: 'A prospect contacts your business. Your Intelligent Sales Agent engages and answers approved questions.' },
+  { title: 'Discovery and qualification', body: 'The agent captures the prospect\'s needs, contact details, and relevant qualification information.' },
+  { title: 'Connected opportunity record', body: 'Captured information becomes a lead and engagement record in your Customer Engagement Operations Center.' },
+  { title: 'Staff visibility and follow-up', body: 'Authorized staff review the record and follow up. Configured notifications and text follow-up support the process where applicable.' },
+  { title: 'The appropriate sales action', body: 'Your team confirms an appointment or consultation, prepares an estimate, or continues the conversation as needed.' },
+  { title: 'An ongoing customer relationship', body: 'When a prospect becomes a customer, the record supports continued engagement, follow-up, retention activity, and future sales opportunities.' },
 ];
 
 const PRICING_STEPS = [
@@ -53,7 +78,7 @@ const INDUSTRIES = [
 ];
 
 const PLATFORM_PAGES = [
-  { href: '/platform/flow-authoring', eyebrow: 'SALES CONVERSATION DESIGN', title: 'Configure the conversation around your sales process', body: 'Call flows, approved responses, simulation, and version history support how your business engages prospects.' },
+  { href: '/platform/flow-authoring', eyebrow: 'SALES CONVERSATION DESIGN', title: 'A conversation configured around your sales process', body: 'Your approved business knowledge, responses, and escalation rules guide how the agent engages prospects.' },
   { href: '/platform/live-operations', eyebrow: 'SALES FOLLOW-UP', title: 'Carry the opportunity into your team\'s workspace', body: 'Lead Management, Activities, Tasks, and Customer 360 help your team continue the sales conversation.' },
   { href: '/platform/intelligence-qa', eyebrow: 'CONVERSATION REVIEW', title: 'Understand and refine sales engagement', body: 'Conversation analytics, transcript review, quality scoring, and coaching support ongoing improvement.' },
   { href: '/platform/governance-platform', eyebrow: 'PLATFORM CONTROLS', title: 'Support your approved sales rules', body: 'Access controls, flow management, and shared platform services support your configured environment.' },
@@ -80,26 +105,26 @@ const STRUCTURED_DATA = {
 export default function HomePage() {
   return <>
     <Head>
-      <title>Intelligent Sales Service System | 24/7 Sales | StellarUC</title>
+      <title>Sales Service System | 24/7 Sales | StellarUC</title>
       <meta name="description" content={DESCRIPTION} />
       <link rel="canonical" href="https://stellaruc.com/" />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://stellaruc.com/" />
       <meta property="og:site_name" content="StellarUC" />
-      <meta property="og:title" content="Intelligent Sales Service System | Your Sales Operation Open 24/7" />
+      <meta property="og:title" content="Sales Service System | Your Sales Operation Open 24/7" />
       <meta property="og:description" content={DESCRIPTION} />
       <meta name="twitter:card" content="summary" />
-      <meta name="twitter:title" content="Intelligent Sales Service System | 24/7 Sales" />
+      <meta name="twitter:title" content="Sales Service System | 24/7 Sales" />
       <meta name="twitter:description" content={DESCRIPTION} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }} />
     </Head>
     <Header publicProductName={SERVICE_NAME} />
     <main className="page salesHome">
       <section className="hero" aria-labelledby="sales-headline">
-        <div className="eyebrow">STELLARUC · APROPOS GROUP LLC</div>
-        <p className="serviceName">INTELLIGENT SALES SERVICE SYSTEM</p>
-        <h1 id="sales-headline">YOUR BUSINESS MAY CLOSE.<br /><span>WHILE YOUR SALES OPERATION REMAINS OPEN 24/7.</span></h1>
-        <p className="heroLead">An Intelligent Sales Agent trained for your business engages prospects, answers approved sales questions, qualifies opportunities, and advances next steps 24/7.</p>
+        <div className="eyebrow">{PLATFORM_NAME}</div>
+        <p className="serviceName">SALES SERVICE SYSTEM</p>
+        <h1 id="sales-headline">WHEN YOUR BUSINESS CLOSES,<br /><span>YOUR SALES OPERATION REMAINS OPEN 24/7.</span></h1>
+        <p className="heroLead">An Intelligent Sales Agent configured for your business engages prospects, understands their needs, answers approved questions, and qualifies the next step 24/7.</p>
         <p className="heroKicker">24/7 SALES AVAILABILITY · USAGE-BASED PRICING</p>
         <div className="ctaRow">
           <Link href="/demo" className="buyerCta">See How It Works →</Link>
@@ -115,7 +140,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>SALES OPPORTUNITIES DO NOT FOLLOW BUSINESS HOURS</small>
           <h2>Be ready when your next prospect <span>is ready.</span></h2>
-          <p>A sales inquiry can arrive when your doors are closed, your sales team is unavailable, or several people need answers at once. The Intelligent Sales Service System gives prospective customers a way to keep the conversation moving.</p>
+          <p>A sales inquiry can arrive when your doors are closed, your sales team is unavailable, or several people need answers at once. The Sales Service System gives prospective customers a way to keep the conversation moving.</p>
         </div>
         <div className="painGrid">{PAIN_POINTS.map(item => <div className="painItem" key={item}>{item}</div>)}</div>
         <div className="painClose">ONE BUSINESS FUNCTION: SALES. <strong>KEEP SALES OPPORTUNITIES MOVING.</strong></div>
@@ -125,7 +150,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>ENGAGE · INFORM · QUALIFY · ADVANCE</small>
           <h2>A sales conversation with an appropriate next step.</h2>
-          <p>From the first inquiry to an appointment, a qualified lead, or sales-team follow-up, the process follows the rules configured for your business.</p>
+          <p>From the first inquiry to an appointment request, a qualified lead, or sales-team follow-up, the process follows the rules configured for your business.</p>
         </div>
         <div className="flowGrid">
           {FLOW.map((item, i) => <div className="flowItem" key={item.title}><span>{String(i + 1).padStart(2, '0')}</span><h3>{item.title}</h3><p>{item.body}</p></div>)}
@@ -136,9 +161,9 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>YOUR INTELLIGENT SALES AGENT</small>
           <h2>Configured around the business it represents.</h2>
-          <p>More than a generic answering bot, your Intelligent Sales Agent is trained around your business knowledge and approved sales process. During onboarding, we configure what it can answer, how it qualifies prospects, and when it should involve your people.</p>
+          <p>The mission is sales. Your Intelligent Sales Agent uses your business knowledge and approved sales process to help prospects move forward. During onboarding, we configure what it can answer, how it qualifies opportunities, and when it should involve your people.</p>
         </div>
-        <div className="industryGrid">{KNOWLEDGE.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
+        <div className="industryGrid">{SALES_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
       </section>
 
       <section className="easyInstall">
@@ -172,13 +197,13 @@ export default function HomePage() {
         <Link href="/demo" className="buyerCta">Explore 24/7 Sales →</Link>
       </section>
 
-      <section className="industries">
+      <section id="staff-workspace" className="industries" aria-labelledby="workspace-title">
         <div className="sectionHead">
-          <small>24/7 AVAILABILITY. BUSINESS-SPECIFIC ENGAGEMENT.</small>
-          <h2>Keep legitimate sales opportunities moving.</h2>
-          <p>Extend your sales presence beyond normal hours while keeping your people focused on the opportunities and decisions that need them.</p>
+          <small>YOUR STAFF. YOUR CUSTOMERS. ONE CONNECTED WORKSPACE.</small>
+          <h2 id="workspace-title">Keep your people connected to the opportunity.</h2>
+          <p>Authorized staff have a secure workspace with customer records, prospects, and activity relevant to their role. Available modules and access are configured for your business, keeping automated engagement connected to the people responsible for the next step.</p>
         </div>
-        <div className="industryGrid">{BENEFITS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
+        <div className="industryGrid">{STAFF_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
       </section>
 
       <section className="industries">
@@ -190,15 +215,27 @@ export default function HomePage() {
         <div className="industryGrid">{INDUSTRIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
       </section>
 
-      <section className="platformStory">
+      <section id="operations-center" className="platformStory" aria-labelledby="operations-title">
         <div className="sectionHead">
-          <small>THE UNDERLYING PLATFORM</small>
-          <h2>Intelligent Customer Engagement Operation Center</h2>
-          <p>The underlying subscribed platform supports the Intelligent Sales Service System. Its conversation tools, lead management, workspace, and review capabilities serve one primary business function here: sales.</p>
+          <small>THE CONNECTED CUSTOMER LIFECYCLE</small>
+          <h2 id="operations-title">{PLATFORM_NAME}</h2>
+          <p>Behind the Sales Service System, the Customer Engagement Operations Center connects the Sales Agent, your staff, and the customer relationship. Customer records, conversation history, pipeline activity, and follow-up help your team continue engagement from the first inquiry onward.</p>
         </div>
+        <div className="industryGrid">{OPERATIONS_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
         <div className="capGrid">
           {PLATFORM_PAGES.map(p => <Link href={p.href} className="capCard" key={p.href}><small>{p.eyebrow}</small><h3>{p.title}</h3><p>{p.body}</p><span>Explore →</span></Link>)}
         </div>
+      </section>
+
+      <section id="customer-lifecycle" className="journey" aria-labelledby="lifecycle-title">
+        <div className="sectionHead">
+          <small>ONE WORKSPACE. ONE CUSTOMER VIEW.</small>
+          <h2 id="lifecycle-title">From the first inquiry to an ongoing relationship.</h2>
+          <p>The Sales Agent begins the conversation. The Operations Center maintains the engagement record. Your staff handle the decisions and follow-up that need a person. Each opportunity follows the path appropriate to your customer and business.</p>
+        </div>
+        <ol className="lifecycleGrid">
+          {LIFECYCLE.map((item, i) => <li className="flowItem" key={item.title}><span>{String(i + 1).padStart(2, '0')}</span><h3>{item.title}</h3><p>{item.body}</p></li>)}
+        </ol>
       </section>
 
       <section className="experience">
@@ -233,7 +270,7 @@ export default function HomePage() {
       </section>
 
       <section id="stellar-review" className="closing">
-        <small>INTELLIGENT SALES SERVICE SYSTEM · APROPOS GROUP LLC</small>
+        <small>SALES SERVICE SYSTEM · APROPOS GROUP LLC</small>
         <h2>See how 24/7 sales engagement could work for your business.</h2>
         <p>An Intelligent Sales Agent configured around your business. Transparent Usage-Based Pricing. Keep Your Number. Add The Intelligence.</p>
         <div className="closingActions">
@@ -243,7 +280,7 @@ export default function HomePage() {
         <div className="partnerFoot">Technology provider, MSP, telecom or reseller? <Link href="/partners">Explore Partner &amp; White-Label Opportunities →</Link></div>
       </section>
     </main>
-    <Footer serviceName={SERVICE_NAME} serviceDescription="24/7 intelligent sales engagement with transparent usage-based pricing." />
+    <Footer serviceName={SERVICE_NAME} serviceDescription="24/7 sales engagement supported by the Customer Engagement Operations Center. Transparent usage-based pricing." />
 
     <style jsx>{`
       .page{color:var(--theme-text);background:var(--theme-canvas)}
@@ -276,6 +313,7 @@ export default function HomePage() {
       .capGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .installFlow{display:flex;gap:.7rem;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:2rem 0;padding:1.2rem;border-top:1px solid var(--theme-border);border-bottom:1px solid var(--theme-border);line-height:1.6}.installFlow b{font-size:.82rem}.installFlow span{color:var(--theme-accent)}
       .flowGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;margin-top:2rem}.flowItem{background:var(--theme-surface);border-top:3px solid var(--theme-accent);padding:1.25rem;min-width:0}.flowItem span{display:block;color:var(--theme-accent);font-size:.7rem;margin-bottom:.65rem}.flowItem h3{font-size:1.35rem;line-height:1.3;margin:0}.flowItem p{font-size:.9rem;margin-bottom:0}
+      .lifecycleGrid{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;padding:0;margin:2rem 0 0}
       .pricing{border-top:2px solid var(--theme-accent);border-bottom:2px solid var(--theme-accent)}
       .sectionHead .pricingPrinciple{color:var(--theme-accent-light);font-size:1.25rem;font-weight:700;line-height:1.6}
       .pricingPromises{list-style:none;padding:0;margin:2rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;color:var(--theme-accent-light);font-size:1.05rem;font-weight:700;line-height:1.65}.pricingPromises li{padding:.85rem 0;border-top:1px solid var(--theme-border)}
@@ -287,8 +325,8 @@ export default function HomePage() {
       .closing{text-align:left}.closing>*{max-width:1192px}.partnerFoot{margin-top:2rem;color:var(--theme-secondary);line-height:1.7}.partnerFoot a{color:var(--theme-accent-light)}
       :global(body .salesHome .closing p){color:var(--theme-secondary)!important}
       @media(max-width:1000px){h1{font-size:3.2rem}.flowGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.experience{display:block}.experienceActions{flex-direction:row;flex-wrap:wrap}}
-      @media(max-width:850px){.painGrid,.industryGrid,.installHighlights{grid-template-columns:1fr}.capGrid,.flowGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pricingPromises{grid-template-columns:1fr;gap:.5rem}.proofRow{grid-template-columns:1fr}.installFlow{display:grid;grid-template-columns:1fr}.installFlow span{transform:rotate(90deg);justify-self:start}}
-      @media(max-width:600px){h1{font-size:2.15rem;line-height:1.12}.serviceName{font-size:.95rem}.heroLead{font-size:1rem}.heroKicker{font-size:.85rem}.eyebrow{font-size:.65rem}:global(body .salesHome .hero){padding-top:28px!important;padding-bottom:28px!important}.sectionHead h2,.easyInstall h2,.experience h2,.closing h2{font-size:2.15rem}.ctaRow,.closingActions,.experienceActions{flex-direction:column}.callCta,:global(.salesHome .buyerCta){width:100%;min-width:0;padding:.8rem 1rem}.capGrid,.flowGrid{grid-template-columns:1fr}.painSection,.journey,.industries,.platformStory,.proof,.fit,.easyInstall,.experience,.closing{padding-top:44px;padding-bottom:44px}}
+      @media(max-width:850px){.painGrid,.industryGrid,.installHighlights{grid-template-columns:1fr}.capGrid,.flowGrid,.lifecycleGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.pricingPromises{grid-template-columns:1fr;gap:.5rem}.proofRow{grid-template-columns:1fr}.installFlow{display:grid;grid-template-columns:1fr}.installFlow span{transform:rotate(90deg);justify-self:start}}
+      @media(max-width:600px){h1{font-size:2.15rem;line-height:1.12}.serviceName{font-size:.95rem}.heroLead{font-size:1rem}.heroKicker{font-size:.85rem}.eyebrow{font-size:.65rem}:global(body .salesHome .hero){padding-top:28px!important;padding-bottom:28px!important}.sectionHead h2,.easyInstall h2,.experience h2,.closing h2{font-size:2.15rem}.ctaRow,.closingActions,.experienceActions{flex-direction:column}.callCta,:global(.salesHome .buyerCta){width:100%;min-width:0;padding:.8rem 1rem}.capGrid,.flowGrid,.lifecycleGrid{grid-template-columns:1fr}.painSection,.journey,.industries,.platformStory,.proof,.fit,.easyInstall,.experience,.closing{padding-top:44px;padding-bottom:44px}}
       @media(max-width:360px){:global(body .salesHome .hero){padding:18px 18px 20px!important}.hero h1{font-size:1.65rem;line-height:1.12;margin:12px 0}.hero .eyebrow{font-size:.55rem}.hero .serviceName{font-size:.85rem;margin:10px 0}.hero .heroLead{font-size:.9rem;line-height:1.55;margin:12px 0}.hero .heroKicker{font-size:.73rem;margin:10px 0}.hero .ctaRow{gap:.6rem;margin-top:14px}.hero .callCta,:global(.salesHome .hero .buyerCta){padding:.5rem .8rem}.hero .callNumber{font-size:1.05rem}.hero .livePrompt{font-size:.83rem;margin:12px 0 0}}
     `}</style>
   </>;
