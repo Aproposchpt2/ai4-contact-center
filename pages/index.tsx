@@ -136,6 +136,18 @@ export default function HomePage() {
         <p className="livePrompt">Keep Your Number. Add The Intelligence.</p>
       </section>
 
+      <section id="operations-center" className="platformStory" aria-labelledby="operations-title">
+        <div className="sectionHead">
+          <small>THE CONNECTED CUSTOMER LIFECYCLE</small>
+          <h2 id="operations-title">{PLATFORM_NAME}</h2>
+          <p>Behind the Sales Service System, the Customer Engagement Operations Center connects the Sales Agent, your staff, and the customer relationship. Customer records, conversation history, pipeline activity, and follow-up help your team continue engagement from the first inquiry onward.</p>
+        </div>
+        <div className="industryGrid">{OPERATIONS_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
+        <div className="capGrid">
+          {PLATFORM_PAGES.map(p => <Link href={p.href} className="capCard" key={p.href}><small>{p.eyebrow}</small><h3>{p.title}</h3><p>{p.body}</p><span>Explore →</span></Link>)}
+        </div>
+      </section>
+
       <section className="painSection">
         <div className="sectionHead">
           <small>SALES OPPORTUNITIES DO NOT FOLLOW BUSINESS HOURS</small>
@@ -213,18 +225,6 @@ export default function HomePage() {
           <p>Requests for quotes, estimates, appointments, inspections, consultations, and product information are strong signals. These are examples, not limits on the businesses the system can serve.</p>
         </div>
         <div className="industryGrid">{INDUSTRIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
-      </section>
-
-      <section id="operations-center" className="platformStory" aria-labelledby="operations-title">
-        <div className="sectionHead">
-          <small>THE CONNECTED CUSTOMER LIFECYCLE</small>
-          <h2 id="operations-title">{PLATFORM_NAME}</h2>
-          <p>Behind the Sales Service System, the Customer Engagement Operations Center connects the Sales Agent, your staff, and the customer relationship. Customer records, conversation history, pipeline activity, and follow-up help your team continue engagement from the first inquiry onward.</p>
-        </div>
-        <div className="industryGrid">{OPERATIONS_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
-        <div className="capGrid">
-          {PLATFORM_PAGES.map(p => <Link href={p.href} className="capCard" key={p.href}><small>{p.eyebrow}</small><h3>{p.title}</h3><p>{p.body}</p><span>Explore →</span></Link>)}
-        </div>
       </section>
 
       <section id="customer-lifecycle" className="journey" aria-labelledby="lifecycle-title">
