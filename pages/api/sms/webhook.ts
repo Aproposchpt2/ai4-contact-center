@@ -98,6 +98,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .select('id, metadata')
       .eq('tenant_id', TENANT_ID)
       .eq('phone', phone)
+      // phone is not unique at the DB level and this tenant already has duplicate rows from
+      // earlier systems; take the most recently touched one, same pattern as knownCallerName
+      // in ../intake/webhook.ts. .maybeSingle() without this limit throws PGRST116 whenever
+      // more than one row matches.
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle();
     if (lookupError) throw lookupError;
 
