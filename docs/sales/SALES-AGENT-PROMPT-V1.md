@@ -28,7 +28,7 @@ Version 1.2: transfer-first answers for anything the agent isn't approved to ans
 
 Version 1.1 adds the knowledge base v1.1 additions (managed service, onboarding needs, go-live, scope limits, extra objections).
 
-Staged on the ElevenLabs test branch `sales-v1` (`agtbrch_5101m3sjyz4cfscsmp74x7gs5h81`, current version `PENDING`) of the live agent (`agent_2001m1dc2shfeg48ptr4x2sv8jwg`). Model, voice and intake tools are unchanged from main; the branch adds a transfer_to_number system tool to the owner's sales line (number held in ElevenLabs, not in this public repo). The live number (725) 330-5102 stays on the main branch until the test calls in the Phase 1 plan pass. Source of truth: `SALES-KNOWLEDGE-BASE-V1.md`.
+Staged on the ElevenLabs test branch `sales-v1` (`agtbrch_5101m3sjyz4cfscsmp74x7gs5h81`, current version `agtvrsn_2701m3w9h2jeejhvz7mxvzbyy621`) of the live agent (`agent_2001m1dc2shfeg48ptr4x2sv8jwg`). Model, voice and intake tools are unchanged from main; the branch adds a transfer_to_number system tool to the owner's sales line (number held in ElevenLabs, not in this public repo). The live number (725) 330-5102 stays on the main branch until the test calls in the Phase 1 plan pass. Source of truth: `SALES-KNOWLEDGE-BASE-V1.md`.
 
 ## First message
 
