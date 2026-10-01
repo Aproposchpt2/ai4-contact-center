@@ -51,7 +51,7 @@ const NAV = [
   { href: '/dashboard',  label: 'Dashboard'      },
 ];
 
-export default function Header() {
+export default function Header({ publicProductName = 'Intelligent Customer Engagement Operation Center' }: { publicProductName?: string }) {
   const { pathname } = useRouter();
   const [theme, setTheme] = useState<Theme>('black');
   const [workspace, setWorkspace] = useState<WorkspaceContext | null>(null);
@@ -114,7 +114,7 @@ export default function Header() {
           ) : (
             <span className="brandMark">{brandInitials}</span>
           )}
-          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : 'Intelligent Customer Engagement Operation Center'}</span>
+          <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : publicProductName}</span>
         </Link>
 
         <nav className="navRail" aria-label="Primary navigation">

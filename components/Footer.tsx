@@ -1,6 +1,9 @@
 import Link from 'next/link';
 
-export default function Footer() {
+export default function Footer({
+  serviceName = 'Intelligent Customer Engagement Operation Center',
+  serviceDescription = 'Intelligent customer engagement operations for modern business communications.',
+}: { serviceName?: string; serviceDescription?: string }) {
   return (
     <footer style={{
       borderTop: '1px solid rgba(200,169,107,.14)',
@@ -17,10 +20,10 @@ export default function Footer() {
       }}>
         <div>
           <div style={{ fontSize: '.72rem', fontWeight: 900, color: '#E2CEA2', letterSpacing: '.12em', textTransform: 'uppercase', marginBottom: '.5rem' }}>
-            Intelligent Customer Engagement Operation Center
+            {serviceName}
           </div>
           <p style={{ fontSize: '.78rem', color: '#8F9CAF', lineHeight: 1.7 }}>
-            Intelligent customer engagement operations for modern business communications.
+            {serviceDescription}
           </p>
           <p style={{ fontSize: '.72rem', color: '#7D899C', marginTop: '.5rem' }}>
             Apropos Group LLC d/b/a Stellar Unified Communications
