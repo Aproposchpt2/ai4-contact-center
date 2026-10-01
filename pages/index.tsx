@@ -291,7 +291,7 @@ export default function HomePage() {
       .sectionHead small,.experience small,.closing small,.easyInstall small{color:var(--theme-accent);font-size:.72rem;font-weight:700;letter-spacing:0;text-transform:uppercase;line-height:1.7;display:block}
       h1,h2,h3{font-family:var(--theme-display);font-weight:400;letter-spacing:0;color:var(--theme-text);overflow-wrap:break-word}
       :global(body .salesHome .hero h1){letter-spacing:0!important}
-      h1{font-size:3.7rem;line-height:1.08;margin:0 0 12px;max-width:1160px}
+      h1{font-size:3.7rem;line-height:1.08;margin:0 0 12px;max-width:1160px;text-wrap:balance}
       .salesHeadline span,.painSection h2 span,.easyInstall h2 span{color:var(--theme-accent-light);font-style:italic}
       .heroService{color:var(--theme-accent-light);font-size:2.35rem;line-height:1.2;margin:0 0 18px}
       .salesHeadline{color:var(--theme-text);font-size:1.7rem;line-height:1.35;margin:0 0 18px;max-width:1000px;letter-spacing:0}
