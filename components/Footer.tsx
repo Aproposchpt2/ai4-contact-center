@@ -47,7 +47,6 @@ export default function Footer({
           <div style={{ fontSize: '.62rem', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#C8A96B', marginBottom: '.8rem' }}>Company</div>
           {[
             { href: 'https://aproposgroupllc.com', label: 'Apropos Group LLC' },
-            { href: 'https://aibizcenter.aproposgroupllc.com', label: 'Business Center' },
           ].map(({ href, label }) => (
             <div key={href} style={{ marginBottom: '.4rem' }}>
               <a href={href} target="_blank" rel="noopener" style={{ fontSize: '.8rem', color: '#9CA8BA', textDecoration: 'none' }}>{label}</a>
