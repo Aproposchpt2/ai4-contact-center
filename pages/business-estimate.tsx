@@ -52,7 +52,7 @@ export default function BusinessEstimatePage(){
       </section>
       <section className="method">
         <small>TRANSPARENT BY DESIGN</small><h2>Know how the estimate is calculated.</h2>
-        <p><strong>$495 monthly platform access + $0.50 per completed voice minute.</strong> Your actual monthly bill reflects actual service usage. This calculator is an estimate based on the information you enter and does not guarantee additional jobs, revenue, savings, or business results.</p>
+        <p><strong>Only pay for your monthly usage.</strong> Your actual monthly bill reflects actual service usage. This calculator is an estimate based on the information you enter and does not guarantee additional jobs, revenue, savings, or business results.</p>
         <div className="actions"><Link href="/demo">EXPERIENCE THE DEMO — TALK TO STELLARUC →</Link><Link href="/#pricing">VIEW PRICING →</Link></div>
       </section>
     </main>
