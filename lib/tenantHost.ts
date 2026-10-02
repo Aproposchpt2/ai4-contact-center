@@ -102,6 +102,7 @@ export function isBlockedOnOperatorHost(pathname: string): boolean {
     pathname === '/partners' ||
     pathname === '/demo' ||
     pathname === '/web-chat' ||
+    pathname === '/intake' ||
     pathname.startsWith('/platform/') ||
     pathname.startsWith('/live/') ||
     pathname.startsWith('/api/public/') ||
@@ -177,6 +178,7 @@ export function isBlockedOnTenantHost(pathname: string): boolean {
     pathname === '/acquisition' ||
     pathname === '/partners' ||
     pathname === '/demo' ||
+    pathname === '/intake' ||
     pathname === '/ops-console' ||
     pathname.startsWith('/platform/') ||
     pathname.startsWith('/live/') ||

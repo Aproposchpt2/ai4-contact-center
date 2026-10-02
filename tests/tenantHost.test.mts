@@ -27,7 +27,7 @@ test('slug validation', () => {
 });
 
 test('marketing and Apropos-data paths are blocked on tenant hosts', () => {
-  for (const p of ['/acquisition', '/partners', '/demo', '/live/leads', '/platform/flow-authoring', '/api/public/leads', '/api/mission-control/status', '/ops-console']) {
+  for (const p of ['/acquisition', '/partners', '/demo', '/intake', '/live/leads', '/platform/flow-authoring', '/api/public/leads', '/api/mission-control/status', '/ops-console']) {
     assert.equal(isBlockedOnTenantHost(p), true, p);
   }
   for (const p of ['/dashboard', '/lead-management', '/api/lead-management', '/web-chat', '/login', '/api/chat/message']) {
@@ -72,7 +72,7 @@ test('operator console host', () => {
 });
 
 test('operator host blocks every public surface', () => {
-  for (const p of ['/acquisition', '/demo', '/partners', '/live/leads', '/platform/x', '/api/public/leads', '/web-chat', '/api/chat/message', '/api/intake/webhook', '/api/sms/webhook']) {
+  for (const p of ['/acquisition', '/demo', '/partners', '/intake', '/live/leads', '/platform/x', '/api/public/leads', '/web-chat', '/api/chat/message', '/api/intake/webhook', '/api/sms/webhook']) {
     assert.equal(isBlockedOnOperatorHost(p), true, p);
   }
   for (const p of ['/ops-console', '/dashboard', '/login', '/lead-management', '/api/mission-control/status']) {

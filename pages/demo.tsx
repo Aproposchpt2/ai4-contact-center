@@ -111,6 +111,12 @@ export default function DemoPage() {
             <div className="proofRow result"><span>Result</span><b>Lead created{call.leadStage ? ` · stage: ${call.leadStage}` : ''}</b></div>
           </div>
         )}
+        {checked && call && (
+          <div className="getStarted">
+            <p>Like what you just experienced?</p>
+            <Link href="/intake" className="getStartedCta">Get Started →</Link>
+          </div>
+        )}
       </section>
 
       <section className="docPages">
@@ -205,6 +211,10 @@ export default function DemoPage() {
       .proofRow b{color:#d7e9f4;font-size:.9rem;font-weight:600}
       .proofRow.result{background:rgba(105,216,255,.06);border-radius:10px}
       .proofRow.result b{color:#69d8ff;font-weight:800}
+      .getStarted{margin-top:22px;border:1px solid rgba(105,216,255,.35);border-radius:16px;background:rgba(105,216,255,.07);padding:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+      .getStarted p{margin:0;color:#d7e9f4;font-size:1rem;font-weight:700}
+      :global(.getStartedCta){flex:0 0 auto;text-decoration:none;background:#69d8ff;color:#06111f;padding:13px 20px;border-radius:10px;font-size:.8rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+      :global(.getStartedCta:hover){filter:brightness(1.06)}
 
       .docPages{max-width:900px;margin:0 auto;padding:10px 24px 70px}
       .docPages h2{font-size:1.4rem;margin:0 0 20px;letter-spacing:-.02em}
