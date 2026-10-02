@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
 type Theme = 'light' | 'black';
@@ -56,6 +56,33 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
   const [theme, setTheme] = useState<Theme>('black');
   const [workspace, setWorkspace] = useState<WorkspaceContext | null>(null);
   const [signingOut, setSigningOut] = useState(false);
+  const navRailRef = useRef<HTMLElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // With ~30 nav items, the rail scrolls horizontally rather than wrapping (keeps the header a
+  // fixed height). Without these arrows the only way to reach hidden items was an undiscoverable
+  // sideways swipe/scroll, and the right-edge fade looked like the list was simply cut off.
+  function updateScrollState() {
+    const el = navRailRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }
+  function scrollNav(direction: -1 | 1) {
+    const el = navRailRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * Math.round(el.clientWidth * 0.8), behavior: 'smooth' });
+  }
+  useEffect(() => {
+    updateScrollState();
+    const el = navRailRef.current;
+    if (!el) return;
+    const onScroll = () => updateScrollState();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => { el.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+  }, [workspace]);
 
   async function signOut() {
     setSigningOut(true);
@@ -117,17 +144,29 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           <span className="brandText">{brandName ? `${brandName} · ${brandProduct}` : publicProductName}</span>
         </Link>
 
-        <nav className="navRail" aria-label="Primary navigation">
-          {visibleNav.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className={pathname === href ? 'navLink active' : 'navLink'}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+        <div className="navRailWrap">
+          {canScrollLeft && (
+            <button type="button" className="navScrollBtn navScrollBtnLeft" aria-label="Scroll navigation left" onClick={() => scrollNav(-1)}>
+              ‹
+            </button>
+          )}
+          <nav className="navRail" aria-label="Primary navigation" ref={navRailRef}>
+            {visibleNav.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={pathname === href ? 'navLink active' : 'navLink'}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+          {canScrollRight && (
+            <button type="button" className="navScrollBtn navScrollBtnRight" aria-label="Scroll navigation right" onClick={() => scrollNav(1)}>
+              ›
+            </button>
+          )}
+        </div>
 
         <div className="themeSwitch" role="group" aria-label="Color theme">
           <button
@@ -210,6 +249,28 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           letter-spacing: .02em;
           white-space: nowrap;
         }
+        .navRailWrap {
+          flex: 1 1 auto;
+          min-width: 0;
+          position: relative;
+          display: flex;
+          align-items: stretch;
+        }
+        .navScrollBtn {
+          flex: 0 0 auto;
+          z-index: 2;
+          width: 22px;
+          display: grid;
+          place-items: center;
+          border: none;
+          background: linear-gradient(90deg, rgba(1,5,13,.98), rgba(1,5,13,.7));
+          color: #E2CEA2;
+          font-size: 1.1rem;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .navScrollBtnRight { background: linear-gradient(270deg, rgba(1,5,13,.98), rgba(1,5,13,.7)); }
+        .navScrollBtn:hover { color: #F5F7FA; }
         .navRail {
           flex: 1 1 auto;
           min-width: 0;
