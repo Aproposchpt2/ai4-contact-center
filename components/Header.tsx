@@ -215,7 +215,7 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           align-items: center;
           gap: 1rem;
           overflow: hidden;
-          background: rgba(1,5,13,.965);
+          background: rgba(5,5,5,.965);
           backdrop-filter: blur(14px);
           border-bottom: 1px solid rgba(200,169,107,.14);
           box-shadow: 0 12px 36px rgba(0,0,0,.22);
@@ -231,7 +231,7 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           width: 30px;
           height: 30px;
           border-radius: 6px;
-          background: linear-gradient(145deg,#07142F,#030A18);
+          background: linear-gradient(145deg,#171717,#080808);
           border: 1px solid rgba(200,169,107,.58);
           display: grid;
           place-items: center;
@@ -242,7 +242,7 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           box-shadow: inset 0 0 0 1px rgba(255,255,255,.025),0 8px 24px rgba(0,0,0,.28);
         }
         .brandText {
-          font-family: Georgia, "Times New Roman", serif;
+          font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
           font-size: .86rem;
           font-weight: 400;
           color: #F5F7FA;
@@ -263,13 +263,13 @@ export default function Header({ publicProductName = 'Intelligent Customer Engag
           display: grid;
           place-items: center;
           border: none;
-          background: linear-gradient(90deg, rgba(1,5,13,.98), rgba(1,5,13,.7));
+          background: linear-gradient(90deg, rgba(5,5,5,.98), rgba(5,5,5,.7));
           color: #E2CEA2;
           font-size: 1.1rem;
           line-height: 1;
           cursor: pointer;
         }
-        .navScrollBtnRight { background: linear-gradient(270deg, rgba(1,5,13,.98), rgba(1,5,13,.7)); }
+        .navScrollBtnRight { background: linear-gradient(270deg, rgba(5,5,5,.98), rgba(5,5,5,.7)); }
         .navScrollBtn:hover { color: #F5F7FA; }
         .navRail {
           flex: 1 1 auto;
