@@ -146,6 +146,7 @@ export default function HomePage() {
         <div className="industryGrid">{OPERATIONS_CAPABILITIES.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
         <div className="capGrid">
           {PLATFORM_PAGES.map(p => <Link href={p.href} className="capCard" key={p.href}><small>{p.eyebrow}</small><h3>{p.title}</h3><p>{p.body}</p><span>Explore →</span></Link>)}
+          <Link href="/platform" className="buyerCta">Explore the Complete StellarUC Platform →</Link>
         </div>
       </section>
 
