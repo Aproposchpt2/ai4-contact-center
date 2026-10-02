@@ -198,7 +198,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>MAKE THE ECONOMICS PERSONAL</small>
           <h2 id="estimate-title">How many additional jobs would cover your StellarUC service?</h2>
-          <p>Using an example monthly service cost of $1,095 — $495 platform access plus 1,200 completed voice minutes at $0.50 per minute — the break-even point depends on the gross profit your business earns from an additional completed job.</p>
+          <p>Using an example monthly service cost of $1,095, the break-even point depends on the gross profit your business earns from an additional completed job.</p>
         </div>
         <div className="roiTable" role="table" aria-label="Additional jobs needed to cover example StellarUC monthly service cost">
           <div className="roiRow roiHead" role="row"><span role="columnheader">Gross profit per additional job</span><span role="columnheader">Additional jobs to cover $1,095</span></div>
@@ -212,7 +212,7 @@ export default function HomePage() {
         <div className="sectionHead">
           <small>USAGE-BASED PRICING FROM APROPOS.</small>
           <h2 id="pricing-title">TRUST STARTS WITH THE PRICE.</h2>
-          <p className="pricingPrinciple">$495/MONTH PLATFORM ACCESS · $0.50 PER COMPLETED VOICE MINUTE</p>
+          <p className="pricingPrinciple">ONLY PAY FOR YOUR MONTHLY USAGE</p>
           <p>Keep an intelligent sales presence available around the clock. Understand the expected cost before service begins, with a monthly bill based on actual service usage.</p>
         </div>
         <div className="industryGrid">{PRICING_STEPS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
