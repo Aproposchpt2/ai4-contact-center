@@ -124,10 +124,11 @@ export default function HomePage() {
         <h1 id="hero-platform">{PLATFORM_NAME.toUpperCase()}</h1>
         <h2 className="heroService">{SERVICE_NAME.toUpperCase()}</h2>
         <p id="sales-headline" className="salesHeadline">WHEN YOUR BUSINESS CLOSES,<br /><span>YOUR SALES OPERATION REMAINS OPEN 24/7.</span></p>
-        <p className="heroLead">An Intelligent Sales Agent configured for your business engages prospects, understands their needs, answers approved questions, and qualifies the next step 24/7.</p>
-        <p className="heroKicker">24/7 SALES AVAILABILITY · USAGE-BASED PRICING</p>
+        <p className="heroLead">An around-the-clock Sales Service System that engages inbound opportunities, supports concurrent conversations, qualifies prospects, and keeps your sales operation available when your team cannot be.</p>
+        <p className="heroKicker">EVERY CALL ANSWERED · MULTIPLE CALLS AT ONCE · AROUND-THE-CLOCK SALES COVERAGE</p>
         <div className="ctaRow">
-          <Link href="/demo" className="buyerCta">See How It Works →</Link>
+          <Link href="/demo" className="buyerCta">Experience the Demo — Talk to StellarUC →</Link>
+          <a href="#business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
           <a href={PHONE_TEL} className="callCta">
             <span className="callLabel">Call the live demo line</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
@@ -192,11 +193,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section id="business-estimate" className="pricing industries" aria-labelledby="estimate-title">
+        <div className="sectionHead">
+          <small>MAKE THE ECONOMICS PERSONAL</small>
+          <h2 id="estimate-title">How many additional jobs would cover your StellarUC service?</h2>
+          <p>Using an example monthly service cost of $1,095 — $495 platform access plus 1,200 completed voice minutes at $0.50 per minute — the break-even point depends on the gross profit your business earns from an additional completed job.</p>
+        </div>
+        <div className="roiTable" role="table" aria-label="Additional jobs needed to cover example StellarUC monthly service cost">
+          <div className="roiRow roiHead" role="row"><span role="columnheader">Gross profit per additional job</span><span role="columnheader">Additional jobs to cover $1,095</span></div>
+          {[['$250','5 jobs'],['$350','4 jobs'],['$500','3 jobs'],['$750','2 jobs'],['$1,000','2 jobs'],['$1,500','1 job'],['$2,500','1 job']].map(([profit,jobs]) => <div className="roiRow" role="row" key={profit}><span role="cell">{profit}</span><strong role="cell">{jobs}</strong></div>)}
+        </div>
+        <p className="estimateNote">This is break-even mathematics, not a guarantee of additional jobs, revenue, or savings. Your estimate depends on your actual usage and business economics.</p>
+        <Link href="/demo" className="buyerCta">Experience the Demo — Talk to StellarUC →</Link>
+      </section>
+
       <section id="pricing" className="pricing industries" aria-labelledby="pricing-title">
         <div className="sectionHead">
           <small>USAGE-BASED PRICING FROM APROPOS.</small>
           <h2 id="pricing-title">TRUST STARTS WITH THE PRICE.</h2>
-          <p className="pricingPrinciple">YOU ONLY PAY FOR THE SERVICE WE PROVIDE.</p>
+          <p className="pricingPrinciple">$495/MONTH PLATFORM ACCESS · $0.50 PER COMPLETED VOICE MINUTE</p>
           <p>Keep an intelligent sales presence available around the clock. Understand the expected cost before service begins, with a monthly bill based on actual service usage.</p>
         </div>
         <div className="industryGrid">{PRICING_STEPS.map(item => <div className="industryCard" key={item.title}><h3>{item.title}</h3><p>{item.body}</p></div>)}</div>
@@ -206,7 +221,7 @@ export default function HomePage() {
           <li>No long-term locked-in contracts.</li>
         </ul>
         <p className="pricingClose">TRANSPARENCY BEFORE SERVICE BEGINS. <strong>TRUST FROM DAY ONE.</strong></p>
-        <Link href="/demo" className="buyerCta">Explore 24/7 Sales →</Link>
+        <a href="#business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
       </section>
 
       <section id="staff-workspace" className="industries" aria-labelledby="workspace-title">
@@ -316,6 +331,11 @@ export default function HomePage() {
       .flowGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;margin-top:2rem}.flowItem{background:var(--theme-surface);border-top:3px solid var(--theme-accent);padding:1.25rem;min-width:0}.flowItem span{display:block;color:var(--theme-accent);font-size:.7rem;margin-bottom:.65rem}.flowItem h3{font-size:1.35rem;line-height:1.3;margin:0}.flowItem p{font-size:.9rem;margin-bottom:0}
       .lifecycleGrid{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;padding:0;margin:2rem 0 0}
       .pricing{border-top:2px solid var(--theme-accent);border-bottom:2px solid var(--theme-accent)}
+      .roiTable{max-width:860px;margin:2rem 0;border-top:1px solid var(--theme-border);border-bottom:1px solid var(--theme-border)}
+      .roiRow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--theme-border-soft);align-items:center}
+      .roiRow:last-child{border-bottom:0}.roiRow strong{color:var(--theme-accent-light);font-family:var(--theme-display);font-size:1.2rem}
+      .roiHead{color:var(--theme-accent);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+      .estimateNote{max-width:860px;color:var(--theme-secondary);line-height:1.7;margin:1rem 0 1.5rem}
       .sectionHead .pricingPrinciple{color:var(--theme-accent-light);font-size:1.25rem;font-weight:700;line-height:1.6}
       .pricingPromises{list-style:none;padding:0;margin:2rem 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.5rem;color:var(--theme-accent-light);font-size:1.05rem;font-weight:700;line-height:1.65}.pricingPromises li{padding:.85rem 0;border-top:1px solid var(--theme-border)}
       .pricingClose{line-height:1.7;color:var(--theme-secondary);margin:1.5rem 0}.pricingClose strong{color:var(--theme-accent-light)}
