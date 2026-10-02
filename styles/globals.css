@@ -2,12 +2,12 @@
 html { scroll-behavior: smooth; color-scheme: dark; }
 
 :root {
-  --apropos-black: #01050D;
-  --apropos-midnight: #030A18;
-  --apropos-navy: #07142F;
-  --apropos-panel: #0A1933;
-  --apropos-panel-elevated: #102544;
-  --apropos-sapphire: #173F91;
+  --apropos-black: #050505;
+  --apropos-midnight: #0A0A0A;
+  --apropos-navy: #101010;
+  --apropos-panel: #111111;
+  --apropos-panel-elevated: #181818;
+  --apropos-sapphire: #242424;
   --apropos-platinum: #F5F7FA;
   --apropos-text: #F5F7FA;
   --apropos-secondary: #B9C3D2;
@@ -23,14 +23,15 @@ html { scroll-behavior: smooth; color-scheme: dark; }
 body {
   background: var(--apropos-black);
   color: var(--apropos-text);
-  font-family: Arial, sans-serif !important;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: .005em;
 }
 
 h1, h2, h3, .mc-title {
-  font-family: Georgia, 'Times New Roman', serif !important;
-  font-weight: 400;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif !important;
+  font-weight: 500;
   color: var(--apropos-platinum);
 }
 
@@ -45,8 +46,8 @@ button,
 input,
 select,
 textarea {
-  font-family: Arial, sans-serif;
-  border-radius: 6px;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  border-radius: 4px;
 }
 
 input,
@@ -69,15 +70,15 @@ textarea:focus {
 .mc-shell {
   min-height: 100vh;
   background:
-    radial-gradient(900px 520px at 84% -8%, rgba(23,63,145,.14), transparent 62%),
+    radial-gradient(900px 520px at 84% -8%, rgba(200,169,107,.14), transparent 62%),
     linear-gradient(180deg, var(--apropos-black) 0%, var(--apropos-midnight) 48%, var(--apropos-black) 100%);
 }
 
 body .page {
   background:
-    radial-gradient(900px 560px at 82% 4%, rgba(23,63,145,.14), transparent 64%),
+    radial-gradient(900px 560px at 82% 4%, rgba(200,169,107,.14), transparent 64%),
     radial-gradient(700px 440px at 14% 30%, rgba(200,169,107,.045), transparent 68%),
-    linear-gradient(180deg, #01050D 0%, #030A18 44%, #01050D 100%) !important;
+    linear-gradient(180deg, #050505 0%, #0A0A0A 44%, #050505 100%) !important;
   color: var(--apropos-platinum) !important;
 }
 
@@ -119,7 +120,7 @@ body .siteHeader {
 }
 
 body .brandMark {
-  background: linear-gradient(145deg,#07142F,#030A18) !important;
+  background: linear-gradient(145deg,#111111,#0A0A0A) !important;
   color: var(--apropos-gold-light) !important;
   border: 1px solid rgba(200,169,107,.58) !important;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 8px 24px rgba(0,0,0,.28) !important;
@@ -157,7 +158,7 @@ body .hero::before {
   right: 0;
   top: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(23,63,145,.18), rgba(23,63,145,.04) 46%, transparent 70%);
+  background: radial-gradient(circle, rgba(200,169,107,.18), rgba(200,169,107,.04) 46%, transparent 70%);
   filter: blur(12px);
   pointer-events: none;
   opacity: .7;
@@ -238,7 +239,7 @@ body .compareRow { border-bottom-color: rgba(255,255,255,.07) !important; }
 body .compareRow span { color: #9EABBE !important; }
 body .compareRow span:first-child { color: #D5DBE4 !important; }
 body .compareRow .hi {
-  background: linear-gradient(90deg, rgba(200,169,107,.08), rgba(23,63,145,.09)) !important;
+  background: linear-gradient(90deg, rgba(200,169,107,.08), rgba(200,169,107,.09)) !important;
   color: var(--apropos-gold-light) !important;
 }
 body .compareHead { background: rgba(255,255,255,.018) !important; }
@@ -248,7 +249,7 @@ body .compareNote { color: #748196 !important; }
 body .proofRow { border-bottom-color: rgba(255,255,255,.07) !important; }
 body .proofRow span { color: #8490A3 !important; }
 body .proofRow.result {
-  background: linear-gradient(90deg, rgba(200,169,107,.075), rgba(23,63,145,.08)) !important;
+  background: linear-gradient(90deg, rgba(200,169,107,.075), rgba(200,169,107,.08)) !important;
 }
 body .proofRow.result b { color: var(--apropos-gold-light) !important; }
 body .checkList li { color: #D5DBE4 !important; }
@@ -301,7 +302,7 @@ body .drawerBackdrop {
   -webkit-backdrop-filter: blur(2px) !important;
 }
 body .demoDrawer {
-  background: linear-gradient(180deg,#030A18,#01050D) !important;
+  background: linear-gradient(180deg,#0A0A0A,#050505) !important;
   color: var(--apropos-text) !important;
   border-left-color: rgba(200,169,107,.26) !important;
   box-shadow: -28px 0 90px rgba(0,0,0,.62) !important;
