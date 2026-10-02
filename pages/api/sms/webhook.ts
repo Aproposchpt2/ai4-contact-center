@@ -14,6 +14,11 @@ import { normalizePhone } from '../intake/webhook';
 // this must be replaced with a real lookup of `To` against an owned-number table.
 const TENANT_ID = '5885a020-d363-4c27-910a-c035eda132f5';
 
+// Same fallback actor as ../intake/webhook.ts's LEGACY_ACTOR_USER_ID -- must be an active
+// tenant_users member of TENANT_ID. Override per environment with AI4CC_INTAKE_FALLBACK_ACTOR_ID
+// rather than editing this default.
+const ACTOR_USER_ID = process.env.AI4CC_INTAKE_FALLBACK_ACTOR_ID || '735fc481-1b75-4cf3-9f68-128e9e169fdc';
+
 const EMPTY_TWIML = '<?xml version="1.0" encoding="UTF-8"?><Response></Response>';
 
 function admin() {
@@ -75,57 +80,90 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const db = admin();
+    const now = new Date().toISOString();
 
     // Idempotent on (tenant_id, channel, external_id): Twilio retries on a slow/odd response.
-    const { error: interactionError } = await db.from('ai4cc_interactions').upsert(
+    // status must be 'completed' -- ai4cc_create_lead_from_interaction below requires it.
+    const { error: upsertError } = await db.from('ai4cc_interactions').upsert(
       {
         tenant_id: TENANT_ID,
         channel: 'sms',
         direction: 'inbound',
         external_id: messageSid,
         customer_identifier: phone,
-        status: 'open',
+        status: 'completed',
+        started_at: now,
+        ended_at: now,
         metadata: { source: 'twilio_sms', to, body: text },
       },
       { onConflict: 'tenant_id,channel,external_id', ignoreDuplicates: true },
     );
-    if (interactionError) throw interactionError;
+    if (upsertError) throw upsertError;
 
-    // Upsert-by-phone so a returning texter is recognized the same way a returning
-    // caller already is (see knownCallerName in ../intake/webhook.ts).
-    const { data: existingContact, error: lookupError } = await db
-      .from('ai4cc_contacts')
-      .select('id, metadata')
+    const { data: interaction, error: fetchError } = await db
+      .from('ai4cc_interactions')
+      .select('id')
       .eq('tenant_id', TENANT_ID)
-      .eq('phone', phone)
-      // phone is not unique at the DB level and this tenant already has duplicate rows from
-      // earlier systems; take the most recently touched one, same pattern as knownCallerName
-      // in ../intake/webhook.ts. .maybeSingle() without this limit throws PGRST116 whenever
-      // more than one row matches.
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (lookupError) throw lookupError;
+      .eq('channel', 'sms')
+      .eq('external_id', messageSid)
+      .single();
+    if (fetchError) throw fetchError;
 
-    if (existingContact) {
-      const { error: updateError } = await db
-        .from('ai4cc_contacts')
-        .update({
-          updated_at: new Date().toISOString(),
-          metadata: { ...(existingContact.metadata as object ?? {}), last_sms_body: text, last_sms_at: new Date().toISOString() },
-        })
-        .eq('id', existingContact.id);
-      if (updateError) throw updateError;
-    } else {
-      const { error: insertError } = await db.from('ai4cc_contacts').insert({
-        tenant_id: TENANT_ID,
-        display_name: phone,
-        phone,
-        lead_source: 'sms',
-        sms_consent: true,
-        metadata: { source: 'twilio_sms', last_sms_body: text, last_sms_at: new Date().toISOString() },
+    // Idempotent on the interaction, not just the upsert above: a Twilio retry after a slow
+    // (but successful) first response would otherwise create a second lead for the same text.
+    const { data: existingLead, error: leadLookupError } = await db
+      .from('ai4cc_leads')
+      .select('id')
+      .eq('tenant_id', TENANT_ID)
+      .eq('originating_interaction_id', interaction.id)
+      .maybeSingle();
+    if (leadLookupError) throw leadLookupError;
+
+    if (!existingLead) {
+      // Creates (or reuses, by phone) the contact and always creates a fresh lead -- same
+      // shape as every voice call via ai4cc_submit_voice_intake. A back-and-forth texter
+      // getting one lead per message matches that existing convention rather than inventing
+      // a different one here.
+      const { data: created, error: rpcError } = await db.rpc('ai4cc_create_lead_from_interaction', {
+        p_tenant_id: TENANT_ID,
+        p_actor_user_id: ACTOR_USER_ID,
+        p_interaction_id: interaction.id,
+        p_identifier_type: 'phone',
+        p_identifier_value: phone,
+        p_email: null,
+        p_phone: phone,
+        p_contact_name: null,
+        p_company_name: null,
+        p_title: null,
+        p_service_interest: null,
+        p_description: text || 'Inbound text with no message body.',
+        p_pipeline_stage: 'new',
+        p_priority: 'normal',
+        p_score: 50,
+        p_estimated_value: 0,
+        p_probability: 0,
+        p_next_action: 'Review inbound text and reply.',
+        p_next_follow_up: null,
       });
-      if (insertError) throw insertError;
+      if (rpcError) throw rpcError;
+
+      // The RPC's own activity row records "Lead created", not the message itself. Record the
+      // actual text as a second activity so it renders in the Customer 360 Activity Timeline,
+      // which reads activity.body -- ai4cc_interactions.metadata.body is never surfaced there.
+      const leadId = (created as { lead?: { id?: string } } | null)?.lead?.id;
+      if (leadId) {
+        const { error: activityError } = await db.rpc('ai4cc_record_lead_activity', {
+          p_tenant_id: TENANT_ID,
+          p_actor_user_id: ACTOR_USER_ID,
+          p_lead_id: leadId,
+          p_activity_type: 'sms',
+          p_direction: 'inbound',
+          p_subject: 'Inbound SMS',
+          p_body: text || null,
+          p_outcome: null,
+        });
+        if (activityError) throw activityError;
+      }
     }
 
     res.setHeader('Content-Type', 'text/xml');
