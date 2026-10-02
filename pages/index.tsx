@@ -128,7 +128,7 @@ export default function HomePage() {
         <p className="heroKicker">EVERY CALL ANSWERED · MULTIPLE CALLS AT ONCE · AROUND-THE-CLOCK SALES COVERAGE</p>
         <div className="ctaRow">
           <Link href="/demo" className="buyerCta">Experience the Demo — Talk to StellarUC →</Link>
-          <a href="#business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
+          <a href="/business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
           <a href={PHONE_TEL} className="callCta">
             <span className="callLabel">Call the live demo line</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
@@ -204,7 +204,7 @@ export default function HomePage() {
           {[['$250','5 jobs'],['$350','4 jobs'],['$500','3 jobs'],['$750','2 jobs'],['$1,000','2 jobs'],['$1,500','1 job'],['$2,500','1 job']].map(([profit,jobs]) => <div className="roiRow" role="row" key={profit}><span role="cell">{profit}</span><strong role="cell">{jobs}</strong></div>)}
         </div>
         <p className="estimateNote">This is break-even mathematics, not a guarantee of additional jobs, revenue, or savings. Your estimate depends on your actual usage and business economics.</p>
-        <Link href="/demo" className="buyerCta">Experience the Demo — Talk to StellarUC →</Link>
+        <Link href="/business-estimate" className="buyerCta">Calculate Your Business Estimate →</Link>
       </section>
 
       <section id="pricing" className="pricing industries" aria-labelledby="pricing-title">
@@ -221,7 +221,7 @@ export default function HomePage() {
           <li>No long-term locked-in contracts.</li>
         </ul>
         <p className="pricingClose">TRANSPARENCY BEFORE SERVICE BEGINS. <strong>TRUST FROM DAY ONE.</strong></p>
-        <a href="#business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
+        <a href="/business-estimate" className="buyerCta">Calculate Your Business Estimate →</a>
       </section>
 
       <section id="staff-workspace" className="industries" aria-labelledby="workspace-title">
