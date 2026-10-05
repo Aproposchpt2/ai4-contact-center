@@ -25,7 +25,7 @@ export default function BusinessEstimatePage(){
   },[calls,minutes,profit]);
   function calculate(e:FormEvent){e.preventDefault();setSubmitted(true);}
   return <>
-    <Head><title>Calculate Your Business Estimate | StellarUC</title><meta name="description" content="Estimate monthly StellarUC service cost and the number of additional completed jobs that could cover the estimate."/></Head>
+    <Head></Head>
     <Header publicProductName="Sales Service System"/>
     <main className="estimatePage">
       <section className="estimateHero">

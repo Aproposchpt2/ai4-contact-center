@@ -75,8 +75,8 @@ const SECTIONS: Section[] = [
 export default function AcquisitionPage() {
   return <>
     <Head>
-      <title>Buyer Walkthrough — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="A self-guided walkthrough of the Intelligent Customer Engagement Operation Center for prospective buyers and white-label partners — architecture, live product surfaces, and the proven Conversational Agent." />
+      
+      
       <meta name="robots" content="noindex" />
     </Head>
     <Header />

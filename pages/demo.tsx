@@ -52,8 +52,8 @@ export default function DemoPage() {
 
   return <>
     <Head>
-      <title>Live Demo — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="Call (725) 330-5102, talk to the Intelligent Customer Engagement Operation Center, then watch the call become a real lead in the live CRM." />
+      
+      
     </Head>
     <Header />
     <main className="page">

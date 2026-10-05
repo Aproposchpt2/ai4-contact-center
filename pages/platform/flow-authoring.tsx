@@ -33,8 +33,8 @@ const ITEMS = [
 export default function FlowAuthoringPage() {
   return <>
     <Head>
-      <title>Flow Authoring — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="How the Intelligent Customer Engagement Operation Center lets you build, simulate and version call flows without writing code — Script Builder, Visual Flow Designer, and full versioning." />
+      
+      
     </Head>
     <Header />
     <main className="page">
