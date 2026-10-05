@@ -1,6 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import SearchMetadata from '@/components/SearchMetadata';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import '../styles/globals.css';
 import '../styles/apropos-theme.css';
 import '../styles/apropos-light-refinement.css';
@@ -17,6 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <Component {...pageProps} />
       <SearchMetadata />
+      <GoogleAnalytics />
     </>
   );
 }
