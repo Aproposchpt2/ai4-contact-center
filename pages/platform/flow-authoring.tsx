@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -32,10 +31,7 @@ const ITEMS = [
 
 export default function FlowAuthoringPage() {
   return <>
-    <Head>
-      <title>Flow Authoring — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="How the Intelligent Customer Engagement Operation Center lets you build, simulate and version call flows without writing code — Script Builder, Visual Flow Designer, and full versioning." />
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="intro">
@@ -80,3 +76,4 @@ export default function FlowAuthoringPage() {
     `}</style>
   </>;
 }
+

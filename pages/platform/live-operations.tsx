@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -31,10 +30,7 @@ const ITEMS = [
 
 export default function LiveOperationsPage() {
   return <>
-    <Head>
-      <title>Live Operations — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="How the Intelligent Customer Engagement Operation Center turns real conversations into a working commercial pipeline — Agent Workspace, Lead Management, and Customer 360." />
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="intro">
@@ -79,3 +75,4 @@ export default function LiveOperationsPage() {
     `}</style>
   </>;
 }
+

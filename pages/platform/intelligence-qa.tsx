@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -29,10 +28,7 @@ const ITEMS = [
 
 export default function IntelligenceQaPage() {
   return <>
-    <Head>
-      <title>Intelligence & QA — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="How the Intelligent Customer Engagement Operation Center turns every call into data — analytics, transcript intelligence, QA scoring, agent coaching, and intent-based routing." />
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="intro">
@@ -77,3 +73,4 @@ export default function IntelligenceQaPage() {
     `}</style>
   </>;
 }
+

@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -14,10 +13,7 @@ const WHY = [
 
 export default function PartnersPage() {
   return <>
-    <Head>
-      <title>Intelligent Customer Engagement Operation Center — For BPOs, MSPs &amp; Agencies</title>
-      <meta name="description" content="Before you sign with another contact-center vendor, call this number. A live AI agent answers, runs a real intake, and creates a lead automatically — see it work in two minutes." />
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="hero">
@@ -107,3 +103,4 @@ export default function PartnersPage() {
     `}</style>
   </>;
 }
+

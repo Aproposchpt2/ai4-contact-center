@@ -1,0 +1,18 @@
+# StellarUC — Sales Service System
+> Around-the-clock inbound sales engagement, supported by the Customer Engagement Operations Center.
+Operated by Apropos Group LLC d/b/a Stellar Unified Communications.
+The Sales Service System answers approved questions, captures prospect information and supports qualification. Lead Management, Customer 360, activities and tasks give authorized staff the context for human follow-up.
+Customers pay for platform access and actual monthly usage. The calculator is an estimate, not a quote or a guarantee of sales results. Retaining an existing phone number depends on technical compatibility.
+## Public pages
+- [24/7 Sales Service System & CRM | StellarUC](https://stellaruc.com/): Keep sales open 24/7 with intelligent call engagement, lead management, Customer 360 and human follow-up. Estimate your usage-based service cost.
+- [Sales Platform, Lead Management & Customer 360 | StellarUC](https://stellaruc.com/platform): Explore StellarUC voice, SMS, web chat, lead management, Customer 360, agent workspaces, analytics and governed sales workflows.
+- [Live Sales Service Demo | StellarUC](https://stellaruc.com/demo): Call the StellarUC live demo to experience intelligent sales intake and see how a conversation becomes a lead with customer context and follow-up.
+- [Usage-Based Pricing Cost Calculator | StellarUC](https://stellaruc.com/business-estimate): Estimate StellarUC platform and voice usage costs using your inbound call volume and average call length. Review the business break-even estimate.
+- [Sales Engagement Platform for BPOs, MSPs & Agencies | StellarUC](https://stellaruc.com/partners): Explore the StellarUC platform for BPOs, MSPs and agencies: multichannel engagement, lead management, Customer 360 and a live intake demonstration.
+- [Customer Engagement Platform Overview | StellarUC](https://stellaruc.com/acquisition): Review StellarUC customer engagement, voice, SMS, web chat, lead workflows, Customer 360 and platform operations.
+- [Flow Design & Automation | StellarUC](https://stellaruc.com/platform/flow-authoring): Explore flow design & automation in the StellarUC Customer Engagement Operations Center and connected sales platform.
+- [Governance & Tenant Controls | StellarUC](https://stellaruc.com/platform/governance-platform): Explore governance & tenant controls in the StellarUC Customer Engagement Operations Center and connected sales platform.
+- [Conversation Analytics & Quality | StellarUC](https://stellaruc.com/platform/intelligence-qa): Explore conversation analytics & quality in the StellarUC Customer Engagement Operations Center and connected sales platform.
+- [Live Sales Operations & Customer 360 | StellarUC](https://stellaruc.com/platform/live-operations): Explore live sales operations & customer 360 in the StellarUC Customer Engagement Operations Center and connected sales platform.
+## Boundaries
+Operational dashboards, workspaces, customer records and API endpoints are not public marketing references. Published feature descriptions do not establish regulatory certification.

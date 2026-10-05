@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -28,10 +27,7 @@ const ITEMS = [
 
 export default function GovernancePlatformPage() {
   return <>
-    <Head>
-      <title>Governance & Platform — Intelligent Customer Engagement Operation Center</title>
-      <meta name="description" content="The shared foundation under the Intelligent Customer Engagement Operation Center — multi-tenant RBAC, compliance automation, flow governance, and platform services." />
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="intro">
@@ -76,3 +72,4 @@ export default function GovernancePlatformPage() {
     `}</style>
   </>;
 }
+
