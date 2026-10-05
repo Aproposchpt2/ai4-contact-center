@@ -1,11 +1,10 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 const PHONE_DISPLAY='(725) 330-5102', PHONE_TEL='tel:+17253305102';
 const SERVICE_NAME='Sales Service System', PLATFORM_NAME='Customer Engagement Operations Center';
 export default function HomePage(){return <>
-<Head></Head>
+
 <Header publicProductName={SERVICE_NAME}/>
 <main className="home">
 <section className="hero"><h1>{PLATFORM_NAME.toUpperCase()}</h1><h2>{SERVICE_NAME.toUpperCase()}</h2><p className="headline">WHEN YOUR BUSINESS CLOSES,<br/><em>YOUR SALES OPERATION REMAINS OPEN 24/7.</em></p><p className="lead">An around-the-clock Sales Service System that engages inbound opportunities, supports concurrent conversations, qualifies prospects, and keeps your sales operation available when your team cannot be.</p><p className="kicker">EVERY CALL ANSWERED · MULTIPLE CALLS AT ONCE · AROUND-THE-CLOCK SALES COVERAGE</p></section>

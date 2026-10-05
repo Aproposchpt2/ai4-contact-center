@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
 import Header from '@/components/Header';
@@ -25,7 +24,7 @@ export default function BusinessEstimatePage(){
   },[calls,minutes,profit]);
   function calculate(e:FormEvent){e.preventDefault();setSubmitted(true);}
   return <>
-    <Head></Head>
+    
     <Header publicProductName="Sales Service System"/>
     <main className="estimatePage">
       <section className="estimateHero">
@@ -65,3 +64,4 @@ export default function BusinessEstimatePage(){
     `}</style>
   </>;
 }
+

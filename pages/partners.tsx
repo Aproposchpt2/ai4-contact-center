@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -14,10 +13,7 @@ const WHY = [
 
 export default function PartnersPage() {
   return <>
-    <Head>
-      
-      
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="hero">
@@ -107,3 +103,4 @@ export default function PartnersPage() {
     `}</style>
   </>;
 }
+

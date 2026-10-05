@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import Header from '@/components/Header';
@@ -51,10 +50,7 @@ export default function DemoPage() {
   }, []);
 
   return <>
-    <Head>
-      
-      
-    </Head>
+    
     <Header />
     <main className="page">
       <section className="intro">
@@ -261,3 +257,4 @@ export default function DemoPage() {
     `}</style>
   </>;
 }
+

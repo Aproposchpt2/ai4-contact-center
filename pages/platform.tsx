@@ -1,4 +1,3 @@
-import Head from 'next/head';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -15,7 +14,7 @@ const groups=[
 
 export default function PlatformPage(){
  return <>
- <Head></Head>
+ 
  <Header publicProductName="Sales Service System"/>
  <main className="platform">
   <section className="hero"><small>ONE COMPLETE SALES PLATFORM</small><h1>The capabilities behind an always-open sales operation.</h1><p>StellarUC brings customer engagement, sales management, automation, routing, intelligence, governance and knowledge into one operating environment—without feature-tier fragmentation.</p><div className="actions"><Link href="/demo">EXPERIENCE THE DEMO →</Link><Link href="/business-estimate">CALCULATE YOUR BUSINESS ESTIMATE →</Link></div></section>
