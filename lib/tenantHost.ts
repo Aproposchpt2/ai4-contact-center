@@ -98,6 +98,8 @@ export function isAllowedOnAppHost(pathname: string): boolean {
 // Everything a public visitor could use must not exist on the operator console.
 export function isBlockedOnOperatorHost(pathname: string): boolean {
   return (
+    pathname === '/platform' ||
+    pathname === '/business-estimate' ||
     pathname === '/acquisition' ||
     pathname === '/partners' ||
     pathname === '/demo' ||
@@ -175,6 +177,8 @@ export function isUnentitledApiRoute(pathname: string): boolean {
 export function isBlockedOnTenantHost(pathname: string): boolean {
   if (isSharedStateRoute(pathname) || isUnentitledApiRoute(pathname)) return true;
   return (
+    pathname === '/platform' ||
+    pathname === '/business-estimate' ||
     pathname === '/acquisition' ||
     pathname === '/partners' ||
     pathname === '/demo' ||
