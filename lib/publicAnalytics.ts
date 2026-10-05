@@ -1,4 +1,4 @@
-type AnalyticsEvent = 'estimate_calculated' | 'demo_call_clicked' | 'demo_result_viewed';
+type AnalyticsEvent = 'estimate_calculated' | 'demo_call_clicked' | 'demo_result_viewed' | 'generate_lead';
 export function trackPublicEvent(name: AnalyticsEvent) {
   if (typeof window === 'undefined' || !['stellaruc.com', 'www.stellaruc.com'].includes(window.location.hostname)) return;
   try {

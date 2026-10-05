@@ -1,3 +1,4 @@
+import { trackPublicEvent } from '@/lib/publicAnalytics';
 import Head from 'next/head';
 import { useMemo, useState, type FormEvent } from 'react';
 import Header from '@/components/Header';
@@ -36,6 +37,7 @@ export default function IntakePage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || 'Something went wrong. Please try again.');
       setSubmitted(true);
+      if (data?.ok) trackPublicEvent('generate_lead');
     } catch (e) {
       setError((e as Error).message);
     } finally {
