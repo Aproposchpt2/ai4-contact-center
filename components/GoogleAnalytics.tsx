@@ -21,7 +21,16 @@ export default function GoogleAnalytics() {
       {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
+var campaign = new URLSearchParams(window.location.search);
+var sources = ['linkedin', 'google_business_profile', 'iss_outreach'];
+var media = ['social', 'organic', 'email'];
+var names = ['iss_sales', 'opportunity_services'];
+var attribution = {};
+if (sources.includes(campaign.get('utm_source'))) attribution.campaign_source = campaign.get('utm_source');
+if (media.includes(campaign.get('utm_medium'))) attribution.campaign_medium = campaign.get('utm_medium');
+if (names.includes(campaign.get('utm_campaign'))) attribution.campaign_name = campaign.get('utm_campaign');
 gtag('config', '${MEASUREMENT_ID}', {
+  ...attribution,
   page_location: window.location.origin + window.location.pathname
 });`}
     </Script>

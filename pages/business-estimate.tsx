@@ -1,3 +1,4 @@
+import { trackPublicEvent } from '@/lib/publicAnalytics';
 import Link from 'next/link';
 import { FormEvent, useMemo, useState } from 'react';
 import Header from '@/components/Header';
@@ -22,7 +23,7 @@ export default function BusinessEstimatePage(){
     const jobs=safeProfit>0?Math.ceil(monthly/safeProfit):null;
     return {voiceMinutes,voiceUsage,monthly,jobs};
   },[calls,minutes,profit]);
-  function calculate(e:FormEvent){e.preventDefault();setSubmitted(true);}
+  function calculate(e:FormEvent){e.preventDefault();setSubmitted(true);trackPublicEvent('estimate_calculated');}
   return <>
     
     <Header publicProductName="Sales Service System"/>

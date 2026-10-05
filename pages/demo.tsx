@@ -1,3 +1,4 @@
+import { trackPublicEvent } from '@/lib/publicAnalytics';
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 import Header from '@/components/Header';
@@ -33,6 +34,7 @@ export default function DemoPage() {
       const r = await fetch(`/api/public/latest-call?last4=${last4}`);
       const d = r.ok ? await r.json() : { call: null };
       setCall(d?.call ?? null);
+      if (d?.call && !call) trackPublicEvent('demo_result_viewed');
     } catch {
       setCall(null);
     } finally {
@@ -64,7 +66,7 @@ export default function DemoPage() {
         <div className="step">
           <span>01</span>
           <h2>Call the number</h2>
-          <a href={PHONE_TEL} className="callCta">
+          <a href={PHONE_TEL} onClick={() => trackPublicEvent('demo_call_clicked')} className="callCta">
             <span className="callLabel">Tap to call</span>
             <span className="callNumber">{PHONE_DISPLAY}</span>
           </a>
@@ -155,7 +157,7 @@ export default function DemoPage() {
           <span>Speak naturally, ask follow-up questions, change direction, challenge an answer, or call more than once using a different business scenario. The purpose of the demonstration is to experience how dynamically the AI Conversational Agent responds.</span>
         </div>
 
-        <a href={PHONE_TEL} className="drawerCallCta">
+        <a href={PHONE_TEL} onClick={() => trackPublicEvent('demo_call_clicked')} className="drawerCallCta">
           <span>CALL THE LIVE AGENT</span>
           <b>{PHONE_DISPLAY}</b>
         </a>
