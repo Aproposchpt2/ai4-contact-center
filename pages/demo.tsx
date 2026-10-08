@@ -13,11 +13,6 @@ type LiveCall = {
   leadStage: string | null; capturedAt: string;
 };
 
-const DOC_PAGES = [
-  { href: '/live/leads', title: 'Live Lead Management', body: 'The real pipeline your call just landed in — pipeline stage, priority, what you told the agent.' },
-  { href: '/live/contacts', title: 'Live Customer 360', body: 'The unified contact record the platform built from your call automatically.' },
-];
-
 export default function DemoPage() {
   const [call, setCall] = useState<LiveCall | null>(null);
   const [checked, setChecked] = useState(false);
@@ -115,19 +110,6 @@ export default function DemoPage() {
             <Link href="/intake" className="getStartedCta">Get Started →</Link>
           </div>
         )}
-      </section>
-
-      <section className="docPages">
-        <h2>See it inside the real platform</h2>
-        <div className="docGrid">
-          {DOC_PAGES.map(p => (
-            <Link href={p.href} className="docCard" key={p.href}>
-              <h3>{p.title}</h3>
-              <p>{p.body}</p>
-              <span>Open live view →</span>
-            </Link>
-          ))}
-        </div>
       </section>
 
       <section className="closing">
