@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function Footer({
   serviceName = 'Intelligent Customer Engagement Operation Center',
   serviceDescription = 'Intelligent customer engagement operations for modern business communications.',
@@ -28,19 +26,6 @@ export default function Footer({
           <p style={{ fontSize: '.72rem', color: '#7D899C', marginTop: '.5rem' }}>
             Apropos Group LLC d/b/a Stellar Unified Communications
           </p>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '.62rem', fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#C8A96B', marginBottom: '.8rem' }}>Product</div>
-          {[
-            { href: '/builder',   label: 'Script Builder' },
-            { href: '/templates', label: 'Templates'      },
-            { href: '/dashboard', label: 'Dashboard'      },
-          ].map(({ href, label }) => (
-            <div key={href} style={{ marginBottom: '.4rem' }}>
-              <Link href={href} style={{ fontSize: '.8rem', color: '#9CA8BA', textDecoration: 'none' }}>{label}</Link>
-            </div>
-          ))}
         </div>
 
         <div>
