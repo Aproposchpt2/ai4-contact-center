@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 const pages: Record<string, { title: string; description: string }> = {
   "/": {
     "title": "24/7 Sales Service System & CRM | StellarUC",
-    "description": "Keep sales open 24/7 with intelligent call engagement, lead management, Customer 360 and human follow-up. Estimate your usage-based service cost."
+    "description": "Keep sales open 24/7 with intelligent call engagement, lead management, Customer 360 and human follow-up. Request a personal consultation to discuss transparent usage-based pricing."
   },
   "/platform": {
     "title": "Sales Platform, Lead Management & Customer 360 | StellarUC",
@@ -13,10 +13,6 @@ const pages: Record<string, { title: string; description: string }> = {
   "/demo": {
     "title": "Live Sales Service Demo | StellarUC",
     "description": "Call the StellarUC live demo to experience intelligent sales intake and see how a conversation becomes a lead with customer context and follow-up."
-  },
-  "/business-estimate": {
-    "title": "Usage-Based Pricing Cost Calculator | StellarUC",
-    "description": "Estimate StellarUC platform and voice usage costs using your inbound call volume and average call length. Review the business break-even estimate."
   },
   "/partners": {
     "title": "Sales Engagement Platform for BPOs, MSPs & Agencies | StellarUC",
