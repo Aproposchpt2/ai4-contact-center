@@ -17,7 +17,7 @@ export default function PlatformPage(){
  
  <Header publicProductName="Sales Service System"/>
  <main className="platform">
-  <section className="hero"><small>ONE COMPLETE SALES PLATFORM</small><h1>The capabilities behind an always-open sales operation.</h1><p>StellarUC brings customer engagement, sales management, automation, routing, intelligence, governance and knowledge into one operating environment—without feature-tier fragmentation.</p><div className="actions"><Link href="/demo">EXPERIENCE THE DEMO →</Link><Link href="/business-estimate">CALCULATE YOUR BUSINESS ESTIMATE →</Link></div></section>
+  <section className="hero"><small>ONE COMPLETE SALES PLATFORM</small><h1>The capabilities behind an always-open sales operation.</h1><p>StellarUC brings customer engagement, sales management, automation, routing, intelligence, governance and knowledge into one operating environment—without feature-tier fragmentation.</p><div className="actions"><Link href="/demo">EXPERIENCE THE DEMO →</Link><Link href="/intake">REQUEST A PERSONAL CONSULTATION →</Link></div></section>
   <section className="grid">{groups.map(g=><article key={g.title}><span>STELLARUC</span><h2>{g.title}</h2><p>{g.copy}</p><ul>{g.items.map(i=><li key={i}>{i}</li>)}</ul></article>)}</section>
   <section className="close"><small>BUILT AROUND SALES</small><h2>Your business may close. Your sales operation doesn’t have to.</h2><p>StellarUC is designed to keep sales opportunities engaged around the clock, including periods of overflow, after-hours demand and simultaneous inbound conversations.</p><Link href="/demo">EXPERIENCE THE DEMO — TALK TO STELLARUC →</Link></section>
  </main><Footer/>
