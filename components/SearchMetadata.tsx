@@ -69,7 +69,11 @@ export default function SearchMetadata() {
     <meta property="og:title" content={page.title} key="og:title" />
     <meta property="og:description" content={page.description} key="og:description" />
     <meta property="og:url" content={url} key="og:url" />
-    <meta name="twitter:card" content="summary" key="twitter:card" />
+    <meta property="og:image" content={origin + '/images/hero-embedded.png'} key="og:image" />
+    <meta property="og:image:alt" content="StellarUC intelligent customer engagement" key="og:image:alt" />
+    <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
+    <meta name="twitter:image" content={origin + '/images/hero-embedded.png'} key="twitter:image" />
+    <meta name="twitter:image:alt" content="StellarUC intelligent customer engagement" key="twitter:image:alt" />
     <meta name="twitter:title" content={page.title} key="twitter:title" />
     <meta name="twitter:description" content={page.description} key="twitter:description" />
     <script type="application/ld+json" key="search-schema" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
