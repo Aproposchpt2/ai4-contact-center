@@ -58,7 +58,9 @@ export default function IntakePage() {
             <div className="success">
               <div className="eyebrow">THANK YOU</div>
               <h1>We&apos;ve received your information.</h1>
-              <p>We&apos;ll contact you to begin your Sales Service assessment.</p>
+              <p>Your Sales Service consultation request has been received. Select an available appointment time using our Google Calendar link.</p>
+              <a className="bookingLink" href="https://calendar.app.google/DNAMvEyWbg2jfxaN8" target="_blank" rel="noopener noreferrer">Schedule Your Google Meet Consultation →</a>
+              <p className="bookingNote">Your appointment is not confirmed until you complete the Google Calendar booking.</p>
             </div>
           ) : (
             <>
@@ -106,6 +108,8 @@ export default function IntakePage() {
         .success{text-align:center}
         .success h1{margin-top:12px}
         .success p{color:#9eb3c4;font-size:1rem;line-height:1.6}
+        .bookingLink{display:inline-block;margin-top:14px;padding:14px 18px;border-radius:10px;background:#69d8ff;color:#06111f;font-weight:900;text-decoration:none;text-align:center}
+        .bookingNote{font-size:.8rem!important;margin-top:14px}
       `}</style>
     </>
   );
