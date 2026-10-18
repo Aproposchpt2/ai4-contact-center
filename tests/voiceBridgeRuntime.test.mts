@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { EventEmitter } from 'node:events';
 const require = createRequire(import.meta.url);
 const source = readFileSync(new URL('../twilio-bridge/server.js', import.meta.url), 'utf8').replace(/start\(\);\s*$/, 'globalThis.handleCall = handleCall; globalThis.wsPool = wsPool;');
-async function session(profile, failSave = false, warm = false, staging = false) {
+async function session(profile, failSave = false, warm = false, staging = false, supportSave:any = null) {
   const outbound:any[] = [], requests:any[] = [], sockets:any[] = [], phoneOutbound:any[] = [];
   class Socket extends EventEmitter {
     static OPEN = 1; readyState = 1;
@@ -15,7 +15,7 @@ async function session(profile, failSave = false, warm = false, staging = false)
     close() { this.readyState=3; }
   }
   const timers:any[]=[];
-  const context:any = { require:(n:string)=>n==='express'?()=>({}):n==='ws'?{WebSocket:Socket,WebSocketServer:class{}}:require(n), console:{log(){},error(){}}, process:{env:{OPENAI_API_KEY:'mock',BRIDGE_HMAC_SECRET:'mock',NETLIFY_BASE_URL:'https://staging.invalid',RAILWAY_ENVIRONMENT_NAME:staging?'staging':'test'}}, Buffer, URL, AbortSignal, setTimeout:(fn:any,ms:number)=>{timers.push({fn,ms});return timers.length;},clearTimeout(){},setInterval:(fn:any,ms:number)=>{timers.push({fn,ms,interval:true});return timers.length;},clearInterval:(id:number)=>{if(timers[id-1])timers[id-1].cleared=true;},fetch:async(url:string,opts:any)=>{
+  const context:any = { require:(n:string)=>n==='./staging-support-intake.cjs'?{readiness:()=> 'STAGING_WRITES_DISABLED',submitStagingSupport:async()=>{if(supportSave)return supportSave();throw new Error('STAGING_WRITES_DISABLED');}}:n==='express'?()=>({}):n==='ws'?{WebSocket:Socket,WebSocketServer:class{}}:require(n), console:{log(){},error(){}}, process:{env:{OPENAI_API_KEY:'mock',BRIDGE_HMAC_SECRET:'mock',NETLIFY_BASE_URL:'https://staging.invalid',RAILWAY_ENVIRONMENT_NAME:staging?'staging':'test'}}, Buffer, URL, AbortSignal, setTimeout:(fn:any,ms:number)=>{timers.push({fn,ms});return timers.length;},clearTimeout(){},setInterval:(fn:any,ms:number)=>{timers.push({fn,ms,interval:true});return timers.length;},clearInterval:(id:number)=>{if(timers[id-1])timers[id-1].cleared=true;},fetch:async(url:string,opts:any)=>{
     const body=JSON.parse(opts.body); requests.push(body);
     return {ok:true,json:async()=>body.action==='start'?{interactionId:'fictional-interaction',transferAllowed:'yes',knownCallerName:'Test'}:failSave?{}:{lead:{id:'fictional-lead'}}};
   }};
@@ -26,7 +26,7 @@ async function session(profile, failSave = false, warm = false, staging = false)
   phone.emit('message',Buffer.from(JSON.stringify({event:'start',start:{streamSid:'TEST_STREAM'}})));
   const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();}; await flush();
   const ws=sockets[0];
-  const tool=async(id:string,name:string,args:any={},envelope=false)=>{const event={type:'response.function_call_arguments.done',call_id:id,name,arguments:JSON.stringify(args)};ws.emit('message',Buffer.from(JSON.stringify(envelope?{type:'response.event',event}:event)));await flush();};
+  const tool=async(id:string,name:string,args:any={},envelope=false)=>{const event=staging && profile==='support'?{type:'response.output_item.done',item:{type:'function_call',call_id:id,name,arguments:JSON.stringify(args)}}:{type:'response.function_call_arguments.done',call_id:id,name,arguments:JSON.stringify(args)};ws.emit('message',Buffer.from(JSON.stringify(envelope?{type:'response.event',event}:event)));await flush();};
   return {outbound,requests,phone,ws,tool,timers,phoneOutbound};
 }
 test('sales transport registers sales tools and initializes the interaction',async()=>{
@@ -72,7 +72,7 @@ test('silent caller gets seeded greeting context without starting backend work',
  assert.equal(s.outbound.filter(x=>x.type==='response.create').length,0);
  const start=s.outbound.find(x=>x.type==='session.start');
  assert.equal(start.session.input[0].role,'developer');
- assert.match(start.session.input[0].content[0].text,/Greet the caller now/);
+ assert.match(start.session.input[0].content[0].text,/immediately/);
  assert.equal(s.timers.filter(x=>x.interval).length,1);
  s.timers.find(x=>x.interval).fn();
  const input=s.outbound.filter(x=>x.type==='session.input_audio.append');
@@ -143,14 +143,124 @@ test('Railway staging blocks intake writes, notifications and external transfers
   assert.match(s.outbound.find(x=>x.item?.call_id==='transfer').item.output,/STAGING_TRANSFERS_DISABLED/);
  }
 });
-test('staging Support keeps the owner-approved model pair and exact conversational instructions',async()=>{
+test('staging Support adds the fixed opening while preserving the approved models and persona',async()=>{
  const s=await session('support',false,false,true);
  const start=s.outbound.find(x=>x.type==='session.start').session;
- const approved=readFileSync(new URL('../pages/api/experimental-support-voice-session.ts',import.meta.url),'utf8');
- const full=JSON.parse(approved.match(/const INSTRUCTIONS = ("[^\n]+")/)[1]);
- const brief=approved.match(/instructions: '([^\n]+)',/)[1];
+ const approved=JSON.parse(readFileSync(new URL('./fixtures/approved-support-persona.json',import.meta.url),'utf8'));
  assert.equal(start.model,'gpt-live-1');
  assert.equal(start.delegation.responses.model,'gpt-5.6-terra');
- assert.equal(start.instructions,brief);
- assert.equal(start.delegation.responses.instructions,full);
+ const greeting = 'Hello, you have reached Stellar Technologies Support Desk. Who do I have the pleasure of speaking with?';
+ const prefix = `At the start of this telephone call, say exactly: "${greeting}" Then pause and wait for the caller's name. Do not repeat this opening later in the call. After the caller responds, continue naturally using the support instructions below.\n\n`;
+ // Frozen original persona remains intact; owner-approved workflow is a separate suffix.
+ assert.ok(start.instructions.startsWith(prefix+approved.brief));
+ assert.ok(start.delegation.responses.instructions.startsWith(prefix+approved.instructions));
+ assert.equal(start.instructions.slice((prefix+approved.brief).length),start.delegation.responses.instructions.slice((prefix+approved.instructions).length));
+ assert.equal(start.turn_detection,undefined);
+ assert.equal(start.audio.output?.voice,undefined);
+ const intake=start.delegation.responses.tools.find((x:any)=>x.name==='submit_support_intake');
+ assert.equal(intake.parameters.required.length,9);
+});
+
+test('restoring the persona retains the current staging telephone greeting transport',async()=>{
+ const s=await session('support',false,false,true);
+ const start=s.outbound.find(x=>x.type==='session.start').session;
+ assert.equal(start.input,undefined);
+ oai(s,{type:'session.started'});oai(s,{type:'session.started'});
+ assert.equal(s.outbound.filter(x=>x.type==='response.create').length,1);
+ assert.equal(s.timers.filter(x=>x.interval).length,1);
+});
+
+
+test('staging Support preserves full-duplex acknowledgments without cancelling backend work',async()=>{
+ const s=await session('support',false,false,true);
+ oai(s,{type:'session.started'});
+ oai(s,{type:'session.output_audio.delta',delta:'AQID'});acknowledgeGreeting(s);
+ oai(s,{type:'session.speech_started'});
+ oai(s,{type:'input_audio_buffer.speech_started'});
+ assert.equal(s.outbound.filter(x=>x.type==='response.cancel').length,0);
+ assert.equal(s.phoneOutbound.filter(x=>x.event==='clear').length,0);
+ phoneEvent(s,{event:'media',media:{payload:'BAUG'}});
+ assert.equal(s.outbound.at(-1).audio,'BAUG');
+ oai(s,{type:'session.output_audio.delta',delta:'BwgJ'});
+ assert.equal(s.phoneOutbound.at(-1).media.payload,'BwgJ');
+});
+
+test('staging Support waits for complete delegated tool items and returns one correlated result',async()=>{
+ const s=await session('support',false,false,true);
+ oai(s,{type:'response.event',event:{type:'response.function_call_arguments.done',item_id:'partial',arguments:'{}'}});
+ assert.equal(s.outbound.filter(x=>x.type==='response.item.create').length,0);
+ await s.tool('confirmed-call','submit_support_intake',{name:'Fictional'},true);
+ await s.tool('confirmed-call','submit_support_intake',{name:'Fictional'},true);
+ const results=s.outbound.filter(x=>x.type==='response.item.create');
+ assert.equal(results.length,1);
+ assert.equal(results[0].item.call_id,'confirmed-call');
+ assert.match(results[0].item.output,/STAGING_WRITES_DISABLED/);
+ assert.equal(s.requests.length,0);
+});
+
+
+test('pending support save receives progress but no success until persistence resolves',async()=>{
+ let resolveSave:any;
+ const saved=new Promise(resolve=>{resolveSave=resolve;});
+ const s=await session('support',false,false,true,()=>saved);
+ await s.tool('pending-save','submit_support_intake',{},true);
+ const progress=s.timers.find(x=>x.ms===4000);assert.ok(progress);
+ progress.fn();
+ assert.ok(s.outbound.some(x=>x.type==='session.commentary.append' && /still waiting/.test(x.content)));
+ assert.equal(s.outbound.filter(x=>x.type==='session.thinking.append').length,0);
+ const caseId='11111111-1111-4111-8111-111111111111';
+ resolveSave({success:true,caseId,customerId:'22222222-2222-4222-8222-222222222222'});
+ for(let i=0;i<12;i++)await Promise.resolve();
+ const factual=s.outbound.findIndex(x=>x.type==='session.thinking.append');
+ const result=s.outbound.findIndex(x=>x.item?.call_id==='pending-save');
+ assert.ok(factual>=0 && factual<result);
+ assert.match(s.outbound[factual].content,new RegExp(caseId));
+ assert.ok(s.outbound.some(x=>x.type==='session.instructions.append' && /Wait for readiness/.test(x.content)));
+ const count=s.outbound.length;progress.fn();assert.equal(s.outbound.length,count);
+});
+test('failed and disconnected support saves cannot emit stale success or pending reminders',async()=>{
+ const failed=await session('support',false,false,true,()=>Promise.reject(Error('SAVE_NOT_CONFIRMED')));
+ await failed.tool('failed-save','submit_support_intake',{},true);
+ assert.equal(failed.outbound.filter(x=>x.type==='session.thinking.append').length,0);
+ assert.ok(failed.outbound.some(x=>x.type==='session.instructions.append' && /no ticket was confirmed/.test(x.content)));
+ const count=failed.outbound.length;failed.timers.find(x=>x.ms===4000).fn();assert.equal(failed.outbound.length,count);
+ let resolveSave:any;const saved=new Promise(resolve=>{resolveSave=resolve;});
+ const gone=await session('support',false,false,true,()=>saved);
+ await gone.tool('disconnected-save','submit_support_intake',{},true);
+ phoneEvent(gone,{event:'stop'});
+ const before=gone.outbound.length;gone.timers.find(x=>x.ms===4000).fn();
+ resolveSave({success:true,caseId:'11111111-1111-4111-8111-111111111111'});
+ for(let i=0;i<12;i++)await Promise.resolve();
+ assert.equal(gone.outbound.length,before);
+});
+
+
+test('missed Support delegation gets one backend review after caller inactivity',async()=>{
+ const s=await session('support',false,false,true);
+ oai(s,{type:'session.started'});
+ oai(s,{type:'session.output_audio.delta',delta:'AQID'});acknowledgeGreeting(s);
+ oai(s,{type:'response.completed'});
+ oai(s,{type:'session.input_transcript.delta',delta:'Fictional caller confirmation'});
+ const review=s.timers.filter(x=>x.ms===15000).at(-1);
+ const count=s.outbound.filter(x=>x.type==='response.create').length;
+ review.fn();review.fn();
+ assert.equal(s.outbound.filter(x=>x.type==='response.create').length,count+1);
+ assert.equal(s.outbound.filter(x=>x.type==='response.item.create').length,0);
+ assert.equal(s.requests.length,0);
+});
+test('Support review does not duplicate active backend work or run after disconnect',async()=>{
+ const s=await session('support',false,false,true);
+ oai(s,{type:'session.started'});oai(s,{type:'session.output_audio.delta',delta:'AQID'});acknowledgeGreeting(s);
+ oai(s,{type:'response.created'});
+ oai(s,{type:'session.input_transcript.delta',delta:'Additional fictional detail'});
+ const count=s.outbound.filter(x=>x.type==='response.create').length;
+ s.timers.filter(x=>x.ms===15000).at(-1).fn();
+ assert.equal(s.outbound.filter(x=>x.type==='response.create').length,count);
+ oai(s,{type:'response.completed'});
+ s.timers.filter(x=>x.ms===5000).at(-1).fn();
+ assert.equal(s.outbound.filter(x=>x.type==='response.create').length,count+1);
+ oai(s,{type:'session.input_transcript.delta',delta:'Goodbye'});
+ phoneEvent(s,{event:'stop'});
+ const after=s.outbound.length;s.timers.filter(x=>x.ms===15000).at(-1).fn();
+ assert.equal(s.outbound.length,after);
 });
